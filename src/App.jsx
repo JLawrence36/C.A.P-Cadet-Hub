@@ -1,5 +1,29 @@
 import { useEffect, useState } from "react";
 
+const RIBBONS = [
+  ["#1e3a8a", "#facc15", "#1e3a8a"],
+  ["#ef4444", "#ffffff", "#1e3a8a"],
+  ["#2563eb", "#facc15", "#ffffff", "#facc15", "#2563eb"],
+  ["#ffffff", "#dc2626", "#1e3a8a", "#dc2626", "#ffffff"],
+  ["#16a34a", "#ffffff", "#2563eb"],
+  ["#7c3aed", "#facc15", "#7c3aed"],
+  ["#f97316", "#ffffff", "#1e3a8a"],
+  ["#0f172a", "#facc15", "#0f172a"],
+  ["#2563eb", "#ffffff", "#dc2626"],
+  ["#facc15", "#1e3a8a", "#facc15"],
+  ["#16a34a", "#facc15", "#ffffff", "#facc15", "#16a34a"],
+  ["#7c2d12", "#facc15", "#7c2d12"],
+  ["#0ea5e9", "#ffffff", "#0ea5e9"],
+  ["#dc2626", "#facc15", "#1e3a8a", "#facc15", "#dc2626"],
+  ["#1e40af", "#93c5fd", "#ffffff", "#93c5fd", "#1e40af"],
+  ["#581c87", "#ffffff", "#facc15", "#ffffff", "#581c87"],
+  ["#166534", "#facc15", "#166534"],
+  ["#7f1d1d", "#ffffff", "#facc15", "#ffffff", "#7f1d1d"],
+  ["#0f172a", "#e5e7eb", "#facc15", "#e5e7eb", "#0f172a"],
+  ["#1e3a8a", "#facc15", "#ffffff", "#facc15", "#1e3a8a"],
+  ["#020617", "#facc15", "#ffffff", "#facc15", "#020617"]
+];
+
 const ACHIEVEMENTS = [
   ["Curry Achievement", "Cadet Airman", "C/Amn", "Phase I", ["Be a current CAP cadet", "Recite the Cadet Oath", "Complete Cadet Welcome Course", "Complete Learn to Lead Chapter 1", "Attempt CPFT", "Participate in character development"], ["Fall In", "Attention", "Parade Rest", "Present Arms", "Order Arms", "Right Face", "Left Face", "About Face", "Forward March", "Flight Halt"]],
   ["Arnold Achievement", "Cadet Airman First Class", "C/A1C", "Phase I", ["Minimum 8 weeks after Curry", "Wear uniform properly", "Complete Learn to Lead Chapter 2", "Complete aerospace module", "Continue CPFT progress", "Attend character development"], ["All Curry drill", "Column Right", "Column Left", "To the Rear March", "Change Step March"]],
@@ -30,7 +54,8 @@ const ACHIEVEMENTS = [
   phase: a[3],
   overview: `${a[0]} promotion tracker for ${a[1]}.`,
   requirements: a[4],
-  drill: a[5]
+  drill: a[5],
+  ribbon: RIBBONS[i]
 }));
 
 const DRILL_LIBRARY = [
@@ -81,24 +106,8 @@ const DRILL_LIBRARY = [
 ];
 
 const DEFAULT_EVENTS = [
-  {
-    id: 1,
-    title: "Weekly Squadron Meeting",
-    date: "2026-06-16",
-    time: "19:00",
-    location: "Squadron HQ",
-    type: "Meeting",
-    notes: "Uniform of the day, announcements, and weekly cadet training."
-  },
-  {
-    id: 2,
-    title: "Aerospace Education Night",
-    date: "2026-06-23",
-    time: "18:30",
-    location: "Classroom",
-    type: "Education",
-    notes: "Bring notebook and be ready for aerospace discussion."
-  }
+  { id: 1, title: "Weekly Squadron Meeting", date: "2026-06-16", time: "19:00", location: "Squadron HQ", type: "Meeting", notes: "Uniform of the day, announcements, and weekly cadet training." },
+  { id: 2, title: "Aerospace Education Night", date: "2026-06-23", time: "18:30", location: "Classroom", type: "Education", notes: "Bring notebook and be ready for aerospace discussion." }
 ];
 
 const DEFAULT_FLIGHTS = [
@@ -144,16 +153,10 @@ function formatDate(value) {
 }
 
 function getCurrentCadetRank(completedIds) {
-  if (!completedIds || completedIds.length === 0) {
-    return { rank: "Cadet Recruit", abbr: "C/Rec" };
-  }
-
+  if (!completedIds || completedIds.length === 0) return { rank: "Cadet Recruit", abbr: "C/Rec" };
   const highestCompletedId = Math.max(...completedIds);
   const achievement = ACHIEVEMENTS.find((a) => a.id === highestCompletedId);
-
-  return achievement
-    ? { rank: achievement.rank, abbr: achievement.abbr }
-    : { rank: "Cadet Recruit", abbr: "C/Rec" };
+  return achievement ? { rank: achievement.rank, abbr: achievement.abbr } : { rank: "Cadet Recruit", abbr: "C/Rec" };
 }
 
 function formatCadetDisplayName(name, currentCadetRank) {
@@ -163,6 +166,19 @@ function formatCadetDisplayName(name, currentCadetRank) {
     .trim();
 
   return `${currentCadetRank.abbr} ${cleanedName || "Cadet"}`;
+}
+
+function RibbonBar({ colors, size = "small" }) {
+  const height = size === "large" ? 42 : 26;
+  const width = size === "large" ? 142 : 76;
+
+  return (
+    <div style={{ ...ribbonShell, width, height }}>
+      {colors.map((color, index) => (
+        <div key={index} style={{ flex: 1, background: color }} />
+      ))}
+    </div>
+  );
 }
 
 export default function App() {
@@ -208,7 +224,6 @@ export default function App() {
           if (allRequirementsChecked && allDrillChecked) {
             return current.includes(achievementId) ? current : [...current, achievementId];
           }
-
           return current.filter((id) => id !== achievementId);
         });
       }
@@ -326,6 +341,7 @@ function DashboardTab({ profile, currentCadetRank, progress, currentAchievement,
       <div style={dashboardGrid}>
         <div style={miniCard}>
           <p style={statLabel}>Target</p>
+          <RibbonBar colors={currentAchievement.ribbon} />
           <h3 style={miniTitle}>{currentAchievement.name}</h3>
           <p style={cardText}>{currentAchievement.rank}</p>
         </div>
@@ -388,7 +404,7 @@ function RankTab({ profile, currentCadetRank, setProfile, onSelect, completedIds
       <div style={hero}>
         <p style={eyebrow}>Civil Air Patrol Companion</p>
         <h1 style={title}>Rank Tracker</h1>
-        <p style={subtitle}>Track requirements and drill toward each promotion.</p>
+        <p style={subtitle}>Track requirements, drill, and ribbons toward each promotion.</p>
 
         <div style={progressBox}>
           <div style={progressHeader}>
@@ -424,11 +440,9 @@ function RankTab({ profile, currentCadetRank, setProfile, onSelect, completedIds
             <input style={input} value={form.squadron} onChange={(e) => setForm({ ...form, squadron: e.target.value })} placeholder="Squadron" />
             <input style={input} value={form.joined} onChange={(e) => setForm({ ...form, joined: e.target.value })} placeholder="Joined" />
             <input style={input} value={form.goal} onChange={(e) => setForm({ ...form, goal: e.target.value })} placeholder="Goal" />
-
             <p style={{ ...cardText, fontSize: "12px" }}>
               This app is not affiliated with Civil Air Patrol. It does not connect to eServices and does not store login credentials.
             </p>
-
             <button style={smallActionButton} onClick={saveProfile}>Save</button>
           </>
         )}
@@ -436,6 +450,7 @@ function RankTab({ profile, currentCadetRank, setProfile, onSelect, completedIds
 
       <div style={currentBox}>
         <p style={smallLabel}>Current Target</p>
+        <RibbonBar colors={currentAchievement.ribbon} />
         <strong>{currentAchievement.name}</strong>
         <p style={cardText}>{currentAchievement.rank} · {currentAchievement.abbr}</p>
       </div>
@@ -453,7 +468,8 @@ function RankTab({ profile, currentCadetRank, setProfile, onSelect, completedIds
             </button>
 
             <button style={cardMainButton} onClick={() => onSelect(achievement)}>
-              <div>
+              <div style={{ flex: 1 }}>
+                <RibbonBar colors={achievement.ribbon} />
                 <strong style={blueText}>{achievement.name}</strong>
                 <p style={cardText}>{achievement.rank} · {achievement.abbr}</p>
                 <p style={phaseText}>{achievement.phase}</p>
@@ -483,6 +499,7 @@ function AchievementDetail({ selected, onBack, completedIds, toggleCompleted, re
 
       <div style={hero}>
         <p style={eyebrow}>{selected.phase}</p>
+        <RibbonBar colors={selected.ribbon} size="large" />
         <h1 style={title}>{selected.name}</h1>
         <p style={subtitle}>{selected.rank} · {selected.abbr}</p>
 
@@ -623,14 +640,7 @@ function DrillTab() {
 function CalendarTab({ events, setEvents }) {
   const [showForm, setShowForm] = useState(false);
   const [editingId, setEditingId] = useState(null);
-  const [form, setForm] = useState({
-    title: "",
-    date: "",
-    time: "",
-    location: "",
-    type: "Meeting",
-    notes: ""
-  });
+  const [form, setForm] = useState({ title: "", date: "", time: "", location: "", type: "Meeting", notes: "" });
 
   function saveEvent() {
     if (!form.title || !form.date) return;
@@ -698,12 +708,7 @@ function CalendarTab({ events, setEvents }) {
             <option>Other</option>
           </select>
 
-          <textarea
-            style={textArea}
-            placeholder="Meeting notes, uniform, what to bring, announcements, reminders..."
-            value={form.notes}
-            onChange={(e) => setForm({ ...form, notes: e.target.value })}
-          />
+          <textarea style={textArea} placeholder="Meeting notes, uniform, what to bring, announcements, reminders..." value={form.notes} onChange={(e) => setForm({ ...form, notes: e.target.value })} />
 
           <button style={primaryButton} onClick={saveEvent}>{editingId ? "Save Changes" : "Save Event"}</button>
           <button style={secondaryButton} onClick={cancelForm}>Cancel</button>
@@ -739,7 +744,6 @@ function FlightsTab({ flights, setFlights }) {
   const [showForm, setShowForm] = useState(false);
   const [editingId, setEditingId] = useState(null);
   const [form, setForm] = useState({ aircraft: "", date: "", duration: "", type: "Orientation Flight" });
-
   const totalHours = flights.reduce((sum, f) => sum + (parseFloat(f.duration) || 0), 0).toFixed(1);
 
   function saveFlight() {
@@ -850,10 +854,10 @@ function DocsTab() {
         <div>
           <strong style={blueText}>Legal / Safety Note</strong>
           <p style={cardText}>
-            This app is an unofficial tracker. It does not connect to CAP eServices, does not collect passwords, and does not store CAP login credentials.
+            This app is an unofficial tracker. Ribbon bars are simplified learning visuals and may not exactly match official CAP ribbon graphics.
           </p>
           <p style={phaseText}>
-            Use the official eServices link below for real CAP records, tests, and account access.
+            Use official CAP resources for real records, tests, regulations, and award verification.
           </p>
         </div>
       </div>
@@ -925,6 +929,7 @@ const doneTag = { margin: "8px 0 0", color: "#ffffff", background: "#22c55e", di
 const arrow = { fontSize: "32px", color: "#9ca3af" };
 const backButton = { border: "none", background: "transparent", color: "#60a5fa", fontWeight: "bold", marginBottom: "12px", fontSize: "16px" };
 const overview = { color: "var(--muted)", lineHeight: 1.5, marginBottom: "16px" };
+const ribbonShell = { display: "flex", overflow: "hidden", border: "2px solid #d1d5db", borderRadius: "4px", margin: "0 0 10px", boxShadow: "0 2px 6px rgba(0,0,0,0.22)", background: "#fff" };
 
 function checkButton(done) {
   return {
