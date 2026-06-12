@@ -339,12 +339,56 @@ function AchievementDetail({ selected, detailTab, setDetailTab, onBack, complete
 
 function CalendarTab({ events, setEvents }) {
   const [showForm, setShowForm] = useState(false);
-  const [form, setForm] = useState({ title: "", date: "", time: "", location: "", type: "Meeting" });
+  const [editingId, setEditingId] = useState(null);
+  const [form, setForm] = useState({
+    title: "",
+    date: "",
+    time: "",
+    location: "",
+    type: "Meeting"
+  });
 
   function saveEvent() {
     if (!form.title || !form.date) return;
-    setEvents([...events, { ...form, id: Date.now() }]);
+
+    if (editingId) {
+      setEvents(events.map((event) => (
+        event.id === editingId ? { ...form, id: editingId } : event
+      )));
+    } else {
+      setEvents([...events, { ...form, id: Date.now() }]);
+    }
+
     setForm({ title: "", date: "", time: "", location: "", type: "Meeting" });
+    setEditingId(null);
+    setShowForm(false);
+  }
+
+  function editEvent(event) {
+    setForm({
+      title: event.title || "",
+      date: event.date || "",
+      time: event.time || "",
+      location: event.location || "",
+      type: event.type || "Meeting"
+    });
+    setEditingId(event.id);
+    setShowForm(true);
+  }
+
+  function deleteEvent(id) {
+    setEvents(events.filter((event) => event.id !== id));
+
+    if (editingId === id) {
+      setEditingId(null);
+      setShowForm(false);
+      setForm({ title: "", date: "", time: "", location: "", type: "Meeting" });
+    }
+  }
+
+  function cancelForm() {
+    setForm({ title: "", date: "", time: "", location: "", type: "Meeting" });
+    setEditingId(null);
     setShowForm(false);
   }
 
@@ -356,14 +400,21 @@ function CalendarTab({ events, setEvents }) {
         <p style={subtitle}>Track meetings, activities, and training.</p>
       </div>
 
-      <button style={primaryButton} onClick={() => setShowForm(!showForm)}>{showForm ? "Close Form" : "+ Add Event"}</button>
+      {!showForm && (
+        <button style={primaryButton} onClick={() => setShowForm(true)}>
+          + Add Event
+        </button>
+      )}
 
       {showForm && (
         <div style={formCard}>
+          <p style={smallLabel}>{editingId ? "Edit Event" : "Add Event"}</p>
+
           <input style={input} placeholder="Event title" value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} />
           <input style={input} type="date" value={form.date} onChange={(e) => setForm({ ...form, date: e.target.value })} />
           <input style={input} type="time" value={form.time} onChange={(e) => setForm({ ...form, time: e.target.value })} />
           <input style={input} placeholder="Location" value={form.location} onChange={(e) => setForm({ ...form, location: e.target.value })} />
+
           <select style={input} value={form.type} onChange={(e) => setForm({ ...form, type: e.target.value })}>
             <option>Meeting</option>
             <option>Education</option>
@@ -372,16 +423,28 @@ function CalendarTab({ events, setEvents }) {
             <option>Encampment</option>
             <option>Other</option>
           </select>
-          <button style={primaryButton} onClick={saveEvent}>Save Event</button>
+
+          <button style={primaryButton} onClick={saveEvent}>
+            {editingId ? "Save Changes" : "Save Event"}
+          </button>
+
+          <button style={secondaryButton} onClick={cancelForm}>
+            Cancel
+          </button>
         </div>
       )}
 
       {[...events].sort((a, b) => String(a.date).localeCompare(String(b.date))).map((event) => (
         <div key={event.id} style={simpleCard}>
-          <div>
+          <div style={{ flex: 1 }}>
             <strong style={blueText}>{event.title}</strong>
             <p style={cardText}>{formatDate(event.date)} · {event.time || "No time"}</p>
             <p style={phaseText}>{event.type} · {event.location || "No location"}</p>
+
+            <div style={actionRow}>
+              <button style={editButton} onClick={() => editEvent(event)}>Edit</button>
+              <button style={deleteButton} onClick={() => deleteEvent(event.id)}>Delete</button>
+            </div>
           </div>
         </div>
       ))}
@@ -391,14 +454,56 @@ function CalendarTab({ events, setEvents }) {
 
 function FlightsTab({ flights, setFlights }) {
   const [showForm, setShowForm] = useState(false);
-  const [form, setForm] = useState({ aircraft: "", date: "", duration: "", type: "Orientation Flight" });
+  const [editingId, setEditingId] = useState(null);
+  const [form, setForm] = useState({
+    aircraft: "",
+    date: "",
+    duration: "",
+    type: "Orientation Flight"
+  });
 
   const totalHours = flights.reduce((sum, f) => sum + (parseFloat(f.duration) || 0), 0).toFixed(1);
 
   function saveFlight() {
     if (!form.aircraft || !form.date) return;
-    setFlights([...flights, { ...form, id: Date.now() }]);
+
+    if (editingId) {
+      setFlights(flights.map((flight) => (
+        flight.id === editingId ? { ...form, id: editingId } : flight
+      )));
+    } else {
+      setFlights([...flights, { ...form, id: Date.now() }]);
+    }
+
     setForm({ aircraft: "", date: "", duration: "", type: "Orientation Flight" });
+    setEditingId(null);
+    setShowForm(false);
+  }
+
+  function editFlight(flight) {
+    setForm({
+      aircraft: flight.aircraft || "",
+      date: flight.date || "",
+      duration: flight.duration || "",
+      type: flight.type || "Orientation Flight"
+    });
+    setEditingId(flight.id);
+    setShowForm(true);
+  }
+
+  function deleteFlight(id) {
+    setFlights(flights.filter((flight) => flight.id !== id));
+
+    if (editingId === id) {
+      setEditingId(null);
+      setShowForm(false);
+      setForm({ aircraft: "", date: "", duration: "", type: "Orientation Flight" });
+    }
+  }
+
+  function cancelForm() {
+    setForm({ aircraft: "", date: "", duration: "", type: "Orientation Flight" });
+    setEditingId(null);
     setShowForm(false);
   }
 
@@ -411,17 +516,31 @@ function FlightsTab({ flights, setFlights }) {
       </div>
 
       <div style={statsRow}>
-        <div style={statCard}><p style={statLabel}>Flights</p><h2 style={statNumber}>{flights.length}</h2></div>
-        <div style={statCard}><p style={statLabel}>Hours</p><h2 style={statNumber}>{totalHours}</h2></div>
+        <div style={statCard}>
+          <p style={statLabel}>Flights</p>
+          <h2 style={statNumber}>{flights.length}</h2>
+        </div>
+
+        <div style={statCard}>
+          <p style={statLabel}>Hours</p>
+          <h2 style={statNumber}>{totalHours}</h2>
+        </div>
       </div>
 
-      <button style={primaryButton} onClick={() => setShowForm(!showForm)}>{showForm ? "Close Form" : "+ Log Flight"}</button>
+      {!showForm && (
+        <button style={primaryButton} onClick={() => setShowForm(true)}>
+          + Log Flight
+        </button>
+      )}
 
       {showForm && (
         <div style={formCard}>
+          <p style={smallLabel}>{editingId ? "Edit Flight" : "Log Flight"}</p>
+
           <input style={input} placeholder="Aircraft" value={form.aircraft} onChange={(e) => setForm({ ...form, aircraft: e.target.value })} />
           <input style={input} type="date" value={form.date} onChange={(e) => setForm({ ...form, date: e.target.value })} />
           <input style={input} type="number" step="0.1" placeholder="Duration hours" value={form.duration} onChange={(e) => setForm({ ...form, duration: e.target.value })} />
+
           <select style={input} value={form.type} onChange={(e) => setForm({ ...form, type: e.target.value })}>
             <option>Orientation Flight</option>
             <option>Glider Flight</option>
@@ -429,16 +548,28 @@ function FlightsTab({ flights, setFlights }) {
             <option>Simulator</option>
             <option>Other</option>
           </select>
-          <button style={primaryButton} onClick={saveFlight}>Save Flight</button>
+
+          <button style={primaryButton} onClick={saveFlight}>
+            {editingId ? "Save Changes" : "Save Flight"}
+          </button>
+
+          <button style={secondaryButton} onClick={cancelForm}>
+            Cancel
+          </button>
         </div>
       )}
 
       {[...flights].sort((a, b) => String(b.date).localeCompare(String(a.date))).map((flight) => (
         <div key={flight.id} style={simpleCard}>
-          <div>
+          <div style={{ flex: 1 }}>
             <strong style={blueText}>{flight.aircraft}</strong>
             <p style={cardText}>{formatDate(flight.date)} · {flight.type}</p>
             <p style={phaseText}>{flight.duration || "0"} hrs</p>
+
+            <div style={actionRow}>
+              <button style={editButton} onClick={() => editFlight(flight)}>Edit</button>
+              <button style={deleteButton} onClick={() => deleteFlight(flight.id)}>Delete</button>
+            </div>
           </div>
         </div>
       ))}
@@ -526,15 +657,81 @@ const sectionTitle = { color: "var(--text)", marginBottom: "12px" };
 const card = { width: "100%", background: "var(--card-bg)", borderRadius: "18px", padding: "14px", marginBottom: "12px", display: "flex", alignItems: "center", gap: "12px", boxShadow: "var(--shadow)", color: "var(--text)" };
 const simpleCard = { width: "100%", background: "var(--card-bg)", border: "1px solid var(--card-border)", borderRadius: "18px", padding: "16px", marginBottom: "12px", display: "flex", alignItems: "center", gap: "12px", boxShadow: "var(--shadow)", color: "var(--text)" };
 const cardMainButton = { flex: 1, border: "none", background: "transparent", textAlign: "left", display: "flex", justifyContent: "space-between", alignItems: "center", color: "var(--text)", padding: 0 };
-function checkButton(done) { return { width: "34px", height: "34px", borderRadius: "999px", border: done ? "2px solid #22c55e" : "2px solid #94a3b8", background: done ? "#22c55e" : "var(--card-bg)", color: "white", fontWeight: "bold", fontSize: "18px", flexShrink: 0 }; }
-function detailCompleteButton(done) { return { marginTop: "16px", width: "100%", border: "none", borderRadius: "14px", padding: "12px", background: done ? "#22c55e" : "white", color: done ? "white" : "#1e3a8a", fontWeight: "bold" }; }
+
+function checkButton(done) {
+  return {
+    width: "34px",
+    height: "34px",
+    borderRadius: "999px",
+    border: done ? "2px solid #22c55e" : "2px solid #94a3b8",
+    background: done ? "#22c55e" : "var(--card-bg)",
+    color: "white",
+    fontWeight: "bold",
+    fontSize: "18px",
+    flexShrink: 0
+  };
+}
+
+function detailCompleteButton(done) {
+  return {
+    marginTop: "16px",
+    width: "100%",
+    border: "none",
+    borderRadius: "14px",
+    padding: "12px",
+    background: done ? "#22c55e" : "white",
+    color: done ? "white" : "#1e3a8a",
+    fontWeight: "bold"
+  };
+}
+
 const requirementProgressBox = { background: "var(--card-bg)", border: "1px solid var(--card-border)", borderRadius: "18px", padding: "16px", marginBottom: "16px", boxShadow: "var(--shadow)", color: "var(--text)" };
 const progressBarLight = { height: "10px", background: "var(--soft-bg)", borderRadius: "999px", overflow: "hidden" };
 const progressFillBlue = { height: "100%", background: "#2563eb", borderRadius: "999px" };
 const requirementProgressText = { margin: "8px 0 0", fontSize: "12px", color: "var(--muted)" };
-function requirementItem(checked) { return { width: "100%", background: checked ? "rgba(37, 99, 235, 0.14)" : "var(--card-bg)", border: checked ? "2px solid #2563eb" : "1px solid var(--card-border)", borderRadius: "14px", padding: "14px", marginBottom: "10px", color: "var(--text)", boxShadow: "var(--shadow)", display: "flex", alignItems: "flex-start", gap: "12px", textAlign: "left" }; }
-function requirementCircle(checked) { return { width: "26px", height: "26px", borderRadius: "999px", border: checked ? "2px solid #2563eb" : "2px solid #94a3b8", background: checked ? "#2563eb" : "var(--card-bg)", color: "white", fontWeight: "bold", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, marginTop: "1px" }; }
-function requirementText(checked) { return { color: checked ? "#60a5fa" : "var(--text)", textDecoration: checked ? "line-through" : "none", lineHeight: 1.4 }; }
+
+function requirementItem(checked) {
+  return {
+    width: "100%",
+    background: checked ? "rgba(37, 99, 235, 0.14)" : "var(--card-bg)",
+    border: checked ? "2px solid #2563eb" : "1px solid var(--card-border)",
+    borderRadius: "14px",
+    padding: "14px",
+    marginBottom: "10px",
+    color: "var(--text)",
+    boxShadow: "var(--shadow)",
+    display: "flex",
+    alignItems: "flex-start",
+    gap: "12px",
+    textAlign: "left"
+  };
+}
+
+function requirementCircle(checked) {
+  return {
+    width: "26px",
+    height: "26px",
+    borderRadius: "999px",
+    border: checked ? "2px solid #2563eb" : "2px solid #94a3b8",
+    background: checked ? "#2563eb" : "var(--card-bg)",
+    color: "white",
+    fontWeight: "bold",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    flexShrink: 0,
+    marginTop: "1px"
+  };
+}
+
+function requirementText(checked) {
+  return {
+    color: checked ? "#60a5fa" : "var(--text)",
+    textDecoration: checked ? "line-through" : "none",
+    lineHeight: 1.4
+  };
+}
+
 const docCard = { width: "100%", background: "var(--card-bg)", border: "1px solid var(--card-border)", borderRadius: "18px", padding: "16px", marginBottom: "12px", textAlign: "left", display: "flex", justifyContent: "space-between", alignItems: "center", boxShadow: "var(--shadow)", color: "var(--text)", textDecoration: "none" };
 const blueText = { color: "#0b82f0" };
 const cardText = { margin: "6px 0 0", color: "var(--muted)", fontSize: "14px" };
@@ -559,4 +756,8 @@ const statNumber = { margin: "6px 0 0", color: "#60a5fa", fontSize: "34px" };
 const input = { width: "100%", border: "1px solid var(--card-border)", background: "var(--app-bg)", color: "var(--text)", borderRadius: "12px", padding: "12px", marginBottom: "10px", fontSize: "15px" };
 const formCard = { background: "var(--card-bg)", border: "1px solid var(--card-border)", borderRadius: "18px", padding: "16px", marginBottom: "16px", boxShadow: "var(--shadow)" };
 const primaryButton = { width: "100%", border: "none", background: "#2563eb", color: "white", borderRadius: "14px", padding: "13px", fontWeight: "bold", marginBottom: "14px", fontSize: "15px" };
+const secondaryButton = { width: "100%", border: "1px solid var(--card-border)", background: "var(--soft-bg)", color: "var(--soft-text)", borderRadius: "14px", padding: "13px", fontWeight: "bold", marginBottom: "4px", fontSize: "15px" };
 const smallActionButton = { border: "none", background: "#2563eb", color: "white", borderRadius: "12px", padding: "10px 12px", fontWeight: "bold", marginTop: "12px" };
+const actionRow = { display: "flex", gap: "8px", marginTop: "12px" };
+const editButton = { border: "none", background: "#2563eb", color: "white", borderRadius: "10px", padding: "8px 12px", fontWeight: "bold", fontSize: "13px" };
+const deleteButton = { border: "none", background: "#dc2626", color: "white", borderRadius: "10px", padding: "8px 12px", fontWeight: "bold", fontSize: "13px" };
