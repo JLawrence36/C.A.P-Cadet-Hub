@@ -6,7 +6,7 @@ const ACHIEVEMENTS = [
     name: "Curry Achievement",
     rank: "Cadet Airman",
     abbr: "C/Amn",
-    phase: "Phase I — Followership",
+    phase: "Phase I — Learning / Followership",
     overview:
       "Your first CAP cadet achievement. Focus on the Cadet Oath, core values, uniform basics, fitness attempt, and basic drill.",
     requirements: [
@@ -37,15 +37,15 @@ const ACHIEVEMENTS = [
     name: "Arnold Achievement",
     rank: "Cadet Airman First Class",
     abbr: "C/A1C",
-    phase: "Phase I — Followership",
+    phase: "Phase I — Learning / Followership",
     overview:
       "Second cadet achievement. Adds aerospace education and continued leadership, fitness, and drill development.",
     requirements: [
       "Minimum 8 weeks after Curry",
       "Wear the CAP uniform properly",
       "Complete Learn to Lead Chapter 2",
-      "Complete Aerospace Dimensions Module 1",
-      "Continue CPFT progress",
+      "Complete an Aerospace Dimensions module",
+      "Participate in one fitness activity and have attempted CPFT within 180 days",
       "Attend character development"
     ],
     drill: [
@@ -63,14 +63,14 @@ const ACHIEVEMENTS = [
     name: "Feik Achievement",
     rank: "Cadet Senior Airman",
     abbr: "C/SrA",
-    phase: "Phase I — Followership",
+    phase: "Phase I — Learning / Followership",
     overview:
       "Third cadet achievement. Cadet begins preparing for more responsibility and the Wright Brothers milestone.",
     requirements: [
       "Minimum 8 weeks after Arnold",
       "Complete Learn to Lead Chapter 3",
-      "Complete Aerospace Dimensions Module 2",
-      "Continue CPFT progress",
+      "Complete an Aerospace Dimensions module",
+      "Participate in one fitness activity and have attempted CPFT within 180 days",
       "Attend character development"
     ],
     drill: [
@@ -91,11 +91,11 @@ const ACHIEVEMENTS = [
       "The first major cadet milestone. Completing this earns NCO rank and closes Phase I.",
     requirements: [
       "Minimum 8 weeks after Feik",
-      "Pass the Wright Brothers leadership exam",
-      "Meet required fitness standard",
+      "Pass the Wright Brothers leadership exam covering Learn to Lead Chapters 1–3",
       "Complete required aerospace work",
-      "Participate in character development",
-      "Complete required drill evaluation"
+      "Participate in one fitness activity and have attained HFZ within 180 days",
+      "Complete comprehensive drill evaluation",
+      "Meet general advancement requirements"
     ],
     drill: [
       "Form the flight",
@@ -104,6 +104,157 @@ const ACHIEVEMENTS = [
       "Marching commands",
       "Open and close ranks",
       "Inspection procedures"
+    ]
+  },
+  {
+    id: 5,
+    name: "Rickenbacker Achievement",
+    rank: "Cadet Technical Sergeant",
+    abbr: "C/TSgt",
+    phase: "Phase II — Leadership",
+    overview:
+      "The first Phase II achievement. Cadet begins developing as an NCO and starts taking more responsibility in the flight.",
+    requirements: [
+      "Minimum 8 weeks after Wright Brothers",
+      "Complete Learn to Lead Chapter 4",
+      "Complete an Aerospace Dimensions module",
+      "Participate in one fitness activity and have attained HFZ within 180 days",
+      "Attend character development",
+      "Complete required drill performance test"
+    ],
+    drill: [
+      "NCO-level drill leadership",
+      "Form and align flight",
+      "Open Ranks",
+      "Close Ranks",
+      "Column movements",
+      "Command voice and bearing"
+    ]
+  },
+  {
+    id: 6,
+    name: "Achievement 5",
+    rank: "Cadet Master Sergeant",
+    abbr: "C/MSgt",
+    phase: "Phase II — Leadership",
+    overview:
+      "Achievement 5 is currently unnamed in the CAP progression. Cadet continues NCO leadership development.",
+    requirements: [
+      "Minimum 8 weeks after Rickenbacker",
+      "Complete Learn to Lead Chapter 5",
+      "Complete an Aerospace Dimensions module",
+      "Participate in one fitness activity and have attained HFZ within 180 days",
+      "Attend character development",
+      "Complete required drill performance test"
+    ],
+    drill: [
+      "Lead basic flight drill",
+      "Maintain alignment and cover",
+      "Stationary commands",
+      "Marching commands",
+      "Inspection preparation",
+      "Mentor junior cadets"
+    ]
+  },
+  {
+    id: 7,
+    name: "Doolittle Achievement",
+    rank: "Cadet Senior Master Sergeant",
+    abbr: "C/SMSgt",
+    phase: "Phase II — Leadership",
+    overview:
+      "A senior NCO achievement. Cadet is expected to show stronger leadership, responsibility, and mentorship of junior cadets.",
+    requirements: [
+      "Minimum 8 weeks after Achievement 5",
+      "Complete Learn to Lead Chapter 6",
+      "Complete an Aerospace Dimensions module",
+      "Participate in one fitness activity and have attained HFZ within 180 days",
+      "Attend character development",
+      "Complete required drill performance test"
+    ],
+    drill: [
+      "Advanced NCO drill leadership",
+      "Flight formation",
+      "Column movements",
+      "Open and close ranks",
+      "Command presence",
+      "Correct junior cadet drill errors"
+    ]
+  },
+  {
+    id: 8,
+    name: "Goddard Achievement",
+    rank: "Cadet Chief Master Sergeant",
+    abbr: "C/CMSgt",
+    phase: "Phase II — Leadership",
+    overview:
+      "A senior Phase II achievement. Cadet should be capable of helping train, correct, and lead other cadets.",
+    requirements: [
+      "Minimum 8 weeks after Doolittle",
+      "Complete Learn to Lead Chapter 7",
+      "Complete an Aerospace Dimensions module",
+      "Participate in one fitness activity and have attained HFZ within 180 days",
+      "Attend character development",
+      "Complete required drill performance test"
+    ],
+    drill: [
+      "Senior NCO drill role",
+      "Lead flight-level drill",
+      "Inspect formation",
+      "Prepare cadets for evaluations",
+      "Teach facing movements",
+      "Teach marching movements"
+    ]
+  },
+  {
+    id: 9,
+    name: "Armstrong Achievement",
+    rank: "Cadet Chief Master Sergeant",
+    abbr: "C/CMSgt",
+    phase: "Phase II — Leadership",
+    overview:
+      "The final NCO achievement before the Mitchell Award. Cadet should be preparing for officer-level responsibility.",
+    requirements: [
+      "Minimum 8 weeks after Goddard",
+      "Complete Learn to Lead Chapter 8",
+      "Complete an Aerospace Dimensions module",
+      "Participate in one fitness activity and have attained HFZ within 180 days",
+      "Attend character development",
+      "Complete required drill performance test",
+      "Complete required speech and essay work"
+    ],
+    drill: [
+      "High-level NCO drill leadership",
+      "Flight sergeant duties",
+      "Form the flight",
+      "Report to commander",
+      "Inspection support",
+      "Mentor junior NCOs"
+    ]
+  },
+  {
+    id: 10,
+    name: "Billy Mitchell Award",
+    rank: "Cadet Second Lieutenant",
+    abbr: "C/2d Lt",
+    phase: "Phase II — Milestone",
+    overview:
+      "The Mitchell Award is a major milestone. Cadet transitions from NCO to officer and completes Phase II.",
+    requirements: [
+      "Minimum 8 weeks after Armstrong",
+      "Pass comprehensive closed-book leadership exam covering Learn to Lead Chapters 4–8",
+      "Pass comprehensive aerospace exam covering Aerospace Dimensions Modules 1–7",
+      "Participate in one fitness activity and have attained HFZ within 180 days",
+      "Graduate encampment before earning the award",
+      "Meet general advancement requirements"
+    ],
+    drill: [
+      "Demonstrate mastery of Phase II drill",
+      "Lead flight-level drill confidently",
+      "Understand inspection procedures",
+      "Use proper command voice",
+      "Mentor junior cadets",
+      "Prepare for officer leadership role"
     ]
   }
 ];
