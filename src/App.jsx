@@ -107,7 +107,7 @@ const DEFAULT_FLIGHTS = [
 ];
 
 const DEFAULT_PROFILE = {
-  name: "Cadet Lawrence",
+  name: "Lawrence",
   capId: "",
   squadron: "CAP Squadron",
   joined: "2026",
@@ -143,6 +143,28 @@ function formatDate(value) {
   });
 }
 
+function getCurrentCadetRank(completedIds) {
+  if (!completedIds || completedIds.length === 0) {
+    return { rank: "Cadet Recruit", abbr: "C/Rec" };
+  }
+
+  const highestCompletedId = Math.max(...completedIds);
+  const achievement = ACHIEVEMENTS.find((a) => a.id === highestCompletedId);
+
+  return achievement
+    ? { rank: achievement.rank, abbr: achievement.abbr }
+    : { rank: "Cadet Recruit", abbr: "C/Rec" };
+}
+
+function formatCadetDisplayName(name, currentCadetRank) {
+  const cleanedName = String(name || "Cadet")
+    .replace(/^cadet\s+/i, "")
+    .replace(/^c\/[a-z0-9]+\s+/i, "")
+    .trim();
+
+  return `${currentCadetRank.abbr} ${cleanedName || "Cadet"}`;
+}
+
 export default function App() {
   const [activeTab, setActiveTab] = useState("dashboard");
   const [selected, setSelected] = useState(null);
@@ -165,6 +187,7 @@ export default function App() {
   const progress = Math.round((completedCount / ACHIEVEMENTS.length) * 100);
   const isDark = theme === "dark";
   const currentAchievement = ACHIEVEMENTS.find((a) => !validCompletedIds.includes(a.id)) || ACHIEVEMENTS[ACHIEVEMENTS.length - 1];
+  const currentCadetRank = getCurrentCadetRank(validCompletedIds);
 
   function toggleCompleted(id) {
     setCompletedIds((prev) => prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]);
@@ -215,6 +238,7 @@ export default function App() {
             {activeTab === "dashboard" && (
               <DashboardTab
                 profile={profile}
+                currentCadetRank={currentCadetRank}
                 progress={progress}
                 currentAchievement={currentAchievement}
                 completedCount={completedCount}
@@ -227,6 +251,7 @@ export default function App() {
             {activeTab === "rank" && (
               <RankTab
                 profile={profile}
+                currentCadetRank={currentCadetRank}
                 setProfile={setProfile}
                 onSelect={setSelected}
                 completedIds={validCompletedIds}
@@ -266,7 +291,7 @@ export default function App() {
   );
 }
 
-function DashboardTab({ profile, progress, currentAchievement, completedCount, events, flights, setActiveTab }) {
+function DashboardTab({ profile, currentCadetRank, progress, currentAchievement, completedCount, events, flights, setActiveTab }) {
   const sortedEvents = [...events].sort((a, b) => String(a.date).localeCompare(String(b.date)));
   const nextEvent = sortedEvents[0];
   const totalHours = flights.reduce((sum, f) => sum + (parseFloat(f.duration) || 0), 0).toFixed(1);
@@ -292,7 +317,7 @@ function DashboardTab({ profile, progress, currentAchievement, completedCount, e
 
       <div style={dashboardProfileCard}>
         <p style={smallLabel}>Cadet</p>
-        <h2 style={profileName}>{profile.name}</h2>
+        <h2 style={profileName}>{formatCadetDisplayName(profile.name, currentCadetRank)}</h2>
         {profile.capId ? <p style={phaseText}>CAP ID: {profile.capId}</p> : <p style={cardText}>CAP ID: Not entered</p>}
         <p style={cardText}>{profile.squadron}</p>
         <p style={goalText}>Goal: {profile.goal}</p>
@@ -349,7 +374,7 @@ function DashboardTab({ profile, progress, currentAchievement, completedCount, e
   );
 }
 
-function RankTab({ profile, setProfile, onSelect, completedIds, toggleCompleted, progress, currentAchievement, completedCount }) {
+function RankTab({ profile, currentCadetRank, setProfile, onSelect, completedIds, toggleCompleted, progress, currentAchievement, completedCount }) {
   const [editing, setEditing] = useState(false);
   const [form, setForm] = useState(profile);
 
@@ -381,20 +406,20 @@ function RankTab({ profile, setProfile, onSelect, completedIds, toggleCompleted,
         {!editing ? (
           <>
             <p style={smallLabel}>Cadet Profile</p>
-            <h2 style={profileName}>{profile.name}</h2>
+            <h2 style={profileName}>{formatCadetDisplayName(profile.name, currentCadetRank)}</h2>
             {profile.capId ? <p style={phaseText}>CAP ID: {profile.capId}</p> : <p style={cardText}>CAP ID: Not entered</p>}
             <p style={cardText}>{profile.squadron}</p>
             <p style={phaseText}>Joined: {profile.joined}</p>
             <p style={goalText}>Goal: {profile.goal}</p>
             <p style={{ ...cardText, marginTop: "12px", fontSize: "12px" }}>
-              CAP ID is stored only on this device. Do not enter or store your CAP password in this app.
+              Enter only the cadet’s name, like Lawrence. The app adds the current rank automatically.
             </p>
             <button style={smallActionButton} onClick={() => { setForm(profile); setEditing(true); }}>Edit Profile</button>
           </>
         ) : (
           <>
             <p style={smallLabel}>Edit Profile</p>
-            <input style={input} value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} placeholder="Cadet name" />
+            <input style={input} value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} placeholder="Last name only, example: Lawrence" />
             <input style={input} value={form.capId || ""} onChange={(e) => setForm({ ...form, capId: e.target.value })} placeholder="CAP ID only — never password" />
             <input style={input} value={form.squadron} onChange={(e) => setForm({ ...form, squadron: e.target.value })} placeholder="Squadron" />
             <input style={input} value={form.joined} onChange={(e) => setForm({ ...form, joined: e.target.value })} placeholder="Joined" />
