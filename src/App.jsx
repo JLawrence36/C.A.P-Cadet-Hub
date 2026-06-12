@@ -108,100 +108,316 @@ const ACHIEVEMENTS = [
   }
 ];
 
+const EVENTS = [
+  {
+    id: 1,
+    title: "Weekly Squadron Meeting",
+    date: "June 16",
+    time: "1900",
+    location: "Squadron HQ",
+    type: "Meeting"
+  },
+  {
+    id: 2,
+    title: "Aerospace Education Night",
+    date: "June 23",
+    time: "1830",
+    location: "Classroom",
+    type: "Education"
+  }
+];
+
+const FLIGHTS = [
+  {
+    id: 1,
+    aircraft: "Cessna 172",
+    date: "May 10",
+    duration: "1.2 hrs",
+    type: "Orientation Flight"
+  },
+  {
+    id: 2,
+    aircraft: "Cessna 172",
+    date: "May 28",
+    duration: "0.9 hrs",
+    type: "Orientation Flight"
+  }
+];
+
+const DOCS = [
+  {
+    id: 1,
+    name: "Cadet Achievement Requirements",
+    category: "Cadet Program",
+    url: "https://www.gocivilairpatrol.com/programs/cadets/stripes-to-diamonds"
+  },
+  {
+    id: 2,
+    name: "eServices Login",
+    category: "Online Learning",
+    url: "https://eservices.cap.gov"
+  },
+  {
+    id: 3,
+    name: "CAPP 60-33 Drill & Ceremonies",
+    category: "Drill",
+    url: "https://www.gocivilairpatrol.com/media/cms/CAPP6020_5_AUG_16_07A0C6200BA4C.pdf"
+  },
+  {
+    id: 4,
+    name: "CAPP 60-34 Practical Drill Tests",
+    category: "Drill",
+    url: "https://www.gocivilairpatrol.com/media/cms/CAPP_6034_Sept_24_3e0cc652c818b.pdf"
+  }
+];
+
 export default function App() {
+  const [activeTab, setActiveTab] = useState("rank");
   const [selected, setSelected] = useState(null);
-  const [tab, setTab] = useState("requirements");
+  const [detailTab, setDetailTab] = useState("requirements");
 
-  if (selected) {
-    return (
-      <div style={page}>
-        <div style={container}>
-          <button style={backButton} onClick={() => setSelected(null)}>
-            ← Back
-          </button>
+  function openAchievement(achievement) {
+    setSelected(achievement);
+    setDetailTab("requirements");
+  }
 
-          <div style={hero}>
-            <p style={eyebrow}>{selected.phase}</p>
-            <h1 style={title}>{selected.name}</h1>
-            <p style={subtitle}>
-              {selected.rank} · {selected.abbr}
-            </p>
-          </div>
-
-          <p style={overview}>{selected.overview}</p>
-
-          <div style={tabRow}>
-            <button
-              style={tab === "requirements" ? activeTab : inactiveTab}
-              onClick={() => setTab("requirements")}
-            >
-              Requirements
-            </button>
-            <button
-              style={tab === "drill" ? activeTab : inactiveTab}
-              onClick={() => setTab("drill")}
-            >
-              Drill
-            </button>
-          </div>
-
-          {tab === "requirements" &&
-            selected.requirements.map((item, index) => (
-              <div key={index} style={listItem}>
-                ✅ {item}
-              </div>
-            ))}
-
-          {tab === "drill" &&
-            selected.drill.map((item, index) => (
-              <div key={index} style={listItem}>
-                🪖 {item}
-              </div>
-            ))}
-        </div>
-      </div>
-    );
+  function goHomeTab(tab) {
+    setActiveTab(tab);
+    setSelected(null);
   }
 
   return (
     <div style={page}>
       <div style={container}>
-        <div style={hero}>
-          <p style={eyebrow}>Civil Air Patrol Companion</p>
-          <h1 style={title}>CAP Cadet Hub</h1>
-          <p style={subtitle}>Track ranks, requirements, and drill.</p>
-        </div>
-
-        <h2 style={sectionTitle}>Rank Tracker</h2>
-
-        {ACHIEVEMENTS.map((achievement) => (
-          <button
-            key={achievement.id}
-            style={card}
-            onClick={() => {
-              setSelected(achievement);
-              setTab("requirements");
-            }}
-          >
-            <div>
-              <strong>{achievement.name}</strong>
-              <p style={cardText}>
-                {achievement.rank} · {achievement.abbr}
-              </p>
-              <p style={phaseText}>{achievement.phase}</p>
-            </div>
-            <span style={arrow}>›</span>
-          </button>
-        ))}
+        {selected ? (
+          <AchievementDetail
+            selected={selected}
+            detailTab={detailTab}
+            setDetailTab={setDetailTab}
+            onBack={() => setSelected(null)}
+          />
+        ) : (
+          <>
+            {activeTab === "rank" && <RankTab onSelect={openAchievement} />}
+            {activeTab === "calendar" && <CalendarTab />}
+            {activeTab === "flights" && <FlightsTab />}
+            {activeTab === "docs" && <DocsTab />}
+          </>
+        )}
       </div>
+
+      {!selected && (
+        <nav style={bottomNav}>
+          <button
+            style={activeTab === "rank" ? activeNavButton : navButton}
+            onClick={() => goHomeTab("rank")}
+          >
+            <span style={navIcon}>⭐</span>
+            <span>Rank</span>
+          </button>
+
+          <button
+            style={activeTab === "calendar" ? activeNavButton : navButton}
+            onClick={() => goHomeTab("calendar")}
+          >
+            <span style={navIcon}>📅</span>
+            <span>Calendar</span>
+          </button>
+
+          <button
+            style={activeTab === "flights" ? activeNavButton : navButton}
+            onClick={() => goHomeTab("flights")}
+          >
+            <span style={navIcon}>✈️</span>
+            <span>Flights</span>
+          </button>
+
+          <button
+            style={activeTab === "docs" ? activeNavButton : navButton}
+            onClick={() => goHomeTab("docs")}
+          >
+            <span style={navIcon}>📁</span>
+            <span>Docs</span>
+          </button>
+        </nav>
+      )}
     </div>
+  );
+}
+
+function RankTab({ onSelect }) {
+  return (
+    <>
+      <div style={hero}>
+        <p style={eyebrow}>Civil Air Patrol Companion</p>
+        <h1 style={title}>CAP Cadet Hub</h1>
+        <p style={subtitle}>Track ranks, requirements, and drill.</p>
+      </div>
+
+      <h2 style={sectionTitle}>Rank Tracker</h2>
+
+      {ACHIEVEMENTS.map((achievement) => (
+        <button
+          key={achievement.id}
+          style={card}
+          onClick={() => onSelect(achievement)}
+        >
+          <div>
+            <strong style={blueText}>{achievement.name}</strong>
+            <p style={cardText}>
+              {achievement.rank} · {achievement.abbr}
+            </p>
+            <p style={phaseText}>{achievement.phase}</p>
+          </div>
+          <span style={arrow}>›</span>
+        </button>
+      ))}
+    </>
+  );
+}
+
+function AchievementDetail({ selected, detailTab, setDetailTab, onBack }) {
+  return (
+    <>
+      <button style={backButton} onClick={onBack}>
+        ← Back
+      </button>
+
+      <div style={hero}>
+        <p style={eyebrow}>{selected.phase}</p>
+        <h1 style={title}>{selected.name}</h1>
+        <p style={subtitle}>
+          {selected.rank} · {selected.abbr}
+        </p>
+      </div>
+
+      <p style={overview}>{selected.overview}</p>
+
+      <div style={tabRow}>
+        <button
+          style={detailTab === "requirements" ? activeTabStyle : inactiveTabStyle}
+          onClick={() => setDetailTab("requirements")}
+        >
+          Requirements
+        </button>
+        <button
+          style={detailTab === "drill" ? activeTabStyle : inactiveTabStyle}
+          onClick={() => setDetailTab("drill")}
+        >
+          Drill
+        </button>
+      </div>
+
+      {detailTab === "requirements" &&
+        selected.requirements.map((item, index) => (
+          <div key={index} style={listItem}>
+            ✅ {item}
+          </div>
+        ))}
+
+      {detailTab === "drill" &&
+        selected.drill.map((item, index) => (
+          <div key={index} style={listItem}>
+            🪖 {item}
+          </div>
+        ))}
+    </>
+  );
+}
+
+function CalendarTab() {
+  return (
+    <>
+      <div style={hero}>
+        <p style={eyebrow}>Upcoming Events</p>
+        <h1 style={title}>Calendar</h1>
+        <p style={subtitle}>Track meetings, activities, and training.</p>
+      </div>
+
+      {EVENTS.map((event) => (
+        <div key={event.id} style={card}>
+          <div>
+            <strong style={blueText}>{event.title}</strong>
+            <p style={cardText}>
+              {event.date} · {event.time}
+            </p>
+            <p style={phaseText}>
+              {event.type} · {event.location}
+            </p>
+          </div>
+        </div>
+      ))}
+    </>
+  );
+}
+
+function FlightsTab() {
+  return (
+    <>
+      <div style={hero}>
+        <p style={eyebrow}>Orientation Flights</p>
+        <h1 style={title}>Flight Log</h1>
+        <p style={subtitle}>Track aircraft, dates, and flight hours.</p>
+      </div>
+
+      <div style={statsRow}>
+        <div style={statCard}>
+          <p style={statLabel}>Flights</p>
+          <h2 style={statNumber}>{FLIGHTS.length}</h2>
+        </div>
+        <div style={statCard}>
+          <p style={statLabel}>Hours</p>
+          <h2 style={statNumber}>2.1</h2>
+        </div>
+      </div>
+
+      {FLIGHTS.map((flight) => (
+        <div key={flight.id} style={card}>
+          <div>
+            <strong style={blueText}>{flight.aircraft}</strong>
+            <p style={cardText}>
+              {flight.date} · {flight.type}
+            </p>
+            <p style={phaseText}>{flight.duration}</p>
+          </div>
+        </div>
+      ))}
+    </>
+  );
+}
+
+function DocsTab() {
+  return (
+    <>
+      <div style={hero}>
+        <p style={eyebrow}>Resources</p>
+        <h1 style={title}>Docs</h1>
+        <p style={subtitle}>Quick links for cadets and parents.</p>
+      </div>
+
+      {DOCS.map((doc) => (
+        <a
+          key={doc.id}
+          href={doc.url}
+          target="_blank"
+          rel="noreferrer"
+          style={docCard}
+        >
+          <div>
+            <strong style={blueText}>{doc.name}</strong>
+            <p style={phaseText}>{doc.category}</p>
+          </div>
+          <span style={arrow}>↗</span>
+        </a>
+      ))}
+    </>
   );
 }
 
 const page = {
   minHeight: "100vh",
   background: "#f9fafb",
-  padding: "24px"
+  padding: "24px 24px 110px"
 };
 
 const container = {
@@ -253,7 +469,28 @@ const card = {
   display: "flex",
   justifyContent: "space-between",
   alignItems: "center",
-  boxShadow: "0 6px 16px rgba(0,0,0,0.05)"
+  boxShadow: "0 6px 16px rgba(0,0,0,0.05)",
+  color: "#111827"
+};
+
+const docCard = {
+  width: "100%",
+  background: "white",
+  border: "1px solid #e5e7eb",
+  borderRadius: "18px",
+  padding: "16px",
+  marginBottom: "12px",
+  textAlign: "left",
+  display: "flex",
+  justifyContent: "space-between",
+  alignItems: "center",
+  boxShadow: "0 6px 16px rgba(0,0,0,0.05)",
+  color: "#111827",
+  textDecoration: "none"
+};
+
+const blueText = {
+  color: "#0b82f0"
 };
 
 const cardText = {
@@ -295,7 +532,7 @@ const tabRow = {
   marginBottom: "16px"
 };
 
-const activeTab = {
+const activeTabStyle = {
   flex: 1,
   padding: "12px",
   borderRadius: "12px",
@@ -305,7 +542,7 @@ const activeTab = {
   fontWeight: "bold"
 };
 
-const inactiveTab = {
+const inactiveTabStyle = {
   flex: 1,
   padding: "12px",
   borderRadius: "12px",
@@ -323,4 +560,75 @@ const listItem = {
   marginBottom: "10px",
   color: "#111827",
   boxShadow: "0 4px 10px rgba(0,0,0,0.04)"
+};
+
+const bottomNav = {
+  position: "fixed",
+  left: "50%",
+  bottom: "18px",
+  transform: "translateX(-50%)",
+  width: "calc(100% - 32px)",
+  maxWidth: "430px",
+  background: "white",
+  border: "1px solid #e5e7eb",
+  borderRadius: "24px",
+  padding: "8px",
+  display: "grid",
+  gridTemplateColumns: "repeat(4, 1fr)",
+  gap: "6px",
+  boxShadow: "0 12px 30px rgba(0,0,0,0.15)",
+  zIndex: 10
+};
+
+const navButton = {
+  border: "none",
+  background: "transparent",
+  color: "#6b7280",
+  borderRadius: "16px",
+  padding: "10px 4px",
+  fontWeight: "bold",
+  fontSize: "11px",
+  display: "flex",
+  flexDirection: "column",
+  alignItems: "center",
+  gap: "3px"
+};
+
+const activeNavButton = {
+  ...navButton,
+  background: "#dbeafe",
+  color: "#1d4ed8"
+};
+
+const navIcon = {
+  fontSize: "18px"
+};
+
+const statsRow = {
+  display: "grid",
+  gridTemplateColumns: "1fr 1fr",
+  gap: "12px",
+  marginBottom: "14px"
+};
+
+const statCard = {
+  background: "white",
+  border: "1px solid #e5e7eb",
+  borderRadius: "18px",
+  padding: "16px",
+  boxShadow: "0 6px 16px rgba(0,0,0,0.05)"
+};
+
+const statLabel = {
+  margin: 0,
+  color: "#6b7280",
+  fontSize: "12px",
+  fontWeight: "bold",
+  textTransform: "uppercase"
+};
+
+const statNumber = {
+  margin: "6px 0 0",
+  color: "#1e3a8a",
+  fontSize: "34px"
 };
