@@ -256,9 +256,273 @@ const ACHIEVEMENTS = [
       "Mentor junior cadets",
       "Prepare for officer leadership role"
     ]
+  },
+  {
+    id: 11,
+    name: "Achievement 9",
+    rank: "Cadet Second Lieutenant",
+    abbr: "C/2d Lt",
+    phase: "Phase III — Command",
+    overview:
+      "The first Phase III achievement. Cadet now operates as a junior officer and begins more formal staff-duty work.",
+    requirements: [
+      "Minimum 8 weeks after Mitchell",
+      "Complete Learn to Lead Chapter 9",
+      "Complete SDA service, writing, and presentation requirement",
+      "Complete Journey of Flight aerospace block test",
+      "Participate in one fitness activity and have attained HFZ within 180 days",
+      "Attend character development"
+    ],
+    drill: [
+      "No new drill test in this phase",
+      "Maintain mastery of previous drill",
+      "Teach junior cadets basic drill",
+      "Evaluate command voice",
+      "Support flight-level drill training"
+    ]
+  },
+  {
+    id: 12,
+    name: "Willa Brown Achievement",
+    rank: "Cadet First Lieutenant",
+    abbr: "C/1st Lt",
+    phase: "Phase III — Command",
+    overview:
+      "Named for Willa Brown. Cadet continues officer development, staff-duty analysis, and command-level responsibility.",
+    requirements: [
+      "Minimum 8 weeks after Achievement 9",
+      "Complete Learn to Lead Chapter 10",
+      "Complete SDA service, writing, and presentation requirement",
+      "Complete Journey of Flight aerospace block test",
+      "Participate in one fitness activity and have attained HFZ within 180 days",
+      "Attend character development"
+    ],
+    drill: [
+      "No new drill test in this phase",
+      "Supervise cadet drill instruction",
+      "Mentor NCOs leading formations",
+      "Support inspections and ceremonies",
+      "Demonstrate officer bearing"
+    ]
+  },
+  {
+    id: 13,
+    name: "Achievement 11",
+    rank: "Cadet First Lieutenant",
+    abbr: "C/1st Lt",
+    phase: "Phase III — Command",
+    overview:
+      "Achievement 11 is currently unnamed. Cadet continues command-phase leadership and staff work before Earhart.",
+    requirements: [
+      "Minimum 8 weeks after Willa Brown",
+      "Complete Learn to Lead Chapter 11",
+      "Complete SDA service, writing, and presentation requirement",
+      "Complete Journey of Flight aerospace block test",
+      "Participate in one fitness activity and have attained HFZ within 180 days",
+      "Attend character development"
+    ],
+    drill: [
+      "No new drill test in this phase",
+      "Coach junior cadet leaders",
+      "Help run formation procedures",
+      "Prepare cadets for drill evaluations",
+      "Support ceremonies"
+    ]
+  },
+  {
+    id: 14,
+    name: "Amelia Earhart Award",
+    rank: "Cadet Captain",
+    abbr: "C/Capt",
+    phase: "Phase III — Milestone",
+    overview:
+      "The Earhart Award is the Phase III milestone. Cadet demonstrates command-level leadership and earns Cadet Captain.",
+    requirements: [
+      "Minimum 8 weeks after Achievement 11",
+      "Pass comprehensive closed-book leadership exam covering Learn to Lead Chapters 9–11",
+      "Participate in one fitness activity and have attained HFZ within 180 days",
+      "Meet general advancement requirements",
+      "No aerospace requirement for this milestone",
+      "No character activity requirement for this milestone"
+    ],
+    drill: [
+      "No new drill test",
+      "Expected to mentor and evaluate junior cadets",
+      "Support unit ceremonies",
+      "Supervise drill instruction",
+      "Model command presence"
+    ]
+  },
+  {
+    id: 15,
+    name: "Achievement 12",
+    rank: "Cadet Captain",
+    abbr: "C/Capt",
+    phase: "Phase IV — Executive",
+    overview:
+      "The first Phase IV achievement. Cadet begins executive-level leadership and more advanced staff work.",
+    requirements: [
+      "Minimum 8 weeks after Earhart",
+      "Complete Learn to Lead Chapter 12",
+      "Complete SDA service, writing, and presentation requirement",
+      "No aerospace requirement",
+      "Participate in one fitness activity and have attained HFZ within 180 days",
+      "Attend character development"
+    ],
+    drill: [
+      "No new drill test",
+      "Oversee training rather than only executing drill",
+      "Help plan inspections and ceremonies",
+      "Coach cadet staff",
+      "Maintain mastery of prior drill"
+    ]
+  },
+  {
+    id: 16,
+    name: "Achievement 13",
+    rank: "Cadet Captain",
+    abbr: "C/Capt",
+    phase: "Phase IV — Executive",
+    overview:
+      "Cadet continues executive-phase growth with staff service, writing, and presentation requirements.",
+    requirements: [
+      "Minimum 8 weeks after Achievement 12",
+      "Complete Learn to Lead Chapter 13",
+      "Complete SDA service, writing, and presentation requirement",
+      "No aerospace requirement",
+      "Participate in one fitness activity and have attained HFZ within 180 days",
+      "Attend character development"
+    ],
+    drill: [
+      "No new drill test",
+      "Mentor cadet officers and NCOs",
+      "Support squadron-level drill standards",
+      "Prepare cadets for ceremonies",
+      "Maintain command presence"
+    ]
+  },
+  {
+    id: 17,
+    name: "Boyd Achievement",
+    rank: "Cadet Major",
+    abbr: "C/Maj",
+    phase: "Phase IV — Executive",
+    overview:
+      "Named for Col. George Boyd. Cadet advances to field-grade officer rank and continues executive leadership development.",
+    requirements: [
+      "Minimum 8 weeks after Achievement 13",
+      "Complete Learn to Lead Chapter 14",
+      "Complete SDA service, writing, and presentation requirement",
+      "Complete Journey of Flight aerospace block test",
+      "Participate in one fitness activity and have attained HFZ within 180 days",
+      "Attend character development"
+    ],
+    drill: [
+      "No new drill test",
+      "Supervise unit drill training",
+      "Support cadet staff development",
+      "Lead by example during formations",
+      "Coach ceremony preparation"
+    ]
+  },
+  {
+    id: 18,
+    name: "Sally Ride Achievement",
+    rank: "Cadet Major",
+    abbr: "C/Maj",
+    phase: "Phase IV — Executive",
+    overview:
+      "Named for Dr. Sally Ride. Cadet continues executive leadership with staff service and aerospace study.",
+    requirements: [
+      "Minimum 8 weeks after Boyd",
+      "Complete Learn to Lead Chapter 15",
+      "Complete SDA service, writing, and presentation requirement",
+      "Complete Journey of Flight aerospace block test",
+      "Participate in one fitness activity and have attained HFZ within 180 days",
+      "Attend character development"
+    ],
+    drill: [
+      "No new drill test",
+      "Manage and mentor cadet leaders",
+      "Support inspections and ceremonies",
+      "Maintain drill expertise",
+      "Teach standards through subordinate leaders"
+    ]
+  },
+  {
+    id: 19,
+    name: "Achievement 16",
+    rank: "Cadet Major",
+    abbr: "C/Maj",
+    phase: "Phase IV — Executive",
+    overview:
+      "The final regular achievement before the Eaker Award. Cadet should be operating as a senior cadet leader.",
+    requirements: [
+      "Minimum 8 weeks after Sally Ride",
+      "Complete Learn to Lead Chapter 16",
+      "Complete SDA service, writing, and presentation requirement",
+      "Complete Journey of Flight aerospace block test",
+      "Participate in one fitness activity and have attained HFZ within 180 days",
+      "Attend character development"
+    ],
+    drill: [
+      "No new drill test",
+      "Senior-level mentorship of drill and ceremonies",
+      "Prepare cadet staff for evaluations",
+      "Support unit command team",
+      "Model senior cadet leadership"
+    ]
+  },
+  {
+    id: 20,
+    name: "Ira C. Eaker Award",
+    rank: "Cadet Lieutenant Colonel",
+    abbr: "C/Lt Col",
+    phase: "Phase IV — Milestone",
+    overview:
+      "The Eaker Award is the Phase IV milestone. Cadet completes executive-phase leadership requirements and becomes a Cadet Lieutenant Colonel.",
+    requirements: [
+      "Minimum 8 weeks after Achievement 16",
+      "Complete required speech and essay",
+      "Participate in one fitness activity and have attained HFZ within 180 days",
+      "Graduate from a leadership academy before earning the award",
+      "Meet general advancement requirements",
+      "No aerospace requirement for this milestone",
+      "No character activity requirement for this milestone"
+    ],
+    drill: [
+      "No new drill test",
+      "Expected to mentor cadets across the unit",
+      "Support advanced ceremonies",
+      "Guide cadet staff",
+      "Maintain mastery of CAP drill and ceremonies"
+    ]
+  },
+  {
+    id: 21,
+    name: "Carl A. Spaatz Award",
+    rank: "Cadet Colonel",
+    abbr: "C/Col",
+    phase: "Pinnacle Award",
+    overview:
+      "The Spaatz Award is the highest cadet achievement in Civil Air Patrol. It requires comprehensive exams and exceptional cadet performance.",
+    requirements: [
+      "Earn the Ira C. Eaker Award",
+      "Pass comprehensive leadership exam covering Learn to Lead Chapters 1–16",
+      "Pass comprehensive aerospace exam covering Journey of Flight",
+      "Pass the USAF Academy Candidate Fitness Assessment",
+      "Complete required essay exam",
+      "Meet general advancement requirements"
+    ],
+    drill: [
+      "No additional drill test",
+      "Expected to demonstrate complete mastery",
+      "Teach and mentor cadet leaders",
+      "Support unit, group, and wing-level ceremonies",
+      "Represent the highest standard of cadet leadership"
+    ]
   }
 ];
-
 const EVENTS = [
   {
     id: 1,
