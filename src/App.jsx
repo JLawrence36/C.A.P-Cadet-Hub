@@ -81,8 +81,24 @@ const DRILL_LIBRARY = [
 ];
 
 const DEFAULT_EVENTS = [
-  { id: 1, title: "Weekly Squadron Meeting", date: "2026-06-16", time: "19:00", location: "Squadron HQ", type: "Meeting" },
-  { id: 2, title: "Aerospace Education Night", date: "2026-06-23", time: "18:30", location: "Classroom", type: "Education" }
+  {
+    id: 1,
+    title: "Weekly Squadron Meeting",
+    date: "2026-06-16",
+    time: "19:00",
+    location: "Squadron HQ",
+    type: "Meeting",
+    notes: "Uniform of the day, announcements, and weekly cadet training."
+  },
+  {
+    id: 2,
+    title: "Aerospace Education Night",
+    date: "2026-06-23",
+    time: "18:30",
+    location: "Classroom",
+    type: "Education",
+    notes: "Bring notebook and be ready for aerospace discussion."
+  }
 ];
 
 const DEFAULT_FLIGHTS = [
@@ -567,7 +583,14 @@ function DrillTab() {
 function CalendarTab({ events, setEvents }) {
   const [showForm, setShowForm] = useState(false);
   const [editingId, setEditingId] = useState(null);
-  const [form, setForm] = useState({ title: "", date: "", time: "", location: "", type: "Meeting" });
+  const [form, setForm] = useState({
+    title: "",
+    date: "",
+    time: "",
+    location: "",
+    type: "Meeting",
+    notes: ""
+  });
 
   function saveEvent() {
     if (!form.title || !form.date) return;
@@ -578,7 +601,15 @@ function CalendarTab({ events, setEvents }) {
       setEvents([...events, { ...form, id: Date.now() }]);
     }
 
-    setForm({ title: "", date: "", time: "", location: "", type: "Meeting" });
+    setForm({
+      title: "",
+      date: "",
+      time: "",
+      location: "",
+      type: "Meeting",
+      notes: ""
+    });
+
     setEditingId(null);
     setShowForm(false);
   }
@@ -589,8 +620,10 @@ function CalendarTab({ events, setEvents }) {
       date: event.date || "",
       time: event.time || "",
       location: event.location || "",
-      type: event.type || "Meeting"
+      type: event.type || "Meeting",
+      notes: event.notes || ""
     });
+
     setEditingId(event.id);
     setShowForm(true);
   }
@@ -600,7 +633,15 @@ function CalendarTab({ events, setEvents }) {
   }
 
   function cancelForm() {
-    setForm({ title: "", date: "", time: "", location: "", type: "Meeting" });
+    setForm({
+      title: "",
+      date: "",
+      time: "",
+      location: "",
+      type: "Meeting",
+      notes: ""
+    });
+
     setEditingId(null);
     setShowForm(false);
   }
@@ -610,20 +651,52 @@ function CalendarTab({ events, setEvents }) {
       <div style={hero}>
         <p style={eyebrow}>Upcoming Events</p>
         <h1 style={title}>Calendar</h1>
-        <p style={subtitle}>Track meetings, activities, and training.</p>
+        <p style={subtitle}>Track meetings, activities, training, and meeting notes.</p>
       </div>
 
-      {!showForm && <button style={primaryButton} onClick={() => setShowForm(true)}>+ Add Event</button>}
+      {!showForm && (
+        <button style={primaryButton} onClick={() => setShowForm(true)}>
+          + Add Event
+        </button>
+      )}
 
       {showForm && (
         <div style={formCard}>
           <p style={smallLabel}>{editingId ? "Edit Event" : "Add Event"}</p>
-          <input style={input} placeholder="Event title" value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} />
-          <input style={input} type="date" value={form.date} onChange={(e) => setForm({ ...form, date: e.target.value })} />
-          <input style={input} type="time" value={form.time} onChange={(e) => setForm({ ...form, time: e.target.value })} />
-          <input style={input} placeholder="Location" value={form.location} onChange={(e) => setForm({ ...form, location: e.target.value })} />
 
-          <select style={input} value={form.type} onChange={(e) => setForm({ ...form, type: e.target.value })}>
+          <input
+            style={input}
+            placeholder="Event title"
+            value={form.title}
+            onChange={(e) => setForm({ ...form, title: e.target.value })}
+          />
+
+          <input
+            style={input}
+            type="date"
+            value={form.date}
+            onChange={(e) => setForm({ ...form, date: e.target.value })}
+          />
+
+          <input
+            style={input}
+            type="time"
+            value={form.time}
+            onChange={(e) => setForm({ ...form, time: e.target.value })}
+          />
+
+          <input
+            style={input}
+            placeholder="Location"
+            value={form.location}
+            onChange={(e) => setForm({ ...form, location: e.target.value })}
+          />
+
+          <select
+            style={input}
+            value={form.type}
+            onChange={(e) => setForm({ ...form, type: e.target.value })}
+          >
             <option>Meeting</option>
             <option>Education</option>
             <option>Activity</option>
@@ -632,8 +705,20 @@ function CalendarTab({ events, setEvents }) {
             <option>Other</option>
           </select>
 
-          <button style={primaryButton} onClick={saveEvent}>{editingId ? "Save Changes" : "Save Event"}</button>
-          <button style={secondaryButton} onClick={cancelForm}>Cancel</button>
+          <textarea
+            style={textArea}
+            placeholder="Meeting notes, uniform, what to bring, announcements, reminders..."
+            value={form.notes}
+            onChange={(e) => setForm({ ...form, notes: e.target.value })}
+          />
+
+          <button style={primaryButton} onClick={saveEvent}>
+            {editingId ? "Save Changes" : "Save Event"}
+          </button>
+
+          <button style={secondaryButton} onClick={cancelForm}>
+            Cancel
+          </button>
         </div>
       )}
 
@@ -644,9 +729,21 @@ function CalendarTab({ events, setEvents }) {
             <p style={cardText}>{formatDate(event.date)} · {event.time || "No time"}</p>
             <p style={phaseText}>{event.type} · {event.location || "No location"}</p>
 
+            {event.notes && (
+              <div style={notesBox}>
+                <p style={smallLabel}>Notes</p>
+                <p style={notesText}>{event.notes}</p>
+              </div>
+            )}
+
             <div style={actionRow}>
-              <button style={editButton} onClick={() => editEvent(event)}>Edit</button>
-              <button style={deleteButton} onClick={() => deleteEvent(event.id)}>Delete</button>
+              <button style={editButton} onClick={() => editEvent(event)}>
+                Edit
+              </button>
+
+              <button style={deleteButton} onClick={() => deleteEvent(event.id)}>
+                Delete
+              </button>
             </div>
           </div>
         </div>
@@ -963,4 +1060,31 @@ const drillReferenceCard = {
   boxShadow: "var(--shadow)",
   color: "var(--text)",
   textAlign: "left"
+};
+const textArea = {
+  width: "100%",
+  minHeight: "100px",
+  border: "1px solid var(--card-border)",
+  background: "var(--app-bg)",
+  color: "var(--text)",
+  borderRadius: "12px",
+  padding: "12px",
+  marginBottom: "10px",
+  fontSize: "15px",
+  resize: "vertical"
+};
+
+const notesBox = {
+  background: "var(--soft-bg)",
+  borderRadius: "14px",
+  padding: "12px",
+  marginTop: "12px"
+};
+
+const notesText = {
+  margin: "4px 0 0",
+  color: "var(--text)",
+  fontSize: "14px",
+  lineHeight: 1.45,
+  whiteSpace: "pre-wrap"
 };
