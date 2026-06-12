@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 const ACHIEVEMENTS = [
   ["Curry Achievement", "Cadet Airman", "C/Amn", "Phase I", ["Be a current CAP cadet", "Recite the Cadet Oath", "Complete Cadet Welcome Course", "Complete Learn to Lead Chapter 1", "Attempt CPFT", "Participate in character development"], ["Fall In", "Attention", "Parade Rest", "Present Arms", "Order Arms", "Right Face", "Left Face", "About Face", "Forward March", "Flight Halt"]],
@@ -28,7 +28,7 @@ const ACHIEVEMENTS = [
   rank: a[1],
   abbr: a[2],
   phase: a[3],
-  overview: `${a[0]} promotion tracker for ${a[1]}.`,
+  overview: `${a[0]} tracker for ${a[1]}.`,
   requirements: a[4],
   drill: a[5]
 }));
@@ -37,58 +37,107 @@ const DRILL_LIBRARY = [
   {
     category: "Stationary Movements",
     items: [
-      { name: "Attention", command: "Flight, ATTENTION", purpose: "Move cadets to the basic position of military bearing.", notes: ["Heels together", "Body straight", "Arms pinned naturally", "Eyes forward", "No talking or movement"] },
-      { name: "Parade Rest", command: "Parade, REST", purpose: "Place cadets in a disciplined rest position.", notes: ["Move left foot about shoulder width", "Hands behind back", "Right hand inside left", "Remain silent", "Eyes forward"] },
-      { name: "Present Arms", command: "Present, ARMS", purpose: "Render a salute while stationary.", notes: ["Raise right hand sharply", "Tip of forefinger near eyebrow or glasses", "Upper arm parallel to ground", "Hold until ordered"] },
-      { name: "Order Arms", command: "Order, ARMS", purpose: "Return from salute to attention.", notes: ["Lower hand sharply", "Return to attention", "Do not drop posture"] },
-      { name: "Right Face", command: "Right, FACE", purpose: "Turn 90 degrees to the right.", notes: ["Pivot on right heel and left toe", "Keep arms pinned", "Snap heels together", "Finish at attention"] },
-      { name: "Left Face", command: "Left, FACE", purpose: "Turn 90 degrees to the left.", notes: ["Pivot on left heel and right toe", "Keep body upright", "Snap heels together", "Finish at attention"] },
-      { name: "About Face", command: "About, FACE", purpose: "Turn 180 degrees to the rear.", notes: ["Place right toe behind left heel", "Pivot over right shoulder", "Keep arms pinned", "Finish at attention"] }
+      ["Attention", "Flight, ATTENTION", "Basic position of military bearing."],
+      ["Parade Rest", "Parade, REST", "Disciplined rest position."],
+      ["Present Arms", "Present, ARMS", "Render a salute."],
+      ["Order Arms", "Order, ARMS", "Return from salute."],
+      ["Right Face", "Right, FACE", "Turn 90 degrees right."],
+      ["Left Face", "Left, FACE", "Turn 90 degrees left."],
+      ["About Face", "About, FACE", "Turn 180 degrees."]
     ]
   },
   {
     category: "Marching Movements",
     items: [
-      { name: "Forward March", command: "Forward, MARCH", purpose: "Move the flight forward in step.", notes: ["Step off with left foot", "Use 24-inch steps", "Swing arms naturally", "Maintain interval and distance"] },
-      { name: "Flight Halt", command: "Flight, HALT", purpose: "Stop the flight while marching.", notes: ["Command called on either foot", "Take one more step", "Bring trailing foot alongside", "End at attention"] },
-      { name: "Column Right", command: "Column Right, MARCH", purpose: "Turn the flight to the right while marching.", notes: ["Base element pivots right", "Others continue until proper point", "Maintain dress and cover"] },
-      { name: "Column Left", command: "Column Left, MARCH", purpose: "Turn the flight to the left while marching.", notes: ["Base element pivots left", "Keep spacing", "Do not drift", "Maintain cadence"] },
-      { name: "To the Rear March", command: "To the Rear, MARCH", purpose: "Reverse the direction of march.", notes: ["Given as right foot strikes", "Take one more step", "Pivot on balls of feet", "Step off with left foot"] },
-      { name: "Change Step March", command: "Change Step, MARCH", purpose: "Correct cadence without stopping.", notes: ["Given as right foot strikes", "Take one more step", "Bring right foot alongside left", "Step off again with left"] }
+      ["Forward March", "Forward, MARCH", "Move the flight forward in step."],
+      ["Flight Halt", "Flight, HALT", "Stop the flight while marching."],
+      ["Column Right", "Column Right, MARCH", "Turn the flight right while marching."],
+      ["Column Left", "Column Left, MARCH", "Turn the flight left while marching."],
+      ["To the Rear March", "To the Rear, MARCH", "Reverse direction of march."],
+      ["Change Step March", "Change Step, MARCH", "Correct cadence without stopping."]
     ]
   },
   {
     category: "Flight Formation",
     items: [
-      { name: "Fall In", command: "FALL IN", purpose: "Form the flight in proper formation.", notes: ["Cadets move quickly", "Form at attention", "Maintain interval", "Dress and cover"] },
-      { name: "Dress Right Dress", command: "Dress Right, DRESS", purpose: "Align the flight.", notes: ["Raise left arm except right flank", "Turn head and eyes right", "Adjust alignment", "Hold until Ready Front"] },
-      { name: "Ready Front", command: "Ready, FRONT", purpose: "Return from alignment to attention.", notes: ["Drop arm sharply", "Head and eyes front", "Remain at attention"] },
-      { name: "Open Ranks", command: "Open Ranks, MARCH", purpose: "Open formation for inspection.", notes: ["Front rank steps forward", "Other ranks adjust spacing", "Maintain alignment"] },
-      { name: "Close Ranks", command: "Close Ranks, MARCH", purpose: "Return to normal formation.", notes: ["Ranks close distance", "Maintain interval", "End at attention"] },
-      { name: "Count Off", command: "Count, OFF", purpose: "Number cadets in formation.", notes: ["Cadets count in sequence", "Turn head when required", "Speak clearly", "Return forward"] }
+      ["Fall In", "FALL IN", "Form the flight."],
+      ["Dress Right Dress", "Dress Right, DRESS", "Align the flight."],
+      ["Ready Front", "Ready, FRONT", "Return from alignment."],
+      ["Open Ranks", "Open Ranks, MARCH", "Open formation for inspection."],
+      ["Close Ranks", "Close Ranks, MARCH", "Return to normal formation."],
+      ["Count Off", "Count, OFF", "Number cadets in formation."]
     ]
   },
   {
     category: "Drill Leadership",
     items: [
-      { name: "Form the Flight", command: "FALL IN", purpose: "Take control and organize the flight.", notes: ["Use command voice", "Position yourself correctly", "Check alignment", "Correct spacing"] },
-      { name: "Report to Commander", command: "Sir/Ma’am, flight is prepared for inspection", purpose: "Report flight status to a commander or evaluator.", notes: ["Salute properly", "Speak clearly", "Maintain bearing", "Wait for return salute"] },
-      { name: "Give Commands", command: "Preparatory command + command of execution", purpose: "Lead cadets through movements.", notes: ["Use strong command voice", "Pause correctly", "Be confident", "Do not mumble"] },
-      { name: "Inspect Basic Alignment", command: "Dress Right, DRESS / Ready, FRONT", purpose: "Check whether cadets are properly aligned.", notes: ["Check dress", "Check cover", "Correct errors calmly", "Reset if needed"] },
-      { name: "Teach Junior Cadets", command: "Demonstrate, explain, practice, correct", purpose: "Train newer cadets in basic drill.", notes: ["Show the movement", "Explain simply", "Let them practice", "Give clear corrections"] }
+      ["Form the Flight", "FALL IN", "Take control and organize the flight."],
+      ["Report to Commander", "Sir/Ma’am, flight is prepared for inspection", "Report flight status."],
+      ["Give Commands", "Preparatory command + command of execution", "Lead cadets through movements."],
+      ["Teach Junior Cadets", "Demonstrate, explain, practice, correct", "Train newer cadets."]
     ]
   }
 ];
-
-const DEFAULT_EVENTS = [];
-const DEFAULT_FLIGHTS = [];
 
 const DEFAULT_PROFILE = {
   name: "Lawrence",
   capId: "",
   squadron: "CAP Squadron",
-  joined: "2026",
+  joined: "2026-06-01",
   goal: "Earn Wright Brothers Award"
+};
+
+const CHECKLISTS = {
+  uniform: [
+    "Blues shirt",
+    "Blues pants",
+    "Belt and buckle",
+    "Black dress shoes",
+    "Black socks",
+    "Nameplate",
+    "Grade insignia",
+    "Flight cap",
+    "Undershirt",
+    "Uniform is clean and pressed"
+  ],
+  field: [
+    "Field uniform top",
+    "Field uniform pants",
+    "Boots",
+    "Boot socks",
+    "Belt",
+    "Cover / cap",
+    "Name tapes",
+    "CAP tapes",
+    "Grade insignia",
+    "Water bottle"
+  ],
+  gear: [
+    "Name tapes ordered",
+    "Grade insignia ordered",
+    "Blues items purchased",
+    "Field uniform items purchased",
+    "Shoes / boots ready",
+    "PT gear ready",
+    "Notebook and pen",
+    "Haircut / grooming squared away",
+    "Extra socks",
+    "Laundry plan"
+  ],
+  encampment: [
+    "Encampment application complete",
+    "Parent forms complete",
+    "Medical forms complete",
+    "Packing list reviewed",
+    "Uniforms inspected",
+    "Boots broken in",
+    "PT clothes packed",
+    "Toiletries packed",
+    "Water bottle packed",
+    "Travel plan confirmed",
+    "Emergency contact info ready",
+    "Cadet understands expectations"
+  ]
 };
 
 const DOCS = [
@@ -112,6 +161,16 @@ function loadSaved(key, fallback) {
   }
 }
 
+function saveTextFile(filename, content) {
+  const blob = new Blob([content], { type: "text/plain" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = filename;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
 function formatDate(value) {
   if (!value) return "No date";
   if (!String(value).includes("-")) return value;
@@ -122,17 +181,17 @@ function formatDate(value) {
   });
 }
 
-function getCurrentCadetRank(completedIds) {
-  if (!completedIds || completedIds.length === 0) {
-    return { rank: "Cadet Recruit", abbr: "C/Rec" };
-  }
+function addWeeks(date, weeks) {
+  const d = new Date(date);
+  d.setDate(d.getDate() + weeks * 7);
+  return d.toISOString().slice(0, 10);
+}
 
+function getCurrentCadetRank(completedIds) {
+  if (!completedIds || completedIds.length === 0) return { rank: "Cadet Recruit", abbr: "C/Rec" };
   const highestCompletedId = Math.max(...completedIds);
   const achievement = ACHIEVEMENTS.find((a) => a.id === highestCompletedId);
-
-  return achievement
-    ? { rank: achievement.rank, abbr: achievement.abbr }
-    : { rank: "Cadet Recruit", abbr: "C/Rec" };
+  return achievement ? { rank: achievement.rank, abbr: achievement.abbr } : { rank: "Cadet Recruit", abbr: "C/Rec" };
 }
 
 function formatCadetDisplayName(name, currentCadetRank) {
@@ -144,15 +203,38 @@ function formatCadetDisplayName(name, currentCadetRank) {
   return `${currentCadetRank.abbr} ${cleanedName || "Cadet"}`;
 }
 
+function getNextStep(currentAchievement, requirementChecks) {
+  if (!currentAchievement) return "All achievements are complete.";
+
+  for (let i = 0; i < currentAchievement.requirements.length; i++) {
+    if (!requirementChecks[`${currentAchievement.id}-${i}`]) {
+      return `Complete: ${currentAchievement.requirements[i]}`;
+    }
+  }
+
+  for (let i = 0; i < currentAchievement.drill.length; i++) {
+    if (!requirementChecks[`drill-${currentAchievement.id}-${i}`]) {
+      return `Drill: ${currentAchievement.drill[i]}`;
+    }
+  }
+
+  return "Mark this achievement complete.";
+}
+
 export default function App() {
   const [activeTab, setActiveTab] = useState("dashboard");
   const [selected, setSelected] = useState(null);
   const [completedIds, setCompletedIds] = useState(() => loadSaved("cap_completed_ids", []));
   const [requirementChecks, setRequirementChecks] = useState(() => loadSaved("cap_requirement_checks", {}));
   const [theme, setTheme] = useState(() => localStorage.getItem("cap_theme") || "light");
-  const [events, setEvents] = useState(() => loadSaved("cap_events", DEFAULT_EVENTS));
-  const [flights, setFlights] = useState(() => loadSaved("cap_flights", DEFAULT_FLIGHTS));
+  const [events, setEvents] = useState(() => loadSaved("cap_events", []));
+  const [flights, setFlights] = useState(() => loadSaved("cap_flights", []));
   const [profile, setProfile] = useState(() => loadSaved("cap_profile", DEFAULT_PROFILE));
+  const [parentNotes, setParentNotes] = useState(() => loadSaved("cap_parent_notes", {}));
+  const [attendance, setAttendance] = useState(() => loadSaved("cap_attendance", []));
+  const [fitness, setFitness] = useState(() => loadSaved("cap_fitness", []));
+  const [checklists, setChecklists] = useState(() => loadSaved("cap_checklists", {}));
+  const [search, setSearch] = useState("");
 
   useEffect(() => localStorage.setItem("cap_completed_ids", JSON.stringify(completedIds)), [completedIds]);
   useEffect(() => localStorage.setItem("cap_requirement_checks", JSON.stringify(requirementChecks)), [requirementChecks]);
@@ -160,6 +242,10 @@ export default function App() {
   useEffect(() => localStorage.setItem("cap_events", JSON.stringify(events)), [events]);
   useEffect(() => localStorage.setItem("cap_flights", JSON.stringify(flights)), [flights]);
   useEffect(() => localStorage.setItem("cap_profile", JSON.stringify(profile)), [profile]);
+  useEffect(() => localStorage.setItem("cap_parent_notes", JSON.stringify(parentNotes)), [parentNotes]);
+  useEffect(() => localStorage.setItem("cap_attendance", JSON.stringify(attendance)), [attendance]);
+  useEffect(() => localStorage.setItem("cap_fitness", JSON.stringify(fitness)), [fitness]);
+  useEffect(() => localStorage.setItem("cap_checklists", JSON.stringify(checklists)), [checklists]);
 
   const validCompletedIds = completedIds.filter((id) => ACHIEVEMENTS.some((a) => a.id === id));
   const completedCount = validCompletedIds.length;
@@ -167,6 +253,28 @@ export default function App() {
   const isDark = theme === "dark";
   const currentAchievement = ACHIEVEMENTS.find((a) => !validCompletedIds.includes(a.id)) || ACHIEVEMENTS[ACHIEVEMENTS.length - 1];
   const currentCadetRank = getCurrentCadetRank(validCompletedIds);
+  const nextStep = getNextStep(currentAchievement, requirementChecks);
+
+  const searchResults = useMemo(() => {
+    if (!search.trim()) return [];
+    const q = search.toLowerCase();
+
+    const achievementHits = ACHIEVEMENTS.filter((a) =>
+      [a.name, a.rank, a.abbr, a.phase, ...a.requirements, ...a.drill].join(" ").toLowerCase().includes(q)
+    ).map((a) => ({ type: "Achievement", title: a.name, subtitle: `${a.rank} · ${a.phase}`, item: a }));
+
+    const drillHits = DRILL_LIBRARY.flatMap((group) =>
+      group.items
+        .filter((item) => item.join(" ").toLowerCase().includes(q))
+        .map((item) => ({ type: "Drill", title: item[0], subtitle: `${group.category} · ${item[1]}` }))
+    );
+
+    const docHits = DOCS.filter((doc) =>
+      [doc.name, doc.category].join(" ").toLowerCase().includes(q)
+    ).map((doc) => ({ type: "Doc", title: doc.name, subtitle: doc.category, url: doc.url }));
+
+    return [...achievementHits, ...drillHits, ...docHits].slice(0, 12);
+  }, [search]);
 
   function toggleCompleted(id) {
     setCompletedIds((prev) => prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]);
@@ -196,21 +304,36 @@ export default function App() {
     });
   }
 
+  function toggleChecklist(category, item) {
+    const key = `${category}-${item}`;
+    setChecklists((prev) => ({ ...prev, [key]: !prev[key] }));
+  }
+
   function resetAppData() {
     const confirmed = window.confirm("Reset all saved cadet data on this device?");
     if (!confirmed) return;
 
-    localStorage.removeItem("cap_completed_ids");
-    localStorage.removeItem("cap_requirement_checks");
-    localStorage.removeItem("cap_events");
-    localStorage.removeItem("cap_flights");
-    localStorage.removeItem("cap_profile");
+    [
+      "cap_completed_ids",
+      "cap_requirement_checks",
+      "cap_events",
+      "cap_flights",
+      "cap_profile",
+      "cap_parent_notes",
+      "cap_attendance",
+      "cap_fitness",
+      "cap_checklists"
+    ].forEach((key) => localStorage.removeItem(key));
 
     setCompletedIds([]);
     setRequirementChecks({});
     setEvents([]);
     setFlights([]);
     setProfile(DEFAULT_PROFILE);
+    setParentNotes({});
+    setAttendance([]);
+    setFitness([]);
+    setChecklists({});
     setSelected(null);
     setActiveTab("dashboard");
   }
@@ -223,8 +346,29 @@ export default function App() {
     setEvents(Array.isArray(data.events) ? data.events : []);
     setFlights(Array.isArray(data.flights) ? data.flights : []);
     setProfile(data.profile && typeof data.profile === "object" ? { ...DEFAULT_PROFILE, ...data.profile } : DEFAULT_PROFILE);
+    setParentNotes(data.parentNotes && typeof data.parentNotes === "object" ? data.parentNotes : {});
+    setAttendance(Array.isArray(data.attendance) ? data.attendance : []);
+    setFitness(Array.isArray(data.fitness) ? data.fitness : []);
+    setChecklists(data.checklists && typeof data.checklists === "object" ? data.checklists : {});
     setSelected(null);
     setActiveTab("dashboard");
+  }
+
+  function exportParentReport() {
+    const report = buildParentReport({
+      profile,
+      currentCadetRank,
+      currentAchievement,
+      nextStep,
+      completedCount,
+      progress,
+      events,
+      attendance,
+      fitness,
+      parentNotes
+    });
+
+    saveTextFile("cap-cadet-parent-report.txt", report);
   }
 
   return (
@@ -242,9 +386,13 @@ export default function App() {
             toggleCompleted={toggleCompleted}
             requirementChecks={requirementChecks}
             toggleRequirement={toggleRequirement}
+            parentNotes={parentNotes}
+            setParentNotes={setParentNotes}
           />
         ) : (
           <>
+            <SearchBox search={search} setSearch={setSearch} results={searchResults} setSelected={setSelected} />
+
             {activeTab === "dashboard" && (
               <DashboardTab
                 profile={profile}
@@ -254,7 +402,9 @@ export default function App() {
                 completedCount={completedCount}
                 events={events}
                 flights={flights}
+                nextStep={nextStep}
                 setActiveTab={setActiveTab}
+                exportParentReport={exportParentReport}
               />
             )}
 
@@ -269,12 +419,26 @@ export default function App() {
                 progress={progress}
                 currentAchievement={currentAchievement}
                 completedCount={completedCount}
+                requirementChecks={requirementChecks}
               />
             )}
 
             {activeTab === "drill" && <DrillTab />}
-            {activeTab === "calendar" && <CalendarTab events={events} setEvents={setEvents} />}
-            {activeTab === "flights" && <FlightsTab flights={flights} setFlights={setFlights} />}
+            {activeTab === "events" && <EventsTab events={events} setEvents={setEvents} />}
+            {activeTab === "tools" && (
+              <ToolsTab
+                flights={flights}
+                setFlights={setFlights}
+                attendance={attendance}
+                setAttendance={setAttendance}
+                fitness={fitness}
+                setFitness={setFitness}
+                checklists={checklists}
+                toggleChecklist={toggleChecklist}
+                profile={profile}
+                completedCount={completedCount}
+              />
+            )}
             {activeTab === "docs" && (
               <DocsTab
                 completedIds={validCompletedIds}
@@ -282,8 +446,13 @@ export default function App() {
                 events={events}
                 flights={flights}
                 profile={profile}
+                parentNotes={parentNotes}
+                attendance={attendance}
+                fitness={fitness}
+                checklists={checklists}
                 restoreBackup={restoreBackup}
                 resetAppData={resetAppData}
+                exportParentReport={exportParentReport}
               />
             )}
           </>
@@ -296,8 +465,8 @@ export default function App() {
             ["dashboard", "🏠", "Home"],
             ["rank", "⭐", "Rank"],
             ["drill", "🪖", "Drill"],
-            ["calendar", "📅", "Events"],
-            ["flights", "✈️", "Flights"],
+            ["events", "📅", "Events"],
+            ["tools", "🧰", "Tools"],
             ["docs", "📁", "Docs"]
           ].map(([id, icon, label]) => (
             <button key={id} style={activeTab === id ? activeNavButton : navButton} onClick={() => setActiveTab(id)}>
@@ -311,7 +480,39 @@ export default function App() {
   );
 }
 
-function DashboardTab({ profile, currentCadetRank, progress, currentAchievement, completedCount, events, flights, setActiveTab }) {
+function SearchBox({ search, setSearch, results, setSelected }) {
+  return (
+    <div style={searchWrap}>
+      <input
+        style={searchInput}
+        value={search}
+        onChange={(e) => setSearch(e.target.value)}
+        placeholder="Search ranks, drill, docs..."
+      />
+
+      {results.length > 0 && (
+        <div style={searchResultsBox}>
+          {results.map((result, index) => (
+            <button
+              key={index}
+              style={searchResult}
+              onClick={() => {
+                if (result.item) setSelected(result.item);
+                if (result.url) window.open(result.url, "_blank");
+                setSearch("");
+              }}
+            >
+              <strong>{result.title}</strong>
+              <span>{result.type} · {result.subtitle}</span>
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function DashboardTab({ profile, currentCadetRank, progress, currentAchievement, completedCount, events, flights, nextStep, setActiveTab, exportParentReport }) {
   const sortedEvents = [...events].sort((a, b) => String(a.date).localeCompare(String(b.date)));
   const nextEvent = sortedEvents[0];
   const totalHours = flights.reduce((sum, f) => sum + (parseFloat(f.duration) || 0), 0).toFixed(1);
@@ -343,11 +544,19 @@ function DashboardTab({ profile, currentCadetRank, progress, currentAchievement,
         <p style={goalText}>Goal: {profile.goal}</p>
       </div>
 
+      <div style={simpleCard}>
+        <div>
+          <p style={smallLabel}>Next Step</p>
+          <strong style={blueText}>{currentAchievement.name}</strong>
+          <p style={cardText}>{nextStep}</p>
+        </div>
+      </div>
+
       <div style={dashboardGrid}>
         <div style={miniCard}>
           <p style={statLabel}>Target</p>
-          <h3 style={miniTitle}>{currentAchievement.name}</h3>
-          <p style={cardText}>{currentAchievement.rank}</p>
+          <h3 style={miniTitle}>{currentAchievement.rank}</h3>
+          <p style={cardText}>{currentAchievement.abbr}</p>
         </div>
 
         <div style={miniCard}>
@@ -360,19 +569,11 @@ function DashboardTab({ profile, currentCadetRank, progress, currentAchievement,
       <div style={simpleCard}>
         <div style={{ flex: 1 }}>
           <p style={smallLabel}>Next Event</p>
-
           {nextEvent ? (
             <>
               <strong style={blueText}>{nextEvent.title}</strong>
               <p style={cardText}>{formatDate(nextEvent.date)} · {nextEvent.time || "No time"}</p>
               <p style={phaseText}>{nextEvent.type} · {nextEvent.location || "No location"}</p>
-
-              {nextEvent.notes && (
-                <div style={notesBox}>
-                  <p style={smallLabel}>Notes</p>
-                  <p style={notesText}>{nextEvent.notes}</p>
-                </div>
-              )}
             </>
           ) : (
             <>
@@ -383,20 +584,48 @@ function DashboardTab({ profile, currentCadetRank, progress, currentAchievement,
         </div>
       </div>
 
+      <TimelineCard profile={profile} completedCount={completedCount} />
+
       <div style={quickButtonGrid}>
         <button style={quickButton} onClick={() => setActiveTab("rank")}>⭐ View Ranks</button>
-        <button style={quickButton} onClick={() => setActiveTab("drill")}>🪖 Drill Library</button>
-        <button style={quickButton} onClick={() => setActiveTab("calendar")}>📅 Add Event</button>
-        <button style={quickButton} onClick={() => setActiveTab("flights")}>✈️ Log Flight</button>
-        <button style={quickButton} onClick={() => setActiveTab("docs")}>📁 Docs</button>
+        <button style={quickButton} onClick={() => setActiveTab("tools")}>🧰 Checklists</button>
+        <button style={quickButton} onClick={() => setActiveTab("events")}>📅 Add Event</button>
+        <button style={quickButton} onClick={exportParentReport}>📝 Export Report</button>
       </div>
     </>
   );
 }
 
-function RankTab({ profile, currentCadetRank, setProfile, onSelect, completedIds, toggleCompleted, progress, currentAchievement, completedCount }) {
+function TimelineCard({ profile, completedCount }) {
+  const startDate = profile.joined && profile.joined.includes("-") ? profile.joined : new Date().toISOString().slice(0, 10);
+  const timeline = ACHIEVEMENTS.slice(completedCount, completedCount + 5).map((a, index) => ({
+    name: a.name,
+    rank: a.rank,
+    date: addWeeks(new Date(), index * 8)
+  }));
+
+  return (
+    <div style={simpleCard}>
+      <div style={{ flex: 1 }}>
+        <p style={smallLabel}>Promotion Timeline</p>
+        <p style={cardText}>Estimated using 8-week minimum windows. Actual timing depends on CAP requirements and squadron approval.</p>
+        <p style={phaseText}>Joined: {formatDate(startDate)}</p>
+
+        {timeline.map((item) => (
+          <div key={item.name} style={timelineItem}>
+            <strong>{item.name}</strong>
+            <span>{formatDate(item.date)} · {item.rank}</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function RankTab({ profile, currentCadetRank, setProfile, onSelect, completedIds, toggleCompleted, progress, currentAchievement, completedCount, requirementChecks }) {
   const [editing, setEditing] = useState(false);
   const [form, setForm] = useState(profile);
+  const nextStep = getNextStep(currentAchievement, requirementChecks);
 
   function saveProfile() {
     setProfile(form);
@@ -408,7 +637,7 @@ function RankTab({ profile, currentCadetRank, setProfile, onSelect, completedIds
       <div style={hero}>
         <p style={eyebrow}>Civil Air Patrol Companion</p>
         <h1 style={title}>Rank Tracker</h1>
-        <p style={subtitle}>Track requirements and drill toward each promotion.</p>
+        <p style={subtitle}>Track requirements, drill, notes, and promotion progress.</p>
 
         <div style={progressBox}>
           <div style={progressHeader}>
@@ -429,11 +658,8 @@ function RankTab({ profile, currentCadetRank, setProfile, onSelect, completedIds
             <h2 style={profileName}>{formatCadetDisplayName(profile.name, currentCadetRank)}</h2>
             {profile.capId ? <p style={phaseText}>CAP ID: {profile.capId}</p> : <p style={cardText}>CAP ID: Not entered</p>}
             <p style={cardText}>{profile.squadron}</p>
-            <p style={phaseText}>Joined: {profile.joined}</p>
+            <p style={phaseText}>Joined: {formatDate(profile.joined)}</p>
             <p style={goalText}>Goal: {profile.goal}</p>
-            <p style={{ ...cardText, marginTop: "12px", fontSize: "12px" }}>
-              Enter only the cadet’s name, like Lawrence. The app adds the current rank automatically.
-            </p>
             <button style={smallActionButton} onClick={() => { setForm(profile); setEditing(true); }}>Edit Profile</button>
           </>
         ) : (
@@ -442,11 +668,8 @@ function RankTab({ profile, currentCadetRank, setProfile, onSelect, completedIds
             <input style={input} value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} placeholder="Last name only, example: Lawrence" />
             <input style={input} value={form.capId || ""} onChange={(e) => setForm({ ...form, capId: e.target.value })} placeholder="CAP ID only — never password" />
             <input style={input} value={form.squadron} onChange={(e) => setForm({ ...form, squadron: e.target.value })} placeholder="Squadron" />
-            <input style={input} value={form.joined} onChange={(e) => setForm({ ...form, joined: e.target.value })} placeholder="Joined" />
+            <input style={input} type="date" value={form.joined} onChange={(e) => setForm({ ...form, joined: e.target.value })} />
             <input style={input} value={form.goal} onChange={(e) => setForm({ ...form, goal: e.target.value })} placeholder="Goal" />
-            <p style={{ ...cardText, fontSize: "12px" }}>
-              This app is not affiliated with Civil Air Patrol. It does not connect to eServices and does not store login credentials.
-            </p>
             <button style={smallActionButton} onClick={saveProfile}>Save</button>
           </>
         )}
@@ -456,6 +679,7 @@ function RankTab({ profile, currentCadetRank, setProfile, onSelect, completedIds
         <p style={smallLabel}>Current Target</p>
         <strong>{currentAchievement.name}</strong>
         <p style={cardText}>{currentAchievement.rank} · {currentAchievement.abbr}</p>
+        <p style={phaseText}>{nextStep}</p>
       </div>
 
       <h2 style={sectionTitle}>Achievement Path</h2>
@@ -487,13 +711,14 @@ function RankTab({ profile, currentCadetRank, setProfile, onSelect, completedIds
   );
 }
 
-function AchievementDetail({ selected, onBack, completedIds, toggleCompleted, requirementChecks, toggleRequirement }) {
+function AchievementDetail({ selected, onBack, completedIds, toggleCompleted, requirementChecks, toggleRequirement, parentNotes, setParentNotes }) {
   const done = completedIds.includes(selected.id);
   const checkedRequirements = selected.requirements.filter((_, i) => requirementChecks[`${selected.id}-${i}`]).length;
   const checkedDrill = selected.drill.filter((_, i) => requirementChecks[`drill-${selected.id}-${i}`]).length;
   const totalItems = selected.requirements.length + selected.drill.length;
   const checkedTotal = checkedRequirements + checkedDrill;
   const awardProgress = Math.round((checkedTotal / totalItems) * 100);
+  const note = parentNotes[selected.id] || "";
 
   return (
     <>
@@ -526,7 +751,6 @@ function AchievementDetail({ selected, onBack, completedIds, toggleCompleted, re
       </div>
 
       <h2 style={sectionTitle}>Promotion Requirements</h2>
-
       {selected.requirements.map((item, index) => {
         const checked = requirementChecks[`${selected.id}-${index}`];
 
@@ -539,7 +763,6 @@ function AchievementDetail({ selected, onBack, completedIds, toggleCompleted, re
       })}
 
       <h2 style={sectionTitle}>Drill Required for Promotion</h2>
-
       {selected.drill.map((item, index) => {
         const checked = requirementChecks[`drill-${selected.id}-${index}`];
 
@@ -550,22 +773,22 @@ function AchievementDetail({ selected, onBack, completedIds, toggleCompleted, re
           </button>
         );
       })}
+
+      <div style={formCard}>
+        <p style={smallLabel}>Parent Notes</p>
+        <textarea
+          style={textArea}
+          value={note}
+          onChange={(e) => setParentNotes({ ...parentNotes, [selected.id]: e.target.value })}
+          placeholder="Example: Needs help with oath, ask senior cadet about drill test, needs uniform item..."
+        />
+      </div>
     </>
   );
 }
 
 function DrillTab() {
   const [selectedMovement, setSelectedMovement] = useState(null);
-
-  function openMovement(item, category) {
-    setSelectedMovement({
-      name: item.name || "Drill Movement",
-      command: item.command || "Command not listed",
-      purpose: item.purpose || "Purpose not listed.",
-      notes: Array.isArray(item.notes) ? item.notes : [],
-      category: category || "Drill"
-    });
-  }
 
   return (
     <>
@@ -578,51 +801,31 @@ function DrillTab() {
       {selectedMovement ? (
         <div style={commandCard}>
           <button style={closeButton} onClick={() => setSelectedMovement(null)}>Close</button>
-
           <p style={smallLabel}>{selectedMovement.category}</p>
           <h2 style={profileName}>{selectedMovement.name}</h2>
-
           <div style={commandBox}>
             <p style={smallLabel}>Command</p>
             <strong>{selectedMovement.command}</strong>
           </div>
-
           <p style={cardText}>{selectedMovement.purpose}</p>
-
-          <p style={smallLabel}>Quick Notes</p>
-
-          {selectedMovement.notes.length > 0 ? (
-            selectedMovement.notes.map((note, index) => (
-              <div key={index} style={listItem}>• {note}</div>
-            ))
-          ) : (
-            <div style={listItem}>No notes listed for this movement.</div>
-          )}
         </div>
       ) : (
         <>
-          <div style={simpleCard}>
-            <div>
-              <strong style={blueText}>Drill Reference</strong>
-              <p style={cardText}>
-                Use this tab to study drill movements. Promotion drill checkoffs are inside each rank’s promotion checklist.
-              </p>
-              <p style={phaseText}>Tap a movement to open the command card.</p>
-            </div>
-          </div>
-
           {DRILL_LIBRARY.map((group) => (
             <div key={group.category} style={drillGroup}>
               <h2 style={sectionTitle}>{group.category}</h2>
 
               {group.items.map((item) => (
-                <button key={`${group.category}-${item.name}`} style={drillReferenceCard} onClick={() => openMovement(item, group.category)}>
+                <button
+                  key={`${group.category}-${item[0]}`}
+                  style={drillReferenceCard}
+                  onClick={() => setSelectedMovement({ category: group.category, name: item[0], command: item[1], purpose: item[2] })}
+                >
                   <div>
-                    <strong style={blueText}>{item.name}</strong>
-                    <p style={cardText}>{item.command}</p>
+                    <strong style={blueText}>{item[0]}</strong>
+                    <p style={cardText}>{item[1]}</p>
                     <p style={phaseText}>Open command card</p>
                   </div>
-
                   <span style={arrow}>›</span>
                 </button>
               ))}
@@ -634,83 +837,16 @@ function DrillTab() {
   );
 }
 
-function CalendarTab({ events, setEvents }) {
-  const [showForm, setShowForm] = useState(false);
-  const [editingId, setEditingId] = useState(null);
-  const [form, setForm] = useState({ title: "", date: "", time: "", location: "", type: "Meeting", notes: "" });
-
-  function saveEvent() {
-    if (!form.title || !form.date) return;
-
-    if (editingId) {
-      setEvents(events.map((event) => event.id === editingId ? { ...form, id: editingId } : event));
-    } else {
-      setEvents([...events, { ...form, id: Date.now() }]);
-    }
-
-    setForm({ title: "", date: "", time: "", location: "", type: "Meeting", notes: "" });
-    setEditingId(null);
-    setShowForm(false);
-  }
-
-  function editEvent(event) {
-    setForm({
-      title: event.title || "",
-      date: event.date || "",
-      time: event.time || "",
-      location: event.location || "",
-      type: event.type || "Meeting",
-      notes: event.notes || ""
-    });
-
-    setEditingId(event.id);
-    setShowForm(true);
-  }
-
-  function deleteEvent(id) {
-    setEvents(events.filter((event) => event.id !== id));
-  }
-
-  function cancelForm() {
-    setForm({ title: "", date: "", time: "", location: "", type: "Meeting", notes: "" });
-    setEditingId(null);
-    setShowForm(false);
-  }
-
+function EventsTab({ events, setEvents }) {
   return (
     <>
       <div style={hero}>
-        <p style={eyebrow}>Upcoming Events</p>
-        <h1 style={title}>Calendar</h1>
-        <p style={subtitle}>Track meetings, activities, training, and meeting notes.</p>
+        <p style={eyebrow}>Calendar</p>
+        <h1 style={title}>Events</h1>
+        <p style={subtitle}>Track meetings, activities, training, and notes.</p>
       </div>
 
-      {!showForm && <button style={primaryButton} onClick={() => setShowForm(true)}>+ Add Event</button>}
-
-      {showForm && (
-        <div style={formCard}>
-          <p style={smallLabel}>{editingId ? "Edit Event" : "Add Event"}</p>
-
-          <input style={input} placeholder="Event title" value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} />
-          <input style={input} type="date" value={form.date} onChange={(e) => setForm({ ...form, date: e.target.value })} />
-          <input style={input} type="time" value={form.time} onChange={(e) => setForm({ ...form, time: e.target.value })} />
-          <input style={input} placeholder="Location" value={form.location} onChange={(e) => setForm({ ...form, location: e.target.value })} />
-
-          <select style={input} value={form.type} onChange={(e) => setForm({ ...form, type: e.target.value })}>
-            <option>Meeting</option>
-            <option>Education</option>
-            <option>Activity</option>
-            <option>PT</option>
-            <option>Encampment</option>
-            <option>Other</option>
-          </select>
-
-          <textarea style={textArea} placeholder="Meeting notes, uniform, what to bring, announcements, reminders..." value={form.notes} onChange={(e) => setForm({ ...form, notes: e.target.value })} />
-
-          <button style={primaryButton} onClick={saveEvent}>{editingId ? "Save Changes" : "Save Event"}</button>
-          <button style={secondaryButton} onClick={cancelForm}>Cancel</button>
-        </div>
-      )}
+      <EventForm events={events} setEvents={setEvents} />
 
       {[...events].sort((a, b) => String(a.date).localeCompare(String(b.date))).map((event) => (
         <div key={event.id} style={simpleCard}>
@@ -718,18 +854,8 @@ function CalendarTab({ events, setEvents }) {
             <strong style={blueText}>{event.title}</strong>
             <p style={cardText}>{formatDate(event.date)} · {event.time || "No time"}</p>
             <p style={phaseText}>{event.type} · {event.location || "No location"}</p>
-
-            {event.notes && (
-              <div style={notesBox}>
-                <p style={smallLabel}>Notes</p>
-                <p style={notesText}>{event.notes}</p>
-              </div>
-            )}
-
-            <div style={actionRow}>
-              <button style={editButton} onClick={() => editEvent(event)}>Edit</button>
-              <button style={deleteButton} onClick={() => deleteEvent(event.id)}>Delete</button>
-            </div>
+            {event.notes && <p style={notesText}>{event.notes}</p>}
+            <button style={deleteButton} onClick={() => setEvents(events.filter((e) => e.id !== event.id))}>Delete</button>
           </div>
         </div>
       ))}
@@ -737,126 +863,218 @@ function CalendarTab({ events, setEvents }) {
   );
 }
 
-function FlightsTab({ flights, setFlights }) {
-  const [showForm, setShowForm] = useState(false);
-  const [editingId, setEditingId] = useState(null);
-  const [form, setForm] = useState({ aircraft: "", date: "", duration: "", type: "Orientation Flight" });
-  const totalHours = flights.reduce((sum, f) => sum + (parseFloat(f.duration) || 0), 0).toFixed(1);
+function EventForm({ events, setEvents }) {
+  const [form, setForm] = useState({ title: "", date: "", time: "", location: "", type: "Meeting", notes: "" });
 
-  function saveFlight() {
-    if (!form.aircraft || !form.date) return;
-
-    if (editingId) {
-      setFlights(flights.map((flight) => flight.id === editingId ? { ...form, id: editingId } : flight));
-    } else {
-      setFlights([...flights, { ...form, id: Date.now() }]);
-    }
-
-    setForm({ aircraft: "", date: "", duration: "", type: "Orientation Flight" });
-    setEditingId(null);
-    setShowForm(false);
-  }
-
-  function editFlight(flight) {
-    setForm({
-      aircraft: flight.aircraft || "",
-      date: flight.date || "",
-      duration: flight.duration || "",
-      type: flight.type || "Orientation Flight"
-    });
-
-    setEditingId(flight.id);
-    setShowForm(true);
-  }
-
-  function deleteFlight(id) {
-    setFlights(flights.filter((flight) => flight.id !== id));
-  }
-
-  function cancelForm() {
-    setForm({ aircraft: "", date: "", duration: "", type: "Orientation Flight" });
-    setEditingId(null);
-    setShowForm(false);
+  function saveEvent() {
+    if (!form.title || !form.date) return;
+    setEvents([...events, { ...form, id: Date.now() }]);
+    setForm({ title: "", date: "", time: "", location: "", type: "Meeting", notes: "" });
   }
 
   return (
+    <div style={formCard}>
+      <p style={smallLabel}>Add Event</p>
+      <input style={input} placeholder="Event title" value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} />
+      <input style={input} type="date" value={form.date} onChange={(e) => setForm({ ...form, date: e.target.value })} />
+      <input style={input} type="time" value={form.time} onChange={(e) => setForm({ ...form, time: e.target.value })} />
+      <input style={input} placeholder="Location" value={form.location} onChange={(e) => setForm({ ...form, location: e.target.value })} />
+      <select style={input} value={form.type} onChange={(e) => setForm({ ...form, type: e.target.value })}>
+        <option>Meeting</option>
+        <option>Education</option>
+        <option>Activity</option>
+        <option>PT</option>
+        <option>Encampment</option>
+        <option>Other</option>
+      </select>
+      <textarea style={textArea} placeholder="Notes..." value={form.notes} onChange={(e) => setForm({ ...form, notes: e.target.value })} />
+      <button style={primaryButton} onClick={saveEvent}>Save Event</button>
+    </div>
+  );
+}
+
+function ToolsTab({ flights, setFlights, attendance, setAttendance, fitness, setFitness, checklists, toggleChecklist, profile, completedCount }) {
+  return (
     <>
       <div style={hero}>
-        <p style={eyebrow}>Orientation Flights</p>
-        <h1 style={title}>Flight Log</h1>
-        <p style={subtitle}>Track aircraft, dates, and flight hours.</p>
+        <p style={eyebrow}>Parent Tools</p>
+        <h1 style={title}>Tools</h1>
+        <p style={subtitle}>Uniforms, gear, encampment, attendance, fitness, and flights.</p>
       </div>
 
-      <div style={statsRow}>
-        <div style={statCard}>
-          <p style={statLabel}>Flights</p>
-          <h2 style={statNumber}>{flights.length}</h2>
-        </div>
+      <ChecklistCard title="Blues Uniform Checklist" category="uniform" items={CHECKLISTS.uniform} checklists={checklists} toggleChecklist={toggleChecklist} />
+      <ChecklistCard title="Field Uniform Checklist" category="field" items={CHECKLISTS.field} checklists={checklists} toggleChecklist={toggleChecklist} />
+      <ChecklistCard title="Gear / Buy List" category="gear" items={CHECKLISTS.gear} checklists={checklists} toggleChecklist={toggleChecklist} />
+      <ChecklistCard title="Encampment Prep Checklist" category="encampment" items={CHECKLISTS.encampment} checklists={checklists} toggleChecklist={toggleChecklist} />
 
-        <div style={statCard}>
-          <p style={statLabel}>Hours</p>
-          <h2 style={statNumber}>{totalHours}</h2>
-        </div>
-      </div>
-
-      {!showForm && <button style={primaryButton} onClick={() => setShowForm(true)}>+ Log Flight</button>}
-
-      {showForm && (
-        <div style={formCard}>
-          <p style={smallLabel}>{editingId ? "Edit Flight" : "Log Flight"}</p>
-          <input style={input} placeholder="Aircraft" value={form.aircraft} onChange={(e) => setForm({ ...form, aircraft: e.target.value })} />
-          <input style={input} type="date" value={form.date} onChange={(e) => setForm({ ...form, date: e.target.value })} />
-          <input style={input} type="number" step="0.1" placeholder="Duration hours" value={form.duration} onChange={(e) => setForm({ ...form, duration: e.target.value })} />
-
-          <select style={input} value={form.type} onChange={(e) => setForm({ ...form, type: e.target.value })}>
-            <option>Orientation Flight</option>
-            <option>Glider Flight</option>
-            <option>Powered Flight</option>
-            <option>Simulator</option>
-            <option>Other</option>
-          </select>
-
-          <button style={primaryButton} onClick={saveFlight}>{editingId ? "Save Changes" : "Save Flight"}</button>
-          <button style={secondaryButton} onClick={cancelForm}>Cancel</button>
-        </div>
-      )}
-
-      {[...flights].sort((a, b) => String(b.date).localeCompare(String(a.date))).map((flight) => (
-        <div key={flight.id} style={simpleCard}>
-          <div style={{ flex: 1 }}>
-            <strong style={blueText}>{flight.aircraft}</strong>
-            <p style={cardText}>{formatDate(flight.date)} · {flight.type}</p>
-            <p style={phaseText}>{flight.duration || "0"} hrs</p>
-
-            <div style={actionRow}>
-              <button style={editButton} onClick={() => editFlight(flight)}>Edit</button>
-              <button style={deleteButton} onClick={() => deleteFlight(flight.id)}>Delete</button>
-            </div>
-          </div>
-        </div>
-      ))}
+      <AttendanceLog attendance={attendance} setAttendance={setAttendance} />
+      <FitnessLog fitness={fitness} setFitness={setFitness} />
+      <FlightLog flights={flights} setFlights={setFlights} />
+      <TimelineCard profile={profile} completedCount={completedCount} />
     </>
   );
 }
 
-function DocsTab({ completedIds, requirementChecks, events, flights, profile, restoreBackup, resetAppData }) {
+function ChecklistCard({ title, category, items, checklists, toggleChecklist }) {
+  const done = items.filter((item) => checklists[`${category}-${item}`]).length;
+  const percent = Math.round((done / items.length) * 100);
+
+  return (
+    <div style={formCard}>
+      <p style={smallLabel}>{title}</p>
+      <div style={progressBarLight}>
+        <div style={{ ...progressFillBlue, width: `${percent}%` }} />
+      </div>
+      <p style={cardText}>{done} of {items.length} complete</p>
+
+      {items.map((item) => {
+        const checked = !!checklists[`${category}-${item}`];
+
+        return (
+          <button key={item} style={requirementItem(checked)} onClick={() => toggleChecklist(category, item)}>
+            <span style={requirementCircle(checked)}>{checked ? "✓" : ""}</span>
+            <span style={requirementText(checked)}>{item}</span>
+          </button>
+        );
+      })}
+    </div>
+  );
+}
+
+function AttendanceLog({ attendance, setAttendance }) {
+  const [form, setForm] = useState({ date: "", type: "Meeting", attended: "Yes", notes: "" });
+
+  function add() {
+    if (!form.date) return;
+    setAttendance([{ ...form, id: Date.now() }, ...attendance]);
+    setForm({ date: "", type: "Meeting", attended: "Yes", notes: "" });
+  }
+
+  return (
+    <div style={formCard}>
+      <p style={smallLabel}>Attendance Log</p>
+      <input style={input} type="date" value={form.date} onChange={(e) => setForm({ ...form, date: e.target.value })} />
+      <select style={input} value={form.type} onChange={(e) => setForm({ ...form, type: e.target.value })}>
+        <option>Meeting</option>
+        <option>PT</option>
+        <option>Activity</option>
+        <option>Training</option>
+        <option>Other</option>
+      </select>
+      <select style={input} value={form.attended} onChange={(e) => setForm({ ...form, attended: e.target.value })}>
+        <option>Yes</option>
+        <option>No</option>
+      </select>
+      <textarea style={textArea} placeholder="Notes..." value={form.notes} onChange={(e) => setForm({ ...form, notes: e.target.value })} />
+      <button style={primaryButton} onClick={add}>Add Attendance</button>
+
+      {attendance.slice(0, 8).map((item) => (
+        <div key={item.id} style={listItem}>
+          <strong>{formatDate(item.date)} · {item.attended}</strong>
+          <p style={cardText}>{item.type}</p>
+          {item.notes && <p style={notesText}>{item.notes}</p>}
+          <button style={deleteButton} onClick={() => setAttendance(attendance.filter((x) => x.id !== item.id))}>Delete</button>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function FitnessLog({ fitness, setFitness }) {
+  const [form, setForm] = useState({ date: "", run: "", pushups: "", curlups: "", sitReach: "", hfz: "Unknown", notes: "" });
+
+  function add() {
+    if (!form.date) return;
+    setFitness([{ ...form, id: Date.now() }, ...fitness]);
+    setForm({ date: "", run: "", pushups: "", curlups: "", sitReach: "", hfz: "Unknown", notes: "" });
+  }
+
+  return (
+    <div style={formCard}>
+      <p style={smallLabel}>CPFT / Fitness Tracker</p>
+      <input style={input} type="date" value={form.date} onChange={(e) => setForm({ ...form, date: e.target.value })} />
+      <input style={input} placeholder="Mile run / shuttle / event time" value={form.run} onChange={(e) => setForm({ ...form, run: e.target.value })} />
+      <input style={input} placeholder="Pushups" value={form.pushups} onChange={(e) => setForm({ ...form, pushups: e.target.value })} />
+      <input style={input} placeholder="Curl-ups / sit-ups" value={form.curlups} onChange={(e) => setForm({ ...form, curlups: e.target.value })} />
+      <input style={input} placeholder="Sit and reach" value={form.sitReach} onChange={(e) => setForm({ ...form, sitReach: e.target.value })} />
+      <select style={input} value={form.hfz} onChange={(e) => setForm({ ...form, hfz: e.target.value })}>
+        <option>Unknown</option>
+        <option>HFZ Met</option>
+        <option>Needs Work</option>
+      </select>
+      <textarea style={textArea} placeholder="Notes..." value={form.notes} onChange={(e) => setForm({ ...form, notes: e.target.value })} />
+      <button style={primaryButton} onClick={add}>Add Fitness Entry</button>
+
+      {fitness.slice(0, 8).map((item) => (
+        <div key={item.id} style={listItem}>
+          <strong>{formatDate(item.date)} · {item.hfz}</strong>
+          <p style={cardText}>Run: {item.run || "—"} · Pushups: {item.pushups || "—"} · Curl-ups: {item.curlups || "—"}</p>
+          {item.notes && <p style={notesText}>{item.notes}</p>}
+          <button style={deleteButton} onClick={() => setFitness(fitness.filter((x) => x.id !== item.id))}>Delete</button>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function FlightLog({ flights, setFlights }) {
+  const [form, setForm] = useState({ aircraft: "", date: "", duration: "", type: "Orientation Flight" });
+  const totalHours = flights.reduce((sum, f) => sum + (parseFloat(f.duration) || 0), 0).toFixed(1);
+
+  function add() {
+    if (!form.aircraft || !form.date) return;
+    setFlights([{ ...form, id: Date.now() }, ...flights]);
+    setForm({ aircraft: "", date: "", duration: "", type: "Orientation Flight" });
+  }
+
+  return (
+    <div style={formCard}>
+      <p style={smallLabel}>Flight Log</p>
+      <p style={cardText}>{flights.length} flights · {totalHours} total hours</p>
+      <input style={input} placeholder="Aircraft" value={form.aircraft} onChange={(e) => setForm({ ...form, aircraft: e.target.value })} />
+      <input style={input} type="date" value={form.date} onChange={(e) => setForm({ ...form, date: e.target.value })} />
+      <input style={input} type="number" step="0.1" placeholder="Duration hours" value={form.duration} onChange={(e) => setForm({ ...form, duration: e.target.value })} />
+      <select style={input} value={form.type} onChange={(e) => setForm({ ...form, type: e.target.value })}>
+        <option>Orientation Flight</option>
+        <option>Glider Flight</option>
+        <option>Powered Flight</option>
+        <option>Simulator</option>
+        <option>Other</option>
+      </select>
+      <button style={primaryButton} onClick={add}>Log Flight</button>
+
+      {flights.slice(0, 8).map((flight) => (
+        <div key={flight.id} style={listItem}>
+          <strong>{flight.aircraft}</strong>
+          <p style={cardText}>{formatDate(flight.date)} · {flight.type} · {flight.duration || "0"} hrs</p>
+          <button style={deleteButton} onClick={() => setFlights(flights.filter((x) => x.id !== flight.id))}>Delete</button>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function DocsTab({ completedIds, requirementChecks, events, flights, profile, parentNotes, attendance, fitness, checklists, restoreBackup, resetAppData, exportParentReport }) {
   const [backupText, setBackupText] = useState("");
 
   function exportBackup() {
     const backup = {
       app: "CAP Cadet Hub",
-      version: 4,
+      version: 6,
       exportedAt: new Date().toISOString(),
       completedIds,
       requirementChecks,
       events,
       flights,
-      profile
+      profile,
+      parentNotes,
+      attendance,
+      fitness,
+      checklists
     };
 
     const text = JSON.stringify(backup, null, 2);
     setBackupText(text);
-
     navigator.clipboard?.writeText(text).catch(() => {});
   }
 
@@ -875,17 +1093,14 @@ function DocsTab({ completedIds, requirementChecks, events, flights, profile, re
       <div style={hero}>
         <p style={eyebrow}>Official CAP Resources</p>
         <h1 style={title}>Docs</h1>
-        <p style={subtitle}>Quick links, backup tools, and data safety.</p>
+        <p style={subtitle}>Links, backup, reports, and data safety.</p>
       </div>
 
       <div style={simpleCard}>
         <div>
-          <strong style={blueText}>Data Backup</strong>
-          <p style={cardText}>
-            This app saves on this device using browser storage. Clearing Safari website data, deleting the home-screen app, or clearing cache can erase saved info.
-          </p>
-          <p style={phaseText}>Use Export Backup before clearing anything.</p>
-
+          <strong style={blueText}>Reports & Backup</strong>
+          <p style={cardText}>Export a parent report or save all app data as backup text.</p>
+          <button style={primaryButton} onClick={exportParentReport}>Export Parent Report</button>
           <button style={primaryButton} onClick={exportBackup}>Export Backup / Copy Data</button>
 
           <textarea
@@ -904,10 +1119,10 @@ function DocsTab({ completedIds, requirementChecks, events, flights, profile, re
         <div>
           <strong style={blueText}>Legal / Safety Note</strong>
           <p style={cardText}>
-            This app is an unofficial tracker. It does not connect to CAP eServices and does not store login credentials.
+            This app is an unofficial parent/cadet tracker. It does not connect to CAP eServices and does not store login credentials.
           </p>
           <p style={phaseText}>
-            Use official CAP resources for real records, tests, regulations, awards, and account access.
+            Use official CAP resources for real records, testing, regulations, awards, uniforms, and account access.
           </p>
         </div>
       </div>
@@ -923,6 +1138,47 @@ function DocsTab({ completedIds, requirementChecks, events, flights, profile, re
       ))}
     </>
   );
+}
+
+function buildParentReport({ profile, currentCadetRank, currentAchievement, nextStep, completedCount, progress, events, attendance, fitness, parentNotes }) {
+  const recentEvents = events.slice(0, 5).map((e) => `- ${formatDate(e.date)}: ${e.title} (${e.type})`).join("\n") || "- No events logged";
+  const recentAttendance = attendance.slice(0, 5).map((a) => `- ${formatDate(a.date)}: ${a.type} · Attended: ${a.attended}`).join("\n") || "- No attendance logged";
+  const recentFitness = fitness.slice(0, 5).map((f) => `- ${formatDate(f.date)}: ${f.hfz} · Run: ${f.run || "—"} · Pushups: ${f.pushups || "—"}`).join("\n") || "- No fitness entries logged";
+
+  const notes = Object.entries(parentNotes)
+    .filter(([, value]) => value && value.trim())
+    .map(([id, value]) => {
+      const achievement = ACHIEVEMENTS.find((a) => a.id === Number(id));
+      return `- ${achievement?.name || "Achievement"}: ${value}`;
+    }).join("\n") || "- No parent notes";
+
+  return `CAP Cadet Parent Report
+
+Cadet: ${formatCadetDisplayName(profile.name, currentCadetRank)}
+CAP ID: ${profile.capId || "Not entered"}
+Squadron: ${profile.squadron}
+Goal: ${profile.goal}
+
+Progress:
+- Completed: ${completedCount} of ${ACHIEVEMENTS.length}
+- Overall: ${progress}%
+- Current target: ${currentAchievement.name}
+- Next step: ${nextStep}
+
+Upcoming / Recent Events:
+${recentEvents}
+
+Attendance:
+${recentAttendance}
+
+Fitness:
+${recentFitness}
+
+Parent Notes:
+${notes}
+
+Generated: ${new Date().toLocaleString()}
+`;
 }
 
 function getThemeVars(isDark) {
@@ -956,6 +1212,10 @@ const hero = { background: "linear-gradient(135deg, #1e3a8a, #2563eb)", color: "
 const eyebrow = { margin: 0, fontSize: "12px", textTransform: "uppercase", letterSpacing: "1px", color: "#bfdbfe", fontWeight: "bold" };
 const title = { margin: "8px 0 4px", fontSize: "30px" };
 const subtitle = { margin: 0, color: "#dbeafe" };
+const searchWrap = { position: "relative", marginBottom: "14px" };
+const searchInput = { width: "100%", border: "1px solid var(--card-border)", background: "var(--card-bg)", color: "var(--text)", borderRadius: "16px", padding: "13px", fontSize: "15px", boxShadow: "var(--shadow)" };
+const searchResultsBox = { position: "absolute", zIndex: 30, top: "52px", left: 0, right: 0, background: "var(--card-bg)", border: "1px solid var(--card-border)", borderRadius: "16px", overflow: "hidden", boxShadow: "var(--shadow)" };
+const searchResult = { width: "100%", border: "none", background: "transparent", color: "var(--text)", padding: "12px", textAlign: "left", display: "flex", flexDirection: "column", gap: "3px" };
 const progressBox = { marginTop: "18px", background: "rgba(255,255,255,0.14)", borderRadius: "16px", padding: "14px" };
 const progressHeader = { display: "flex", justifyContent: "space-between", fontSize: "14px", marginBottom: "8px" };
 const progressHeaderDark = { display: "flex", justifyContent: "space-between", fontSize: "14px", marginBottom: "8px", color: "var(--text)" };
@@ -979,6 +1239,39 @@ const doneTag = { margin: "8px 0 0", color: "#ffffff", background: "#22c55e", di
 const arrow = { fontSize: "32px", color: "#9ca3af" };
 const backButton = { border: "none", background: "transparent", color: "#60a5fa", fontWeight: "bold", marginBottom: "12px", fontSize: "16px" };
 const overview = { color: "var(--muted)", lineHeight: 1.5, marginBottom: "16px" };
+const requirementProgressBox = { background: "var(--card-bg)", border: "1px solid var(--card-border)", borderRadius: "18px", padding: "16px", marginBottom: "16px", boxShadow: "var(--shadow)", color: "var(--text)" };
+const progressBarLight = { height: "10px", background: "var(--soft-bg)", borderRadius: "999px", overflow: "hidden" };
+const progressFillBlue = { height: "100%", background: "#2563eb", borderRadius: "999px" };
+const requirementProgressText = { margin: "8px 0 0", fontSize: "12px", color: "var(--muted)" };
+const bottomNav = { position: "fixed", left: "50%", bottom: "18px", transform: "translateX(-50%)", width: "calc(100% - 32px)", maxWidth: "430px", background: "var(--card-bg)", border: "1px solid var(--card-border)", borderRadius: "24px", padding: "8px", display: "grid", gridTemplateColumns: "repeat(6, 1fr)", gap: "4px", boxShadow: "0 12px 30px rgba(0,0,0,0.25)", zIndex: 10 };
+const navButton = { border: "none", background: "transparent", color: "var(--muted)", borderRadius: "16px", padding: "9px 1px", fontWeight: "bold", fontSize: "9px", display: "flex", flexDirection: "column", alignItems: "center", gap: "3px" };
+const activeNavButton = { ...navButton, background: "rgba(37, 99, 235, 0.18)", color: "#60a5fa" };
+const navIcon = { fontSize: "17px" };
+const input = { width: "100%", border: "1px solid var(--card-border)", background: "var(--app-bg)", color: "var(--text)", borderRadius: "12px", padding: "12px", marginBottom: "10px", fontSize: "15px" };
+const textArea = { width: "100%", minHeight: "100px", border: "1px solid var(--card-border)", background: "var(--app-bg)", color: "var(--text)", borderRadius: "12px", padding: "12px", marginBottom: "10px", fontSize: "15px", resize: "vertical" };
+const formCard = { background: "var(--card-bg)", border: "1px solid var(--card-border)", borderRadius: "18px", padding: "16px", marginBottom: "16px", boxShadow: "var(--shadow)" };
+const primaryButton = { width: "100%", border: "none", background: "#2563eb", color: "white", borderRadius: "14px", padding: "13px", fontWeight: "bold", marginBottom: "14px", fontSize: "15px" };
+const secondaryButton = { width: "100%", border: "1px solid var(--card-border)", background: "var(--soft-bg)", color: "var(--soft-text)", borderRadius: "14px", padding: "13px", fontWeight: "bold", marginBottom: "4px", fontSize: "15px" };
+const smallActionButton = { border: "none", background: "#2563eb", color: "white", borderRadius: "12px", padding: "10px 12px", fontWeight: "bold", marginTop: "12px" };
+const deleteButton = { border: "none", background: "#dc2626", color: "white", borderRadius: "10px", padding: "8px 12px", fontWeight: "bold", fontSize: "13px", marginTop: "10px" };
+const dangerWideButton = { width: "100%", border: "none", background: "#dc2626", color: "white", borderRadius: "14px", padding: "13px", fontWeight: "bold", marginBottom: "4px", fontSize: "15px" };
+const dashboardProfileCard = { background: "var(--card-bg)", border: "1px solid var(--card-border)", borderRadius: "18px", padding: "16px", marginBottom: "14px", boxShadow: "var(--shadow)", color: "var(--text)" };
+const dashboardGrid = { display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px", marginBottom: "14px" };
+const miniCard = { background: "var(--card-bg)", border: "1px solid var(--card-border)", borderRadius: "18px", padding: "16px", boxShadow: "var(--shadow)", color: "var(--text)" };
+const miniTitle = { margin: "8px 0 0", color: "#60a5fa", fontSize: "16px", lineHeight: 1.2 };
+const miniNumber = { margin: "8px 0 0", color: "#60a5fa", fontSize: "34px" };
+const quickButtonGrid = { display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px", marginTop: "14px" };
+const quickButton = { border: "none", background: "#2563eb", color: "white", borderRadius: "16px", padding: "14px 10px", fontWeight: "bold", fontSize: "14px", boxShadow: "var(--shadow)" };
+const drillGroup = { marginBottom: "20px" };
+const commandCard = { background: "var(--card-bg)", border: "1px solid var(--card-border)", borderRadius: "22px", padding: "18px", marginBottom: "16px", boxShadow: "var(--shadow)", color: "var(--text)" };
+const commandBox = { background: "var(--soft-bg)", borderRadius: "16px", padding: "14px", margin: "12px 0", color: "var(--text)" };
+const closeButton = { border: "none", background: "var(--soft-bg)", color: "var(--soft-text)", borderRadius: "999px", padding: "8px 12px", fontWeight: "bold", float: "right" };
+const drillReferenceCard = { width: "100%", background: "var(--card-bg)", border: "1px solid var(--card-border)", borderRadius: "18px", padding: "14px", marginBottom: "10px", display: "flex", justifyContent: "space-between", alignItems: "center", gap: "12px", boxShadow: "var(--shadow)", color: "var(--text)", textAlign: "left" };
+const notesBox = { background: "var(--soft-bg)", borderRadius: "14px", padding: "12px", marginTop: "12px" };
+const notesText = { margin: "8px 0 0", color: "var(--text)", fontSize: "14px", lineHeight: 1.45, whiteSpace: "pre-wrap" };
+const listItem = { background: "var(--card-bg)", border: "1px solid var(--card-border)", borderRadius: "14px", padding: "14px", marginBottom: "10px", color: "var(--text)", boxShadow: "var(--shadow)" };
+const docCard = { width: "100%", background: "var(--card-bg)", border: "1px solid var(--card-border)", borderRadius: "18px", padding: "16px", marginBottom: "12px", textAlign: "left", display: "flex", justifyContent: "space-between", alignItems: "center", boxShadow: "var(--shadow)", color: "var(--text)", textDecoration: "none" };
+const timelineItem = { display: "flex", flexDirection: "column", gap: "3px", marginTop: "12px", padding: "10px", borderRadius: "12px", background: "var(--soft-bg)", color: "var(--text)" };
 
 function checkButton(done) {
   return {
@@ -1006,11 +1299,6 @@ function detailCompleteButton(done) {
     fontWeight: "bold"
   };
 }
-
-const requirementProgressBox = { background: "var(--card-bg)", border: "1px solid var(--card-border)", borderRadius: "18px", padding: "16px", marginBottom: "16px", boxShadow: "var(--shadow)", color: "var(--text)" };
-const progressBarLight = { height: "10px", background: "var(--soft-bg)", borderRadius: "999px", overflow: "hidden" };
-const progressFillBlue = { height: "100%", background: "#2563eb", borderRadius: "999px" };
-const requirementProgressText = { margin: "8px 0 0", fontSize: "12px", color: "var(--muted)" };
 
 function requirementItem(checked) {
   return {
@@ -1053,38 +1341,3 @@ function requirementText(checked) {
     lineHeight: 1.4
   };
 }
-
-const bottomNav = { position: "fixed", left: "50%", bottom: "18px", transform: "translateX(-50%)", width: "calc(100% - 32px)", maxWidth: "430px", background: "var(--card-bg)", border: "1px solid var(--card-border)", borderRadius: "24px", padding: "8px", display: "grid", gridTemplateColumns: "repeat(6, 1fr)", gap: "4px", boxShadow: "0 12px 30px rgba(0,0,0,0.25)", zIndex: 10 };
-const navButton = { border: "none", background: "transparent", color: "var(--muted)", borderRadius: "16px", padding: "9px 1px", fontWeight: "bold", fontSize: "9px", display: "flex", flexDirection: "column", alignItems: "center", gap: "3px" };
-const activeNavButton = { ...navButton, background: "rgba(37, 99, 235, 0.18)", color: "#60a5fa" };
-const navIcon = { fontSize: "17px" };
-const statsRow = { display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px", marginBottom: "14px" };
-const statCard = { background: "var(--card-bg)", border: "1px solid var(--card-border)", borderRadius: "18px", padding: "16px", boxShadow: "var(--shadow)" };
-const statLabel = { margin: 0, color: "var(--muted)", fontSize: "12px", fontWeight: "bold", textTransform: "uppercase" };
-const statNumber = { margin: "6px 0 0", color: "#60a5fa", fontSize: "34px" };
-const input = { width: "100%", border: "1px solid var(--card-border)", background: "var(--app-bg)", color: "var(--text)", borderRadius: "12px", padding: "12px", marginBottom: "10px", fontSize: "15px" };
-const textArea = { width: "100%", minHeight: "100px", border: "1px solid var(--card-border)", background: "var(--app-bg)", color: "var(--text)", borderRadius: "12px", padding: "12px", marginBottom: "10px", fontSize: "15px", resize: "vertical" };
-const formCard = { background: "var(--card-bg)", border: "1px solid var(--card-border)", borderRadius: "18px", padding: "16px", marginBottom: "16px", boxShadow: "var(--shadow)" };
-const primaryButton = { width: "100%", border: "none", background: "#2563eb", color: "white", borderRadius: "14px", padding: "13px", fontWeight: "bold", marginBottom: "14px", fontSize: "15px" };
-const secondaryButton = { width: "100%", border: "1px solid var(--card-border)", background: "var(--soft-bg)", color: "var(--soft-text)", borderRadius: "14px", padding: "13px", fontWeight: "bold", marginBottom: "4px", fontSize: "15px" };
-const smallActionButton = { border: "none", background: "#2563eb", color: "white", borderRadius: "12px", padding: "10px 12px", fontWeight: "bold", marginTop: "12px" };
-const actionRow = { display: "flex", gap: "8px", marginTop: "12px" };
-const editButton = { border: "none", background: "#2563eb", color: "white", borderRadius: "10px", padding: "8px 12px", fontWeight: "bold", fontSize: "13px" };
-const deleteButton = { border: "none", background: "#dc2626", color: "white", borderRadius: "10px", padding: "8px 12px", fontWeight: "bold", fontSize: "13px" };
-const dangerWideButton = { width: "100%", border: "none", background: "#dc2626", color: "white", borderRadius: "14px", padding: "13px", fontWeight: "bold", marginBottom: "4px", fontSize: "15px" };
-const dashboardProfileCard = { background: "var(--card-bg)", border: "1px solid var(--card-border)", borderRadius: "18px", padding: "16px", marginBottom: "14px", boxShadow: "var(--shadow)", color: "var(--text)" };
-const dashboardGrid = { display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px", marginBottom: "14px" };
-const miniCard = { background: "var(--card-bg)", border: "1px solid var(--card-border)", borderRadius: "18px", padding: "16px", boxShadow: "var(--shadow)", color: "var(--text)" };
-const miniTitle = { margin: "8px 0 0", color: "#60a5fa", fontSize: "16px", lineHeight: 1.2 };
-const miniNumber = { margin: "8px 0 0", color: "#60a5fa", fontSize: "34px" };
-const quickButtonGrid = { display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px", marginTop: "14px" };
-const quickButton = { border: "none", background: "#2563eb", color: "white", borderRadius: "16px", padding: "14px 10px", fontWeight: "bold", fontSize: "14px", boxShadow: "var(--shadow)" };
-const drillGroup = { marginBottom: "20px" };
-const commandCard = { background: "var(--card-bg)", border: "1px solid var(--card-border)", borderRadius: "22px", padding: "18px", marginBottom: "16px", boxShadow: "var(--shadow)", color: "var(--text)" };
-const commandBox = { background: "var(--soft-bg)", borderRadius: "16px", padding: "14px", margin: "12px 0", color: "var(--text)" };
-const closeButton = { border: "none", background: "var(--soft-bg)", color: "var(--soft-text)", borderRadius: "999px", padding: "8px 12px", fontWeight: "bold", float: "right" };
-const drillReferenceCard = { width: "100%", background: "var(--card-bg)", border: "1px solid var(--card-border)", borderRadius: "18px", padding: "14px", marginBottom: "10px", display: "flex", justifyContent: "space-between", alignItems: "center", gap: "12px", boxShadow: "var(--shadow)", color: "var(--text)", textAlign: "left" };
-const notesBox = { background: "var(--soft-bg)", borderRadius: "14px", padding: "12px", marginTop: "12px" };
-const notesText = { margin: "4px 0 0", color: "var(--text)", fontSize: "14px", lineHeight: 1.45, whiteSpace: "pre-wrap" };
-const listItem = { background: "var(--card-bg)", border: "1px solid var(--card-border)", borderRadius: "14px", padding: "14px", marginBottom: "10px", color: "var(--text)", boxShadow: "var(--shadow)" };
-const docCard = { width: "100%", background: "var(--card-bg)", border: "1px solid var(--card-border)", borderRadius: "18px", padding: "16px", marginBottom: "12px", textAlign: "left", display: "flex", justifyContent: "space-between", alignItems: "center", boxShadow: "var(--shadow)", color: "var(--text)", textDecoration: "none" }; 
