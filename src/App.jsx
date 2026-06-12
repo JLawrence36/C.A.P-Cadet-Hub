@@ -320,6 +320,12 @@ function DashboardTab({ profile, progress, currentAchievement, completedCount, e
               <strong style={blueText}>{nextEvent.title}</strong>
               <p style={cardText}>{formatDate(nextEvent.date)} · {nextEvent.time || "No time"}</p>
               <p style={phaseText}>{nextEvent.type} · {nextEvent.location || "No location"}</p>
+              {nextEvent.notes && (
+                <div style={notesBox}>
+                  <p style={smallLabel}>Notes</p>
+                  <p style={notesText}>{nextEvent.notes}</p>
+                </div>
+              )}
             </>
           ) : (
             <>
@@ -601,15 +607,7 @@ function CalendarTab({ events, setEvents }) {
       setEvents([...events, { ...form, id: Date.now() }]);
     }
 
-    setForm({
-      title: "",
-      date: "",
-      time: "",
-      location: "",
-      type: "Meeting",
-      notes: ""
-    });
-
+    setForm({ title: "", date: "", time: "", location: "", type: "Meeting", notes: "" });
     setEditingId(null);
     setShowForm(false);
   }
@@ -633,15 +631,7 @@ function CalendarTab({ events, setEvents }) {
   }
 
   function cancelForm() {
-    setForm({
-      title: "",
-      date: "",
-      time: "",
-      location: "",
-      type: "Meeting",
-      notes: ""
-    });
-
+    setForm({ title: "", date: "", time: "", location: "", type: "Meeting", notes: "" });
     setEditingId(null);
     setShowForm(false);
   }
@@ -654,49 +644,18 @@ function CalendarTab({ events, setEvents }) {
         <p style={subtitle}>Track meetings, activities, training, and meeting notes.</p>
       </div>
 
-      {!showForm && (
-        <button style={primaryButton} onClick={() => setShowForm(true)}>
-          + Add Event
-        </button>
-      )}
+      {!showForm && <button style={primaryButton} onClick={() => setShowForm(true)}>+ Add Event</button>}
 
       {showForm && (
         <div style={formCard}>
           <p style={smallLabel}>{editingId ? "Edit Event" : "Add Event"}</p>
 
-          <input
-            style={input}
-            placeholder="Event title"
-            value={form.title}
-            onChange={(e) => setForm({ ...form, title: e.target.value })}
-          />
+          <input style={input} placeholder="Event title" value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} />
+          <input style={input} type="date" value={form.date} onChange={(e) => setForm({ ...form, date: e.target.value })} />
+          <input style={input} type="time" value={form.time} onChange={(e) => setForm({ ...form, time: e.target.value })} />
+          <input style={input} placeholder="Location" value={form.location} onChange={(e) => setForm({ ...form, location: e.target.value })} />
 
-          <input
-            style={input}
-            type="date"
-            value={form.date}
-            onChange={(e) => setForm({ ...form, date: e.target.value })}
-          />
-
-          <input
-            style={input}
-            type="time"
-            value={form.time}
-            onChange={(e) => setForm({ ...form, time: e.target.value })}
-          />
-
-          <input
-            style={input}
-            placeholder="Location"
-            value={form.location}
-            onChange={(e) => setForm({ ...form, location: e.target.value })}
-          />
-
-          <select
-            style={input}
-            value={form.type}
-            onChange={(e) => setForm({ ...form, type: e.target.value })}
-          >
+          <select style={input} value={form.type} onChange={(e) => setForm({ ...form, type: e.target.value })}>
             <option>Meeting</option>
             <option>Education</option>
             <option>Activity</option>
@@ -712,13 +671,8 @@ function CalendarTab({ events, setEvents }) {
             onChange={(e) => setForm({ ...form, notes: e.target.value })}
           />
 
-          <button style={primaryButton} onClick={saveEvent}>
-            {editingId ? "Save Changes" : "Save Event"}
-          </button>
-
-          <button style={secondaryButton} onClick={cancelForm}>
-            Cancel
-          </button>
+          <button style={primaryButton} onClick={saveEvent}>{editingId ? "Save Changes" : "Save Event"}</button>
+          <button style={secondaryButton} onClick={cancelForm}>Cancel</button>
         </div>
       )}
 
@@ -737,13 +691,8 @@ function CalendarTab({ events, setEvents }) {
             )}
 
             <div style={actionRow}>
-              <button style={editButton} onClick={() => editEvent(event)}>
-                Edit
-              </button>
-
-              <button style={deleteButton} onClick={() => deleteEvent(event.id)}>
-                Delete
-              </button>
+              <button style={editButton} onClick={() => editEvent(event)}>Edit</button>
+              <button style={deleteButton} onClick={() => deleteEvent(event.id)}>Delete</button>
             </div>
           </div>
         </div>
@@ -936,30 +885,11 @@ const simpleCard = { width: "100%", background: "var(--card-bg)", border: "1px s
 const cardMainButton = { flex: 1, border: "none", background: "transparent", textAlign: "left", display: "flex", justifyContent: "space-between", alignItems: "center", color: "var(--text)", padding: 0 };
 
 function checkButton(done) {
-  return {
-    width: "34px",
-    height: "34px",
-    borderRadius: "999px",
-    border: done ? "2px solid #22c55e" : "2px solid #94a3b8",
-    background: done ? "#22c55e" : "var(--card-bg)",
-    color: "white",
-    fontWeight: "bold",
-    fontSize: "18px",
-    flexShrink: 0
-  };
+  return { width: "34px", height: "34px", borderRadius: "999px", border: done ? "2px solid #22c55e" : "2px solid #94a3b8", background: done ? "#22c55e" : "var(--card-bg)", color: "white", fontWeight: "bold", fontSize: "18px", flexShrink: 0 };
 }
 
 function detailCompleteButton(done) {
-  return {
-    marginTop: "16px",
-    width: "100%",
-    border: "none",
-    borderRadius: "14px",
-    padding: "12px",
-    background: done ? "#22c55e" : "white",
-    color: done ? "white" : "#1e3a8a",
-    fontWeight: "bold"
-  };
+  return { marginTop: "16px", width: "100%", border: "none", borderRadius: "14px", padding: "12px", background: done ? "#22c55e" : "white", color: done ? "white" : "#1e3a8a", fontWeight: "bold" };
 }
 
 const requirementProgressBox = { background: "var(--card-bg)", border: "1px solid var(--card-border)", borderRadius: "18px", padding: "16px", marginBottom: "16px", boxShadow: "var(--shadow)", color: "var(--text)" };
@@ -968,45 +898,15 @@ const progressFillBlue = { height: "100%", background: "#2563eb", borderRadius: 
 const requirementProgressText = { margin: "8px 0 0", fontSize: "12px", color: "var(--muted)" };
 
 function requirementItem(checked) {
-  return {
-    width: "100%",
-    background: checked ? "rgba(37, 99, 235, 0.14)" : "var(--card-bg)",
-    border: checked ? "2px solid #2563eb" : "1px solid var(--card-border)",
-    borderRadius: "14px",
-    padding: "14px",
-    marginBottom: "10px",
-    color: "var(--text)",
-    boxShadow: "var(--shadow)",
-    display: "flex",
-    alignItems: "flex-start",
-    gap: "12px",
-    textAlign: "left"
-  };
+  return { width: "100%", background: checked ? "rgba(37, 99, 235, 0.14)" : "var(--card-bg)", border: checked ? "2px solid #2563eb" : "1px solid var(--card-border)", borderRadius: "14px", padding: "14px", marginBottom: "10px", color: "var(--text)", boxShadow: "var(--shadow)", display: "flex", alignItems: "flex-start", gap: "12px", textAlign: "left" };
 }
 
 function requirementCircle(checked) {
-  return {
-    width: "26px",
-    height: "26px",
-    borderRadius: "999px",
-    border: checked ? "2px solid #2563eb" : "2px solid #94a3b8",
-    background: checked ? "#2563eb" : "var(--card-bg)",
-    color: "white",
-    fontWeight: "bold",
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-    flexShrink: 0,
-    marginTop: "1px"
-  };
+  return { width: "26px", height: "26px", borderRadius: "999px", border: checked ? "2px solid #2563eb" : "2px solid #94a3b8", background: checked ? "#2563eb" : "var(--card-bg)", color: "white", fontWeight: "bold", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, marginTop: "1px" };
 }
 
 function requirementText(checked) {
-  return {
-    color: checked ? "#60a5fa" : "var(--text)",
-    textDecoration: checked ? "line-through" : "none",
-    lineHeight: 1.4
-  };
+  return { color: checked ? "#60a5fa" : "var(--text)", textDecoration: checked ? "line-through" : "none", lineHeight: 1.4 };
 }
 
 const docCard = { width: "100%", background: "var(--card-bg)", border: "1px solid var(--card-border)", borderRadius: "18px", padding: "16px", marginBottom: "12px", textAlign: "left", display: "flex", justifyContent: "space-between", alignItems: "center", boxShadow: "var(--shadow)", color: "var(--text)", textDecoration: "none" };
@@ -1027,6 +927,7 @@ const statCard = { background: "var(--card-bg)", border: "1px solid var(--card-b
 const statLabel = { margin: 0, color: "var(--muted)", fontSize: "12px", fontWeight: "bold", textTransform: "uppercase" };
 const statNumber = { margin: "6px 0 0", color: "#60a5fa", fontSize: "34px" };
 const input = { width: "100%", border: "1px solid var(--card-border)", background: "var(--app-bg)", color: "var(--text)", borderRadius: "12px", padding: "12px", marginBottom: "10px", fontSize: "15px" };
+const textArea = { width: "100%", minHeight: "100px", border: "1px solid var(--card-border)", background: "var(--app-bg)", color: "var(--text)", borderRadius: "12px", padding: "12px", marginBottom: "10px", fontSize: "15px", resize: "vertical" };
 const formCard = { background: "var(--card-bg)", border: "1px solid var(--card-border)", borderRadius: "18px", padding: "16px", marginBottom: "16px", boxShadow: "var(--shadow)" };
 const primaryButton = { width: "100%", border: "none", background: "#2563eb", color: "white", borderRadius: "14px", padding: "13px", fontWeight: "bold", marginBottom: "14px", fontSize: "15px" };
 const secondaryButton = { width: "100%", border: "1px solid var(--card-border)", background: "var(--soft-bg)", color: "var(--soft-text)", borderRadius: "14px", padding: "13px", fontWeight: "bold", marginBottom: "4px", fontSize: "15px" };
@@ -1045,46 +946,6 @@ const drillGroup = { marginBottom: "20px" };
 const commandCard = { background: "var(--card-bg)", border: "1px solid var(--card-border)", borderRadius: "22px", padding: "18px", marginBottom: "16px", boxShadow: "var(--shadow)", color: "var(--text)" };
 const commandBox = { background: "var(--soft-bg)", borderRadius: "16px", padding: "14px", margin: "12px 0", color: "var(--text)" };
 const closeButton = { border: "none", background: "var(--soft-bg)", color: "var(--soft-text)", borderRadius: "999px", padding: "8px 12px", fontWeight: "bold", float: "right" };
-
-const drillReferenceCard = {
-  width: "100%",
-  background: "var(--card-bg)",
-  border: "1px solid var(--card-border)",
-  borderRadius: "18px",
-  padding: "14px",
-  marginBottom: "10px",
-  display: "flex",
-  justifyContent: "space-between",
-  alignItems: "center",
-  gap: "12px",
-  boxShadow: "var(--shadow)",
-  color: "var(--text)",
-  textAlign: "left"
-};
-const textArea = {
-  width: "100%",
-  minHeight: "100px",
-  border: "1px solid var(--card-border)",
-  background: "var(--app-bg)",
-  color: "var(--text)",
-  borderRadius: "12px",
-  padding: "12px",
-  marginBottom: "10px",
-  fontSize: "15px",
-  resize: "vertical"
-};
-
-const notesBox = {
-  background: "var(--soft-bg)",
-  borderRadius: "14px",
-  padding: "12px",
-  marginTop: "12px"
-};
-
-const notesText = {
-  margin: "4px 0 0",
-  color: "var(--text)",
-  fontSize: "14px",
-  lineHeight: 1.45,
-  whiteSpace: "pre-wrap"
-};
+const drillReferenceCard = { width: "100%", background: "var(--card-bg)", border: "1px solid var(--card-border)", borderRadius: "18px", padding: "14px", marginBottom: "10px", display: "flex", justifyContent: "space-between", alignItems: "center", gap: "12px", boxShadow: "var(--shadow)", color: "var(--text)", textAlign: "left" };
+const notesBox = { background: "var(--soft-bg)", borderRadius: "14px", padding: "12px", marginTop: "12px" };
+const notesText = { margin: "4px 0 0", color: "var(--text)", fontSize: "14px", lineHeight: 1.45, whiteSpace: "pre-wrap" };
