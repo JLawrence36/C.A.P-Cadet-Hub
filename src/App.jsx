@@ -11,79 +11,95 @@ import { useEffect, useState } from "react";
 const CADET_RIBBONS = {
   curry: {
     label: "Curry Award Ribbon",
-    colors: ["#6f2a86", "#ffffff", "#6f2a86"]
+    colors: ["#ffffff", "#b02a8f", "#b02a8f", "#b02a8f", "#ffffff"]
   },
+
   arnold: {
     label: "Arnold Achievement Ribbon",
-    colors: ["#0b5f86", "#ffffff", "#dc2626", "#ffffff", "#0b5f86"]
+    colors: ["#c62828", "#ffffff", "#0077a3", "#0077a3", "#0077a3", "#ffffff", "#c62828"]
   },
+
   feik: {
     label: "Feik Achievement Ribbon",
-    colors: ["#facc15", "#0f172a", "#facc15", "#0b5f86", "#dc2626", "#0b5f86", "#16a34a"]
+    colors: ["#facc15", "#e5f06a", "#0077a3", "#0077a3", "#dc2626", "#0077a3", "#0077a3", "#e5f06a", "#facc15"]
   },
+
   wrightBrothers: {
     label: "Wright Brothers Award Ribbon",
-    colors: ["#16a34a", "#ffffff", "#16a34a", "#16a34a", "#ffffff", "#16a34a"]
+    colors: ["#16a34a", "#ffffff", "#16a34a", "#16a34a", "#16a34a", "#ffffff", "#16a34a"]
   },
+
   rickenbacker: {
     label: "Rickenbacker Achievement Ribbon",
-    colors: ["#ffffff", "#facc15", "#ffffff", "#ffffff", "#facc15", "#ffffff"]
+    colors: ["#ffffff", "#ffffff", "#eab308", "#ffffff", "#ffffff", "#ffffff", "#eab308", "#ffffff", "#ffffff"]
   },
+
   achievement5: {
     label: "Achievement 5 Ribbon",
-    colors: ["#facc15", "#111827", "#facc15", "#facc15", "#111827", "#facc15"]
+    colors: ["#facc15", "#facc15", "#111827", "#facc15", "#facc15", "#facc15", "#111827", "#facc15", "#facc15"]
   },
+
   doolittle: {
     label: "Doolittle Achievement Ribbon",
-    colors: ["#fb923c", "#ffffff", "#fb923c", "#fb923c", "#ffffff", "#fb923c"]
+    colors: ["#d97706", "#ffffff", "#f97316", "#f97316", "#f97316", "#ffffff", "#d97706"]
   },
+
   goddard: {
     label: "Goddard Achievement Ribbon",
-    colors: ["#111827", "#ffffff", "#7f1d1d", "#1e3a8a", "#1e3a8a", "#7f1d1d", "#ffffff", "#111827"]
+    colors: ["#111827", "#ffffff", "#7f1d1d", "#1e3a8a", "#1e3a8a", "#1e3a8a", "#7f1d1d", "#ffffff", "#111827"]
   },
+
   armstrong: {
     label: "Armstrong Achievement Ribbon",
-    colors: ["#111827", "#ffffff", "#7f1d1d", "#111827", "#111827", "#7f1d1d", "#ffffff", "#111827"]
+    colors: ["#0f766e", "#ffffff", "#7f1d1d", "#111827", "#111827", "#111827", "#7f1d1d", "#ffffff", "#0f766e"]
   },
+
   mitchell: {
     label: "Billy Mitchell Award Ribbon",
-    colors: ["#fb923c", "#ffffff", "#fb923c"]
+    colors: ["#f97316", "#ffffff", "#f97316", "#f97316", "#ffffff", "#f97316"]
   },
+
   earhart: {
     label: "Amelia Earhart Award Ribbon",
-    colors: ["#ffffff", "#dc2626", "#ffffff", "#2563eb", "#ffffff", "#dc2626", "#ffffff"]
+    colors: ["#ffffff", "#dc2626", "#ffffff", "#2563eb", "#2563eb", "#ffffff", "#dc2626", "#ffffff"]
   },
+
   eaker: {
     label: "Ira C. Eaker Award Ribbon",
-    colors: ["#1e3a8a", "#7f1d1d", "#1e3a8a"]
+    colors: ["#1e3a8a", "#1e3a8a", "#7f1d1d", "#1e3a8a", "#1e3a8a"]
   },
+
   spaatz: {
     label: "Carl A. Spaatz Award Ribbon",
-    colors: ["#ffffff", "#dc2626", "#dc2626", "#ffffff"]
+    colors: ["#ffffff", "#dc2626", "#dc2626", "#dc2626", "#ffffff"]
   }
 };
 
 function getRibbonForAchievement(index) {
   const map = [
-    "curry",          // 1 Curry
-    "arnold",         // 2 Arnold
-    "feik",           // 3 Feik
+    "curry",          // Achievement 1 - Curry
+    "arnold",         // Achievement 2 - Arnold
+    "feik",           // Achievement 3 - Feik
     "wrightBrothers", // Wright Brothers Award
-    "rickenbacker",   // Achievement 4
+    "rickenbacker",   // Achievement 4 - Rickenbacker
     "achievement5",   // Achievement 5
-    "doolittle",      // Achievement 6
-    "goddard",        // Achievement 7
-    "armstrong",      // Achievement 8
+    "doolittle",      // Achievement 6 - Doolittle
+    "goddard",        // Achievement 7 - Goddard
+    "armstrong",      // Achievement 8 - Armstrong
     "mitchell",       // Billy Mitchell Award
-    null,             // Achievement 9 — No Ribbon Awarded
-    null,             // Achievement 10 — No Ribbon Awarded
-    null,             // Achievement 11 — No Ribbon Awarded
+
+    null,             // Achievement 9 - No Ribbon Awarded
+    null,             // Achievement 10 - No Ribbon Awarded
+    null,             // Achievement 11 - No Ribbon Awarded
+
     "earhart",        // Amelia Earhart Award
-    null,             // Achievement 12 — No Ribbon Awarded
-    null,             // Achievement 13 — No Ribbon Awarded
-    null,             // Achievement 14 / Boyd — No Ribbon Awarded
-    null,             // Achievement 15 / Sally Ride — No Ribbon Awarded
-    null,             // Achievement 16 — No Ribbon Awarded
+
+    null,             // Achievement 12 - No Ribbon Awarded
+    null,             // Achievement 13 - No Ribbon Awarded
+    null,             // Boyd - No Ribbon Awarded
+    null,             // Sally Ride - No Ribbon Awarded
+    null,             // Achievement 16 - No Ribbon Awarded
+
     "eaker",          // Ira C. Eaker Award
     "spaatz"          // Carl A. Spaatz Award
   ];
