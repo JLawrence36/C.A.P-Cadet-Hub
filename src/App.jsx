@@ -1,80 +1,95 @@
 import { useEffect, useState } from "react";
 
 /*
-  Ribbon order based on the image you sent:
-  The far-right purple ribbon is Curry.
-  The app uses a 10-ribbon cadet rack pattern and maps the 21 achievements to those standard ribbon visuals.
+  Ribbon logic based on the CAP Cadet Super Chart you sent.
+  Important:
+  - Curry starts as the purple ribbon.
+  - Several achievements say "No Ribbon Awarded" on the chart.
+  - Those achievements now show a No Ribbon marker instead of fake ribbon bars.
 */
 
 const CADET_RIBBONS = {
   curry: {
     label: "Curry Award Ribbon",
-    colors: ["#4b155f", "#ffffff", "#4b155f", "#6f2a86"]
+    colors: ["#6f2a86", "#ffffff", "#6f2a86"]
   },
   arnold: {
     label: "Arnold Achievement Ribbon",
-    colors: ["#3b0f5f", "#ffffff", "#3b0f5f"]
+    colors: ["#0b5f86", "#ffffff", "#dc2626", "#ffffff", "#0b5f86"]
   },
   feik: {
     label: "Feik Achievement Ribbon",
-    colors: ["#0b3f1f", "#ffffff", "#0b3f1f", "#ffffff", "#0b3f1f"]
+    colors: ["#facc15", "#0f172a", "#facc15", "#0b5f86", "#dc2626", "#0b5f86", "#16a34a"]
   },
   wrightBrothers: {
     label: "Wright Brothers Award Ribbon",
-    colors: ["#7f1d1d", "#ffffff", "#d1d5db", "#0f172a", "#d1d5db", "#ffffff", "#7f1d1d"]
+    colors: ["#16a34a", "#ffffff", "#16a34a", "#16a34a", "#ffffff", "#16a34a"]
+  },
+  rickenbacker: {
+    label: "Rickenbacker Achievement Ribbon",
+    colors: ["#ffffff", "#facc15", "#ffffff", "#ffffff", "#facc15", "#ffffff"]
+  },
+  achievement5: {
+    label: "Achievement 5 Ribbon",
+    colors: ["#facc15", "#111827", "#facc15", "#facc15", "#111827", "#facc15"]
+  },
+  doolittle: {
+    label: "Doolittle Achievement Ribbon",
+    colors: ["#fb923c", "#ffffff", "#fb923c", "#fb923c", "#ffffff", "#fb923c"]
+  },
+  goddard: {
+    label: "Goddard Achievement Ribbon",
+    colors: ["#111827", "#ffffff", "#7f1d1d", "#1e3a8a", "#1e3a8a", "#7f1d1d", "#ffffff", "#111827"]
+  },
+  armstrong: {
+    label: "Armstrong Achievement Ribbon",
+    colors: ["#111827", "#ffffff", "#7f1d1d", "#111827", "#111827", "#7f1d1d", "#ffffff", "#111827"]
   },
   mitchell: {
     label: "Billy Mitchell Award Ribbon",
-    colors: ["#0f172a", "#ffffff", "#9ca3af", "#0f172a"]
+    colors: ["#fb923c", "#ffffff", "#fb923c"]
   },
   earhart: {
     label: "Amelia Earhart Award Ribbon",
-    colors: ["#f97316", "#ffffff", "#f97316", "#ffffff", "#f97316"]
+    colors: ["#ffffff", "#dc2626", "#ffffff", "#2563eb", "#ffffff", "#dc2626", "#ffffff"]
   },
   eaker: {
     label: "Ira C. Eaker Award Ribbon",
-    colors: ["#d9a122", "#ffffff", "#d9a122", "#ffffff", "#d9a122"]
+    colors: ["#1e3a8a", "#7f1d1d", "#1e3a8a"]
   },
   spaatz: {
     label: "Carl A. Spaatz Award Ribbon",
-    colors: ["#0f172a", "#ffffff", "#dc2626", "#ffffff", "#0f172a", "#0b5f86"]
-  },
-  achievementBlue: {
-    label: "Cadet Achievement Ribbon",
-    colors: ["#0b1f5f", "#8b1e3f", "#0b1f5f"]
-  },
-  achievementGold: {
-    label: "Cadet Achievement Ribbon",
-    colors: ["#facc15", "#0f172a", "#facc15", "#0f172a", "#facc15"]
+    colors: ["#ffffff", "#dc2626", "#dc2626", "#ffffff"]
   }
 };
 
 function getRibbonForAchievement(index) {
   const map = [
-    "curry",
-    "arnold",
-    "feik",
-    "wrightBrothers",
-    "achievementGold",
-    "achievementBlue",
-    "achievementBlue",
-    "achievementBlue",
-    "achievementBlue",
-    "mitchell",
-    "achievementBlue",
-    "achievementBlue",
-    "achievementBlue",
-    "earhart",
-    "achievementBlue",
-    "achievementBlue",
-    "achievementBlue",
-    "achievementBlue",
-    "achievementBlue",
-    "eaker",
-    "spaatz"
+    "curry",          // 1 Curry
+    "arnold",         // 2 Arnold
+    "feik",           // 3 Feik
+    "wrightBrothers", // Wright Brothers Award
+    "rickenbacker",   // Achievement 4
+    "achievement5",   // Achievement 5
+    "doolittle",      // Achievement 6
+    "goddard",        // Achievement 7
+    "armstrong",      // Achievement 8
+    "mitchell",       // Billy Mitchell Award
+    null,             // Achievement 9 — No Ribbon Awarded
+    null,             // Achievement 10 — No Ribbon Awarded
+    null,             // Achievement 11 — No Ribbon Awarded
+    "earhart",        // Amelia Earhart Award
+    null,             // Achievement 12 — No Ribbon Awarded
+    null,             // Achievement 13 — No Ribbon Awarded
+    null,             // Achievement 14 / Boyd — No Ribbon Awarded
+    null,             // Achievement 15 / Sally Ride — No Ribbon Awarded
+    null,             // Achievement 16 — No Ribbon Awarded
+    "eaker",          // Ira C. Eaker Award
+    "spaatz"          // Carl A. Spaatz Award
   ];
 
-  return CADET_RIBBONS[map[index]] || CADET_RIBBONS.achievementBlue;
+  const key = map[index];
+  return key ? CADET_RIBBONS[key] : null;
 }
 
 const ACHIEVEMENTS = [
@@ -200,12 +215,16 @@ function formatDate(value) {
 }
 
 function getCurrentCadetRank(completedIds) {
-  if (!completedIds || completedIds.length === 0) return { rank: "Cadet Recruit", abbr: "C/Rec" };
+  if (!completedIds || completedIds.length === 0) {
+    return { rank: "Cadet Recruit", abbr: "C/Rec" };
+  }
 
   const highestCompletedId = Math.max(...completedIds);
   const achievement = ACHIEVEMENTS.find((a) => a.id === highestCompletedId);
 
-  return achievement ? { rank: achievement.rank, abbr: achievement.abbr } : { rank: "Cadet Recruit", abbr: "C/Rec" };
+  return achievement
+    ? { rank: achievement.rank, abbr: achievement.abbr }
+    : { rank: "Cadet Recruit", abbr: "C/Rec" };
 }
 
 function formatCadetDisplayName(name, currentCadetRank) {
@@ -220,6 +239,18 @@ function formatCadetDisplayName(name, currentCadetRank) {
 function RibbonBar({ ribbon, size = "small" }) {
   const height = size === "large" ? 46 : 28;
   const width = size === "large" ? 150 : 82;
+
+  if (!ribbon) {
+    return (
+      <div>
+        <div style={{ ...noRibbonBox, width, height }}>
+          No Ribbon
+        </div>
+
+        {size === "large" && <p style={ribbonLabel}>No Ribbon Awarded</p>}
+      </div>
+    );
+  }
 
   return (
     <div>
@@ -548,7 +579,7 @@ function RankTab({ profile, currentCadetRank, setProfile, onSelect, completedIds
         <RibbonBar ribbon={currentAchievement.ribbon} />
         <strong>{currentAchievement.name}</strong>
         <p style={cardText}>{currentAchievement.rank} · {currentAchievement.abbr}</p>
-        <p style={phaseText}>{currentAchievement.ribbon.label}</p>
+        <p style={phaseText}>{currentAchievement.ribbon?.label || "No Ribbon Awarded"}</p>
       </div>
 
       <h2 style={sectionTitle}>Achievement Path</h2>
@@ -568,6 +599,7 @@ function RankTab({ profile, currentCadetRank, setProfile, onSelect, completedIds
                 <RibbonBar ribbon={achievement.ribbon} />
                 <strong style={blueText}>{achievement.name}</strong>
                 <p style={cardText}>{achievement.rank} · {achievement.abbr}</p>
+                <p style={phaseText}>{achievement.ribbon?.label || "No Ribbon Awarded"}</p>
                 <p style={phaseText}>{achievement.phase}</p>
                 {isCurrent && <p style={currentTag}>Current Target</p>}
                 {done && <p style={doneTag}>Completed</p>}
@@ -940,7 +972,7 @@ function DocsTab({ completedIds, requirementChecks, events, flights, profile, re
   function exportBackup() {
     const backup = {
       app: "CAP Cadet Hub",
-      version: 2,
+      version: 3,
       exportedAt: new Date().toISOString(),
       completedIds,
       requirementChecks,
@@ -979,9 +1011,7 @@ function DocsTab({ completedIds, requirementChecks, events, flights, profile, re
           <p style={cardText}>
             This app saves on this device using browser storage. Clearing Safari website data, deleting the home-screen app, or clearing cache can erase saved info.
           </p>
-          <p style={phaseText}>
-            Use Export Backup before clearing anything.
-          </p>
+          <p style={phaseText}>Use Export Backup before clearing anything.</p>
 
           <button style={primaryButton} onClick={exportBackup}>Export Backup / Copy Data</button>
 
@@ -1001,7 +1031,7 @@ function DocsTab({ completedIds, requirementChecks, events, flights, profile, re
         <div>
           <strong style={blueText}>Legal / Safety Note</strong>
           <p style={cardText}>
-            This app is an unofficial tracker. Ribbon bars are visual learning references based on the rack image you provided.
+            This app is an unofficial tracker. Ribbon bars are simplified visual references based on the Cadet Super Chart image you provided.
           </p>
           <p style={phaseText}>
             Use official CAP resources for real records, tests, regulations, and award verification.
@@ -1076,7 +1106,32 @@ const doneTag = { margin: "8px 0 0", color: "#ffffff", background: "#22c55e", di
 const arrow = { fontSize: "32px", color: "#9ca3af" };
 const backButton = { border: "none", background: "transparent", color: "#60a5fa", fontWeight: "bold", marginBottom: "12px", fontSize: "16px" };
 const overview = { color: "var(--muted)", lineHeight: 1.5, marginBottom: "16px" };
-const ribbonShell = { display: "flex", overflow: "hidden", border: "2px solid #d1d5db", borderRadius: "3px", margin: "0 0 10px", boxShadow: "0 2px 6px rgba(0,0,0,0.22)", background: "#fff" };
+
+const ribbonShell = {
+  display: "flex",
+  overflow: "hidden",
+  border: "2px solid #d1d5db",
+  borderRadius: "3px",
+  margin: "0 0 10px",
+  boxShadow: "0 2px 6px rgba(0,0,0,0.22)",
+  background: "#fff"
+};
+
+const noRibbonBox = {
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "center",
+  overflow: "hidden",
+  border: "2px dashed #9ca3af",
+  borderRadius: "3px",
+  margin: "0 0 10px",
+  background: "var(--soft-bg)",
+  color: "var(--muted)",
+  fontSize: "10px",
+  fontWeight: "bold",
+  textTransform: "uppercase"
+};
+
 const ribbonLabel = { margin: "0 0 8px", fontSize: "12px", fontWeight: "bold", color: "#dbeafe" };
 
 function checkButton(done) {
