@@ -33,6 +33,53 @@ const ACHIEVEMENTS = [
   drill: a[5]
 }));
 
+const DRILL_LIBRARY = [
+  {
+    category: "Stationary Movements",
+    items: [
+      { name: "Attention", command: "Flight, ATTENTION", purpose: "Move cadets to the basic position of military bearing.", notes: ["Heels together", "Body straight", "Arms pinned naturally", "Eyes forward", "No talking or movement"] },
+      { name: "Parade Rest", command: "Parade, REST", purpose: "Place cadets in a disciplined rest position.", notes: ["Move left foot about shoulder width", "Hands behind back", "Right hand inside left", "Remain silent", "Eyes forward"] },
+      { name: "Present Arms", command: "Present, ARMS", purpose: "Render a salute while stationary.", notes: ["Raise right hand sharply", "Tip of forefinger near eyebrow or glasses", "Upper arm parallel to ground", "Hold until ordered"] },
+      { name: "Order Arms", command: "Order, ARMS", purpose: "Return from salute to attention.", notes: ["Lower hand sharply", "Return to attention", "Do not drop posture"] },
+      { name: "Right Face", command: "Right, FACE", purpose: "Turn 90 degrees to the right.", notes: ["Pivot on right heel and left toe", "Keep arms pinned", "Snap heels together", "Finish at attention"] },
+      { name: "Left Face", command: "Left, FACE", purpose: "Turn 90 degrees to the left.", notes: ["Pivot on left heel and right toe", "Keep body upright", "Snap heels together", "Finish at attention"] },
+      { name: "About Face", command: "About, FACE", purpose: "Turn 180 degrees to the rear.", notes: ["Place right toe behind left heel", "Pivot over right shoulder", "Keep arms pinned", "Finish at attention"] }
+    ]
+  },
+  {
+    category: "Marching Movements",
+    items: [
+      { name: "Forward March", command: "Forward, MARCH", purpose: "Move the flight forward in step.", notes: ["Step off with left foot", "Use 24-inch steps", "Swing arms naturally", "Maintain interval and distance"] },
+      { name: "Flight Halt", command: "Flight, HALT", purpose: "Stop the flight while marching.", notes: ["Command called on either foot", "Take one more step", "Bring trailing foot alongside", "End at attention"] },
+      { name: "Column Right", command: "Column Right, MARCH", purpose: "Turn the flight to the right while marching.", notes: ["Base element pivots right", "Others continue until proper point", "Maintain dress and cover"] },
+      { name: "Column Left", command: "Column Left, MARCH", purpose: "Turn the flight to the left while marching.", notes: ["Base element pivots left", "Keep spacing", "Do not drift", "Maintain cadence"] },
+      { name: "To the Rear March", command: "To the Rear, MARCH", purpose: "Reverse the direction of march.", notes: ["Given as right foot strikes", "Take one more step", "Pivot on balls of feet", "Step off with left foot"] },
+      { name: "Change Step March", command: "Change Step, MARCH", purpose: "Correct cadence without stopping.", notes: ["Given as right foot strikes", "Take one more step", "Bring right foot alongside left", "Step off again with left"] }
+    ]
+  },
+  {
+    category: "Flight Formation",
+    items: [
+      { name: "Fall In", command: "FALL IN", purpose: "Form the flight in proper formation.", notes: ["Cadets move quickly", "Form at attention", "Maintain interval", "Dress and cover"] },
+      { name: "Dress Right Dress", command: "Dress Right, DRESS", purpose: "Align the flight.", notes: ["Raise left arm except right flank", "Turn head and eyes right", "Adjust alignment", "Hold until Ready Front"] },
+      { name: "Ready Front", command: "Ready, FRONT", purpose: "Return from alignment to attention.", notes: ["Drop arm sharply", "Head and eyes front", "Remain at attention"] },
+      { name: "Open Ranks", command: "Open Ranks, MARCH", purpose: "Open formation for inspection.", notes: ["Front rank steps forward", "Other ranks adjust spacing", "Maintain alignment"] },
+      { name: "Close Ranks", command: "Close Ranks, MARCH", purpose: "Return to normal formation.", notes: ["Ranks close distance", "Maintain interval", "End at attention"] },
+      { name: "Count Off", command: "Count, OFF", purpose: "Number cadets in formation.", notes: ["Cadets count in sequence", "Turn head when required", "Speak clearly", "Return forward"] }
+    ]
+  },
+  {
+    category: "Drill Leadership",
+    items: [
+      { name: "Form the Flight", command: "FALL IN", purpose: "Take control and organize the flight.", notes: ["Use command voice", "Position yourself correctly", "Check alignment", "Correct spacing"] },
+      { name: "Report to Commander", command: "Sir/Ma’am, flight is prepared for inspection", purpose: "Report flight status to a commander or evaluator.", notes: ["Salute properly", "Speak clearly", "Maintain bearing", "Wait for return salute"] },
+      { name: "Give Commands", command: "Preparatory command + command of execution", purpose: "Lead cadets through movements.", notes: ["Use strong command voice", "Pause correctly", "Be confident", "Do not mumble"] },
+      { name: "Inspect Basic Alignment", command: "Dress Right, DRESS / Ready, FRONT", purpose: "Check whether cadets are properly aligned.", notes: ["Check dress", "Check cover", "Correct errors calmly", "Reset if needed"] },
+      { name: "Teach Junior Cadets", command: "Demonstrate, explain, practice, correct", purpose: "Train newer cadets in basic drill.", notes: ["Show the movement", "Explain simply", "Let them practice", "Give clear corrections"] }
+    ]
+  }
+];
+
 const DEFAULT_EVENTS = [
   { id: 1, title: "Weekly Squadron Meeting", date: "2026-06-16", time: "19:00", location: "Squadron HQ", type: "Meeting" },
   { id: 2, title: "Aerospace Education Night", date: "2026-06-23", time: "18:30", location: "Classroom", type: "Education" }
@@ -80,6 +127,15 @@ function formatDate(value) {
   });
 }
 
+function flattenDrill() {
+  return DRILL_LIBRARY.flatMap((group) =>
+    group.items.map((item) => ({
+      ...item,
+      category: group.category
+    }))
+  );
+}
+
 export default function App() {
   const [activeTab, setActiveTab] = useState("dashboard");
   const [selected, setSelected] = useState(null);
@@ -87,6 +143,7 @@ export default function App() {
 
   const [completedIds, setCompletedIds] = useState(() => loadSaved("cap_completed_ids", []));
   const [requirementChecks, setRequirementChecks] = useState(() => loadSaved("cap_requirement_checks", {}));
+  const [drillPracticeChecks, setDrillPracticeChecks] = useState(() => loadSaved("cap_drill_practice_checks", {}));
   const [theme, setTheme] = useState(() => localStorage.getItem("cap_theme") || "light");
   const [events, setEvents] = useState(() => loadSaved("cap_events", DEFAULT_EVENTS));
   const [flights, setFlights] = useState(() => loadSaved("cap_flights", DEFAULT_FLIGHTS));
@@ -94,6 +151,7 @@ export default function App() {
 
   useEffect(() => localStorage.setItem("cap_completed_ids", JSON.stringify(completedIds)), [completedIds]);
   useEffect(() => localStorage.setItem("cap_requirement_checks", JSON.stringify(requirementChecks)), [requirementChecks]);
+  useEffect(() => localStorage.setItem("cap_drill_practice_checks", JSON.stringify(drillPracticeChecks)), [drillPracticeChecks]);
   useEffect(() => localStorage.setItem("cap_theme", theme), [theme]);
   useEffect(() => localStorage.setItem("cap_events", JSON.stringify(events)), [events]);
   useEffect(() => localStorage.setItem("cap_flights", JSON.stringify(flights)), [flights]);
@@ -109,15 +167,17 @@ export default function App() {
     setCompletedIds((prev) => prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]);
   }
 
-  function toggleRequirement(achievementId, index) {
-    const key = `${achievementId}-${index}`;
+  function toggleRequirement(achievementId, index, type = "requirement") {
+    const key = type === "drill" ? `drill-${achievementId}-${index}` : `${achievementId}-${index}`;
 
     setRequirementChecks((prev) => {
       const next = { ...prev, [key]: !prev[key] };
       const achievement = ACHIEVEMENTS.find((a) => a.id === achievementId);
 
       if (achievement) {
-        const allChecked = achievement.requirements.every((_, i) => next[`${achievementId}-${i}`]);
+        const allRequirementsChecked = achievement.requirements.every((_, i) => next[`${achievementId}-${i}`]);
+        const allDrillChecked = achievement.drill.every((_, i) => next[`drill-${achievementId}-${i}`]);
+        const allChecked = allRequirementsChecked && allDrillChecked;
 
         setCompletedIds((current) => {
           if (allChecked) return current.includes(achievementId) ? current : [...current, achievementId];
@@ -127,6 +187,13 @@ export default function App() {
 
       return next;
     });
+  }
+
+  function toggleDrillPractice(name) {
+    setDrillPracticeChecks((prev) => ({
+      ...prev,
+      [name]: !prev[name]
+    }));
   }
 
   return (
@@ -177,6 +244,13 @@ export default function App() {
               />
             )}
 
+            {activeTab === "drill" && (
+              <DrillTab
+                drillPracticeChecks={drillPracticeChecks}
+                toggleDrillPractice={toggleDrillPractice}
+              />
+            )}
+
             {activeTab === "calendar" && <CalendarTab events={events} setEvents={setEvents} />}
             {activeTab === "flights" && <FlightsTab flights={flights} setFlights={setFlights} />}
             {activeTab === "docs" && <DocsTab />}
@@ -189,6 +263,7 @@ export default function App() {
           {[
             ["dashboard", "🏠", "Home"],
             ["rank", "⭐", "Rank"],
+            ["drill", "🪖", "Drill"],
             ["calendar", "📅", "Events"],
             ["flights", "✈️", "Flights"],
             ["docs", "📁", "Docs"]
@@ -271,6 +346,7 @@ function DashboardTab({ profile, progress, currentAchievement, completedCount, e
 
       <div style={quickButtonGrid}>
         <button style={quickButton} onClick={() => setActiveTab("rank")}>⭐ View Ranks</button>
+        <button style={quickButton} onClick={() => setActiveTab("drill")}>🪖 Drill Practice</button>
         <button style={quickButton} onClick={() => setActiveTab("calendar")}>📅 Add Event</button>
         <button style={quickButton} onClick={() => setActiveTab("flights")}>✈️ Log Flight</button>
         <button style={quickButton} onClick={() => setActiveTab("docs")}>🔐 eServices</button>
@@ -292,8 +368,8 @@ function RankTab({ profile, setProfile, onSelect, completedIds, toggleCompleted,
     <>
       <div style={hero}>
         <p style={eyebrow}>Civil Air Patrol Companion</p>
-        <h1 style={title}>CAP Cadet Hub</h1>
-        <p style={subtitle}>Track ranks, requirements, and drill.</p>
+        <h1 style={title}>Rank Tracker</h1>
+        <p style={subtitle}>Track requirements and drill toward each award.</p>
 
         <div style={progressBox}>
           <div style={progressHeader}>
@@ -326,7 +402,7 @@ function RankTab({ profile, setProfile, onSelect, completedIds, toggleCompleted,
             <p style={smallLabel}>Edit Profile</p>
             <input style={input} value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} placeholder="Cadet name" />
             <input style={input} value={form.capId || ""} onChange={(e) => setForm({ ...form, capId: e.target.value })} placeholder="CAP ID only — never password" />
-            <input style={input} value={form.squadron} onChange={(e) => setForm({ ...form, squadron: e.target.value })} placeholder="Squadron" />
+            <input style={input} value={form.squadron} onChange={(e) => setForm({ ...form, squadron: e.target.value })} placeholder="Squron" />
             <input style={input} value={form.joined} onChange={(e) => setForm({ ...form, joined: e.target.value })} placeholder="Joined" />
             <input style={input} value={form.goal} onChange={(e) => setForm({ ...form, goal: e.target.value })} placeholder="Goal" />
             <p style={{ ...cardText, fontSize: "12px" }}>
@@ -343,7 +419,7 @@ function RankTab({ profile, setProfile, onSelect, completedIds, toggleCompleted,
         <p style={cardText}>{currentAchievement.rank} · {currentAchievement.abbr}</p>
       </div>
 
-      <h2 style={sectionTitle}>Rank Tracker</h2>
+      <h2 style={sectionTitle}>Achievement Path</h2>
 
       {ACHIEVEMENTS.map((achievement) => {
         const done = completedIds.includes(achievement.id);
@@ -374,8 +450,13 @@ function RankTab({ profile, setProfile, onSelect, completedIds, toggleCompleted,
 
 function AchievementDetail({ selected, detailTab, setDetailTab, onBack, completedIds, toggleCompleted, requirementChecks, toggleRequirement }) {
   const done = completedIds.includes(selected.id);
-  const checkedCount = selected.requirements.filter((_, i) => requirementChecks[`${selected.id}-${i}`]).length;
-  const reqProgress = Math.round((checkedCount / selected.requirements.length) * 100);
+
+  const checkedRequirements = selected.requirements.filter((_, i) => requirementChecks[`${selected.id}-${i}`]).length;
+  const checkedDrill = selected.drill.filter((_, i) => requirementChecks[`drill-${selected.id}-${i}`]).length;
+
+  const totalItems = selected.requirements.length + selected.drill.length;
+  const checkedTotal = checkedRequirements + checkedDrill;
+  const awardProgress = Math.round((checkedTotal / totalItems) * 100);
 
   return (
     <>
@@ -394,34 +475,147 @@ function AchievementDetail({ selected, detailTab, setDetailTab, onBack, complete
 
       <div style={requirementProgressBox}>
         <div style={progressHeaderDark}>
-          <span>Requirement Progress</span>
-          <strong>{reqProgress}%</strong>
+          <span>Award Progress</span>
+          <strong>{awardProgress}%</strong>
         </div>
+
         <div style={progressBarLight}>
-          <div style={{ ...progressFillBlue, width: `${reqProgress}%` }} />
+          <div style={{ ...progressFillBlue, width: `${awardProgress}%` }} />
         </div>
-        <p style={requirementProgressText}>{checkedCount} of {selected.requirements.length} requirements checked</p>
+
+        <p style={requirementProgressText}>
+          {checkedTotal} of {totalItems} total items checked
+        </p>
+
+        <p style={requirementProgressText}>
+          Requirements: {checkedRequirements} of {selected.requirements.length} · Drill: {checkedDrill} of {selected.drill.length}
+        </p>
       </div>
 
       <div style={tabRow}>
-        <button style={detailTab === "requirements" ? activeTabStyle : inactiveTabStyle} onClick={() => setDetailTab("requirements")}>Requirements</button>
-        <button style={detailTab === "drill" ? activeTabStyle : inactiveTabStyle} onClick={() => setDetailTab("drill")}>Drill</button>
+        <button style={detailTab === "requirements" ? activeTabStyle : inactiveTabStyle} onClick={() => setDetailTab("requirements")}>
+          Requirements
+        </button>
+
+        <button style={detailTab === "drill" ? activeTabStyle : inactiveTabStyle} onClick={() => setDetailTab("drill")}>
+          Drill
+        </button>
       </div>
 
       {detailTab === "requirements" && selected.requirements.map((item, index) => {
         const checked = requirementChecks[`${selected.id}-${index}`];
 
         return (
-          <button key={index} style={requirementItem(checked)} onClick={() => toggleRequirement(selected.id, index)}>
+          <button key={index} style={requirementItem(checked)} onClick={() => toggleRequirement(selected.id, index, "requirement")}>
             <span style={requirementCircle(checked)}>{checked ? "✓" : ""}</span>
             <span style={requirementText(checked)}>{item}</span>
           </button>
         );
       })}
 
-      {detailTab === "drill" && selected.drill.map((item, index) => (
-        <div key={index} style={listItem}>🪖 {item}</div>
-      ))}
+      {detailTab === "drill" && selected.drill.map((item, index) => {
+        const checked = requirementChecks[`drill-${selected.id}-${index}`];
+
+        return (
+          <button key={index} style={requirementItem(checked)} onClick={() => toggleRequirement(selected.id, index, "drill")}>
+            <span style={requirementCircle(checked)}>{checked ? "✓" : ""}</span>
+            <span style={requirementText(checked)}>🪖 {item}</span>
+          </button>
+        );
+      })}
+    </>
+  );
+}
+
+function DrillTab({ drillPracticeChecks, toggleDrillPractice }) {
+  const [selectedMovement, setSelectedMovement] = useState(null);
+  const allDrill = flattenDrill();
+  const practicedCount = allDrill.filter((item) => drillPracticeChecks[item.name]).length;
+  const progress = Math.round((practicedCount / allDrill.length) * 100);
+
+  return (
+    <>
+      <div style={hero}>
+        <p style={eyebrow}>Drill Training</p>
+        <h1 style={title}>Drill Library</h1>
+        <p style={subtitle}>Practice commands, movements, and cadet leadership.</p>
+
+        <div style={progressBox}>
+          <div style={progressHeader}>
+            <span>Practice Progress</span>
+            <strong>{progress}%</strong>
+          </div>
+          <div style={progressBar}>
+            <div style={{ ...progressFill, width: `${progress}%` }} />
+          </div>
+          <p style={progressText}>{practicedCount} of {allDrill.length} movements practiced</p>
+        </div>
+      </div>
+
+      {selectedMovement && (
+        <div style={commandCard}>
+          <button style={closeButton} onClick={() => setSelectedMovement(null)}>Close</button>
+          <p style={smallLabel}>{selectedMovement.category}</p>
+          <h2 style={profileName}>{selectedMovement.name}</h2>
+
+          <div style={commandBox}>
+            <p style={smallLabel}>Command</p>
+            <strong>{selectedMovement.command}</strong>
+          </div>
+
+          <p style={cardText}>{selectedMovement.purpose}</p>
+
+          <p style={smallLabel}>Quick Notes</p>
+          {selectedMovement.notes.map((note, index) => (
+            <div key={index} style={listItem}>• {note}</div>
+          ))}
+
+          <button style={primaryButton} onClick={() => toggleDrillPractice(selectedMovement.name)}>
+            {drillPracticeChecks[selectedMovement.name] ? "✓ Practiced" : "Mark Practiced"}
+          </button>
+        </div>
+      )}
+
+      {!selectedMovement && (
+        <>
+          <div style={simpleCard}>
+            <div>
+              <strong style={blueText}>How this works</strong>
+              <p style={cardText}>
+                This drill library is for practice. Drill items inside each achievement also count toward award completion.
+              </p>
+              <p style={phaseText}>Tap a movement to open the command card.</p>
+            </div>
+          </div>
+
+          {DRILL_LIBRARY.map((group) => (
+            <div key={group.category} style={drillGroup}>
+              <h2 style={sectionTitle}>{group.category}</h2>
+
+              {group.items.map((item) => {
+                const checked = drillPracticeChecks[item.name];
+
+                return (
+                  <div key={item.name} style={drillMovementCard}>
+                    <button style={checkButton(checked)} onClick={() => toggleDrillPractice(item.name)}>
+                      {checked ? "✓" : ""}
+                    </button>
+
+                    <button style={cardMainButton} onClick={() => setSelectedMovement({ ...item, category: group.category })}>
+                      <div>
+                        <strong style={blueText}>{item.name}</strong>
+                        <p style={cardText}>{item.command}</p>
+                        <p style={phaseText}>{checked ? "Practiced" : "Tap for command card"}</p>
+                      </div>
+                      <span style={arrow}>›</span>
+                    </button>
+                  </div>
+                );
+              })}
+            </div>
+          ))}
+        </>
+      )}
     </>
   );
 }
@@ -787,10 +981,10 @@ const tabRow = { display: "flex", gap: "8px", marginBottom: "16px" };
 const activeTabStyle = { flex: 1, padding: "12px", borderRadius: "12px", border: "none", background: "#111827", color: "white", fontWeight: "bold" };
 const inactiveTabStyle = { flex: 1, padding: "12px", borderRadius: "12px", border: "none", background: "var(--soft-bg)", color: "var(--soft-text)", fontWeight: "bold" };
 const listItem = { background: "var(--card-bg)", border: "1px solid var(--card-border)", borderRadius: "14px", padding: "14px", marginBottom: "10px", color: "var(--text)", boxShadow: "var(--shadow)" };
-const bottomNav = { position: "fixed", left: "50%", bottom: "18px", transform: "translateX(-50%)", width: "calc(100% - 32px)", maxWidth: "430px", background: "var(--card-bg)", border: "1px solid var(--card-border)", borderRadius: "24px", padding: "8px", display: "grid", gridTemplateColumns: "repeat(5, 1fr)", gap: "6px", boxShadow: "0 12px 30px rgba(0,0,0,0.25)", zIndex: 10 };
-const navButton = { border: "none", background: "transparent", color: "var(--muted)", borderRadius: "16px", padding: "10px 2px", fontWeight: "bold", fontSize: "10px", display: "flex", flexDirection: "column", alignItems: "center", gap: "3px" };
+const bottomNav = { position: "fixed", left: "50%", bottom: "18px", transform: "translateX(-50%)", width: "calc(100% - 32px)", maxWidth: "430px", background: "var(--card-bg)", border: "1px solid var(--card-border)", borderRadius: "24px", padding: "8px", display: "grid", gridTemplateColumns: "repeat(6, 1fr)", gap: "4px", boxShadow: "0 12px 30px rgba(0,0,0,0.25)", zIndex: 10 };
+const navButton = { border: "none", background: "transparent", color: "var(--muted)", borderRadius: "16px", padding: "9px 1px", fontWeight: "bold", fontSize: "9px", display: "flex", flexDirection: "column", alignItems: "center", gap: "3px" };
 const activeNavButton = { ...navButton, background: "rgba(37, 99, 235, 0.18)", color: "#60a5fa" };
-const navIcon = { fontSize: "18px" };
+const navIcon = { fontSize: "17px" };
 const statsRow = { display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px", marginBottom: "14px" };
 const statCard = { background: "var(--card-bg)", border: "1px solid var(--card-border)", borderRadius: "18px", padding: "16px", boxShadow: "var(--shadow)" };
 const statLabel = { margin: 0, color: "var(--muted)", fontSize: "12px", fontWeight: "bold", textTransform: "uppercase" };
@@ -803,60 +997,15 @@ const smallActionButton = { border: "none", background: "#2563eb", color: "white
 const actionRow = { display: "flex", gap: "8px", marginTop: "12px" };
 const editButton = { border: "none", background: "#2563eb", color: "white", borderRadius: "10px", padding: "8px 12px", fontWeight: "bold", fontSize: "13px" };
 const deleteButton = { border: "none", background: "#dc2626", color: "white", borderRadius: "10px", padding: "8px 12px", fontWeight: "bold", fontSize: "13px" };
-
-const dashboardProfileCard = {
-  background: "var(--card-bg)",
-  border: "1px solid var(--card-border)",
-  borderRadius: "18px",
-  padding: "16px",
-  marginBottom: "14px",
-  boxShadow: "var(--shadow)",
-  color: "var(--text)"
-};
-
-const dashboardGrid = {
-  display: "grid",
-  gridTemplateColumns: "1fr 1fr",
-  gap: "12px",
-  marginBottom: "14px"
-};
-
-const miniCard = {
-  background: "var(--card-bg)",
-  border: "1px solid var(--card-border)",
-  borderRadius: "18px",
-  padding: "16px",
-  boxShadow: "var(--shadow)",
-  color: "var(--text)"
-};
-
-const miniTitle = {
-  margin: "8px 0 0",
-  color: "#60a5fa",
-  fontSize: "16px",
-  lineHeight: 1.2
-};
-
-const miniNumber = {
-  margin: "8px 0 0",
-  color: "#60a5fa",
-  fontSize: "34px"
-};
-
-const quickButtonGrid = {
-  display: "grid",
-  gridTemplateColumns: "1fr 1fr",
-  gap: "10px",
-  marginTop: "14px"
-};
-
-const quickButton = {
-  border: "none",
-  background: "#2563eb",
-  color: "white",
-  borderRadius: "16px",
-  padding: "14px 10px",
-  fontWeight: "bold",
-  fontSize: "14px",
-  boxShadow: "var(--shadow)"
-};
+const dashboardProfileCard = { background: "var(--card-bg)", border: "1px solid var(--card-border)", borderRadius: "18px", padding: "16px", marginBottom: "14px", boxShadow: "var(--shadow)", color: "var(--text)" };
+const dashboardGrid = { display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px", marginBottom: "14px" };
+const miniCard = { background: "var(--card-bg)", border: "1px solid var(--card-border)", borderRadius: "18px", padding: "16px", boxShadow: "var(--shadow)", color: "var(--text)" };
+const miniTitle = { margin: "8px 0 0", color: "#60a5fa", fontSize: "16px", lineHeight: 1.2 };
+const miniNumber = { margin: "8px 0 0", color: "#60a5fa", fontSize: "34px" };
+const quickButtonGrid = { display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px", marginTop: "14px" };
+const quickButton = { border: "none", background: "#2563eb", color: "white", borderRadius: "16px", padding: "14px 10px", fontWeight: "bold", fontSize: "14px", boxShadow: "var(--shadow)" };
+const drillGroup = { marginBottom: "20px" };
+const drillMovementCard = { width: "100%", background: "var(--card-bg)", border: "1px solid var(--card-border)", borderRadius: "18px", padding: "14px", marginBottom: "10px", display: "flex", alignItems: "center", gap: "12px", boxShadow: "var(--shadow)", color: "var(--text)" };
+const commandCard = { background: "var(--card-bg)", border: "1px solid var(--card-border)", borderRadius: "22px", padding: "18px", marginBottom: "16px", boxShadow: "var(--shadow)", color: "var(--text)" };
+const commandBox = { background: "var(--soft-bg)", borderRadius: "16px", padding: "14px", margin: "12px 0", color: "var(--text)" };
+const closeButton = { border: "none", background: "var(--soft-bg)", color: "var(--soft-text)", borderRadius: "999px", padding: "8px 12px", fontWeight: "bold", float: "right" };
