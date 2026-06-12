@@ -45,16 +45,20 @@ const DEFAULT_FLIGHTS = [
 
 const DEFAULT_PROFILE = {
   name: "Cadet Lawrence",
+  capId: "",
   squadron: "CAP Squadron",
   joined: "2026",
   goal: "Earn Wright Brothers Award"
 };
 
 const DOCS = [
-  { id: 1, name: "Cadet Achievement Requirements", category: "Cadet Program", url: "https://www.gocivilairpatrol.com/programs/cadets/stripes-to-diamonds" },
-  { id: 2, name: "eServices Login", category: "Online Learning", url: "https://eservices.cap.gov" },
-  { id: 3, name: "CAPP 60-33 Drill & Ceremonies", category: "Drill", url: "https://www.gocivilairpatrol.com/media/cms/CAPP6020_5_AUG_16_07A0C6200BA4C.pdf" },
-  { id: 4, name: "CAPP 60-34 Practical Drill Tests", category: "Drill", url: "https://www.gocivilairpatrol.com/media/cms/CAPP_6034_Sept_24_3e0cc652c818b.pdf" }
+  { id: 1, name: "eServices Login", category: "Official Login", url: "https://www.capnhq.gov/" },
+  { id: 2, name: "Parent / Guardian Portal", category: "Official Parent Portal", url: "https://www.gocivilairpatrol.com/programs/cadets/parents/parent-guardian-portal" },
+  { id: 3, name: "Cadet Achievement Requirements", category: "Cadet Program", url: "https://www.gocivilairpatrol.com/programs/cadets/stripes-to-diamonds" },
+  { id: 4, name: "Cadet Tests & Exams", category: "Testing", url: "https://www.gocivilairpatrol.com/programs/cadets/stripes-to-diamonds/cadet-tests--exams" },
+  { id: 5, name: "Drill & Ceremonies Library", category: "Drill", url: "https://www.gocivilairpatrol.com/programs/cadets/library/drill" },
+  { id: 6, name: "CAPP 60-33 Drill & Ceremonies", category: "Drill PDF", url: "https://www.gocivilairpatrol.com/media/cms/CAPP6020_5_AUG_16_07A0C6200BA4C.pdf" },
+  { id: 7, name: "CAPP 60-34 Practical Drill Tests", category: "Drill Tests PDF", url: "https://www.gocivilairpatrol.com/media/cms/CAPP_6034_Sept_24_3e0cc652c818b.pdf" }
 ];
 
 function loadSaved(key, fallback) {
@@ -219,18 +223,26 @@ function RankTab({ profile, setProfile, onSelect, completedIds, toggleCompleted,
           <>
             <p style={smallLabel}>Cadet Profile</p>
             <h2 style={profileName}>{profile.name}</h2>
+            {profile.capId ? <p style={phaseText}>CAP ID: {profile.capId}</p> : <p style={cardText}>CAP ID: Not entered</p>}
             <p style={cardText}>{profile.squadron}</p>
             <p style={phaseText}>Joined: {profile.joined}</p>
             <p style={goalText}>Goal: {profile.goal}</p>
+            <p style={{ ...cardText, marginTop: "12px", fontSize: "12px" }}>
+              CAP ID is stored only on this device. Do not enter or store your CAP password in this app.
+            </p>
             <button style={smallActionButton} onClick={() => { setForm(profile); setEditing(true); }}>Edit Profile</button>
           </>
         ) : (
           <>
             <p style={smallLabel}>Edit Profile</p>
             <input style={input} value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} placeholder="Cadet name" />
+            <input style={input} value={form.capId || ""} onChange={(e) => setForm({ ...form, capId: e.target.value })} placeholder="CAP ID only — never password" />
             <input style={input} value={form.squadron} onChange={(e) => setForm({ ...form, squadron: e.target.value })} placeholder="Squadron" />
             <input style={input} value={form.joined} onChange={(e) => setForm({ ...form, joined: e.target.value })} placeholder="Joined" />
             <input style={input} value={form.goal} onChange={(e) => setForm({ ...form, goal: e.target.value })} placeholder="Goal" />
+            <p style={{ ...cardText, fontSize: "12px" }}>
+              This app is not affiliated with Civil Air Patrol. It does not connect to eServices and does not store login credentials.
+            </p>
             <button style={smallActionButton} onClick={saveProfile}>Save</button>
           </>
         )}
@@ -438,9 +450,21 @@ function DocsTab() {
   return (
     <>
       <div style={hero}>
-        <p style={eyebrow}>Resources</p>
+        <p style={eyebrow}>Official CAP Resources</p>
         <h1 style={title}>Docs</h1>
         <p style={subtitle}>Quick links for cadets and parents.</p>
+      </div>
+
+      <div style={simpleCard}>
+        <div>
+          <strong style={blueText}>Legal / Safety Note</strong>
+          <p style={cardText}>
+            This app is an unofficial tracker. It does not connect to CAP eServices, does not collect passwords, and does not store CAP login credentials.
+          </p>
+          <p style={phaseText}>
+            Use the official eServices link below for real CAP records, tests, and account access.
+          </p>
+        </div>
       </div>
 
       {DOCS.map((doc) => (
