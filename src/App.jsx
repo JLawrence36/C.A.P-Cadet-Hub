@@ -146,7 +146,6 @@ function formatDate(value) {
 export default function App() {
   const [activeTab, setActiveTab] = useState("dashboard");
   const [selected, setSelected] = useState(null);
-
   const [completedIds, setCompletedIds] = useState(() => loadSaved("cap_completed_ids", []));
   const [requirementChecks, setRequirementChecks] = useState(() => loadSaved("cap_requirement_checks", {}));
   const [theme, setTheme] = useState(() => localStorage.getItem("cap_theme") || "light");
@@ -181,10 +180,12 @@ export default function App() {
       if (achievement) {
         const allRequirementsChecked = achievement.requirements.every((_, i) => next[`${achievementId}-${i}`]);
         const allDrillChecked = achievement.drill.every((_, i) => next[`drill-${achievementId}-${i}`]);
-        const allChecked = allRequirementsChecked && allDrillChecked;
 
         setCompletedIds((current) => {
-          if (allChecked) return current.includes(achievementId) ? current : [...current, achievementId];
+          if (allRequirementsChecked && allDrillChecked) {
+            return current.includes(achievementId) ? current : [...current, achievementId];
+          }
+
           return current.filter((id) => id !== achievementId);
         });
       }
@@ -320,6 +321,7 @@ function DashboardTab({ profile, progress, currentAchievement, completedCount, e
               <strong style={blueText}>{nextEvent.title}</strong>
               <p style={cardText}>{formatDate(nextEvent.date)} · {nextEvent.time || "No time"}</p>
               <p style={phaseText}>{nextEvent.type} · {nextEvent.location || "No location"}</p>
+
               {nextEvent.notes && (
                 <div style={notesBox}>
                   <p style={smallLabel}>Notes</p>
@@ -397,9 +399,11 @@ function RankTab({ profile, setProfile, onSelect, completedIds, toggleCompleted,
             <input style={input} value={form.squadron} onChange={(e) => setForm({ ...form, squadron: e.target.value })} placeholder="Squadron" />
             <input style={input} value={form.joined} onChange={(e) => setForm({ ...form, joined: e.target.value })} placeholder="Joined" />
             <input style={input} value={form.goal} onChange={(e) => setForm({ ...form, goal: e.target.value })} placeholder="Goal" />
+
             <p style={{ ...cardText, fontSize: "12px" }}>
               This app is not affiliated with Civil Air Patrol. It does not connect to eServices and does not store login credentials.
             </p>
+
             <button style={smallActionButton} onClick={saveProfile}>Save</button>
           </>
         )}
@@ -442,10 +446,8 @@ function RankTab({ profile, setProfile, onSelect, completedIds, toggleCompleted,
 
 function AchievementDetail({ selected, onBack, completedIds, toggleCompleted, requirementChecks, toggleRequirement }) {
   const done = completedIds.includes(selected.id);
-
   const checkedRequirements = selected.requirements.filter((_, i) => requirementChecks[`${selected.id}-${i}`]).length;
   const checkedDrill = selected.drill.filter((_, i) => requirementChecks[`drill-${selected.id}-${i}`]).length;
-
   const totalItems = selected.requirements.length + selected.drill.length;
   const checkedTotal = checkedRequirements + checkedDrill;
   const awardProgress = Math.round((checkedTotal / totalItems) * 100);
@@ -476,13 +478,8 @@ function AchievementDetail({ selected, onBack, completedIds, toggleCompleted, re
           <div style={{ ...progressFillBlue, width: `${awardProgress}%` }} />
         </div>
 
-        <p style={requirementProgressText}>
-          {checkedTotal} of {totalItems} promotion items checked
-        </p>
-
-        <p style={requirementProgressText}>
-          Requirements: {checkedRequirements} of {selected.requirements.length} · Drill: {checkedDrill} of {selected.drill.length}
-        </p>
+        <p style={requirementProgressText}>{checkedTotal} of {totalItems} promotion items checked</p>
+        <p style={requirementProgressText}>Requirements: {checkedRequirements} of {selected.requirements.length} · Drill: {checkedDrill} of {selected.drill.length}</p>
       </div>
 
       <h2 style={sectionTitle}>Promotion Requirements</h2>
@@ -537,9 +534,7 @@ function DrillTab() {
 
       {selectedMovement ? (
         <div style={commandCard}>
-          <button style={closeButton} onClick={() => setSelectedMovement(null)}>
-            Close
-          </button>
+          <button style={closeButton} onClick={() => setSelectedMovement(null)}>Close</button>
 
           <p style={smallLabel}>{selectedMovement.category}</p>
           <h2 style={profileName}>{selectedMovement.name}</h2>
@@ -555,9 +550,7 @@ function DrillTab() {
 
           {selectedMovement.notes.length > 0 ? (
             selectedMovement.notes.map((note, index) => (
-              <div key={index} style={listItem}>
-                • {note}
-              </div>
+              <div key={index} style={listItem}>• {note}</div>
             ))
           ) : (
             <div style={listItem}>No notes listed for this movement.</div>
@@ -899,33 +892,6 @@ const sectionTitle = { color: "var(--text)", margin: "18px 0 12px" };
 const card = { width: "100%", background: "var(--card-bg)", borderRadius: "18px", padding: "14px", marginBottom: "12px", display: "flex", alignItems: "center", gap: "12px", boxShadow: "var(--shadow)", color: "var(--text)" };
 const simpleCard = { width: "100%", background: "var(--card-bg)", border: "1px solid var(--card-border)", borderRadius: "18px", padding: "16px", marginBottom: "12px", display: "flex", alignItems: "center", gap: "12px", boxShadow: "var(--shadow)", color: "var(--text)" };
 const cardMainButton = { flex: 1, border: "none", background: "transparent", textAlign: "left", display: "flex", justifyContent: "space-between", alignItems: "center", color: "var(--text)", padding: 0 };
-
-function checkButton(done) {
-  return { width: "34px", height: "34px", borderRadius: "999px", border: done ? "2px solid #22c55e" : "2px solid #94a3b8", background: done ? "#22c55e" : "var(--card-bg)", color: "white", fontWeight: "bold", fontSize: "18px", flexShrink: 0 };
-}
-
-function detailCompleteButton(done) {
-  return { marginTop: "16px", width: "100%", border: "none", borderRadius: "14px", padding: "12px", background: done ? "#22c55e" : "white", color: done ? "white" : "#1e3a8a", fontWeight: "bold" };
-}
-
-const requirementProgressBox = { background: "var(--card-bg)", border: "1px solid var(--card-border)", borderRadius: "18px", padding: "16px", marginBottom: "16px", boxShadow: "var(--shadow)", color: "var(--text)" };
-const progressBarLight = { height: "10px", background: "var(--soft-bg)", borderRadius: "999px", overflow: "hidden" };
-const progressFillBlue = { height: "100%", background: "#2563eb", borderRadius: "999px" };
-const requirementProgressText = { margin: "8px 0 0", fontSize: "12px", color: "var(--muted)" };
-
-function requirementItem(checked) {
-  return { width: "100%", background: checked ? "rgba(37, 99, 235, 0.14)" : "var(--card-bg)", border: checked ? "2px solid #2563eb" : "1px solid var(--card-border)", borderRadius: "14px", padding: "14px", marginBottom: "10px", color: "var(--text)", boxShadow: "var(--shadow)", display: "flex", alignItems: "flex-start", gap: "12px", textAlign: "left" };
-}
-
-function requirementCircle(checked) {
-  return { width: "26px", height: "26px", borderRadius: "999px", border: checked ? "2px solid #2563eb" : "2px solid #94a3b8", background: checked ? "#2563eb" : "var(--card-bg)", color: "white", fontWeight: "bold", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, marginTop: "1px" };
-}
-
-function requirementText(checked) {
-  return { color: checked ? "#60a5fa" : "var(--text)", textDecoration: checked ? "line-through" : "none", lineHeight: 1.4 };
-}
-
-const docCard = { width: "100%", background: "var(--card-bg)", border: "1px solid var(--card-border)", borderRadius: "18px", padding: "16px", marginBottom: "12px", textAlign: "left", display: "flex", justifyContent: "space-between", alignItems: "center", boxShadow: "var(--shadow)", color: "var(--text)", textDecoration: "none" };
 const blueText = { color: "#0b82f0" };
 const cardText = { margin: "6px 0 0", color: "var(--muted)", fontSize: "14px" };
 const phaseText = { margin: "8px 0 0", color: "#2563eb", fontSize: "12px", fontWeight: "bold" };
@@ -934,6 +900,81 @@ const doneTag = { margin: "8px 0 0", color: "#ffffff", background: "#22c55e", di
 const arrow = { fontSize: "32px", color: "#9ca3af" };
 const backButton = { border: "none", background: "transparent", color: "#60a5fa", fontWeight: "bold", marginBottom: "12px", fontSize: "16px" };
 const overview = { color: "var(--muted)", lineHeight: 1.5, marginBottom: "16px" };
+
+function checkButton(done) {
+  return {
+    width: "34px",
+    height: "34px",
+    borderRadius: "999px",
+    border: done ? "2px solid #22c55e" : "2px solid #94a3b8",
+    background: done ? "#22c55e" : "var(--card-bg)",
+    color: "white",
+    fontWeight: "bold",
+    fontSize: "18px",
+    flexShrink: 0
+  };
+}
+
+function detailCompleteButton(done) {
+  return {
+    marginTop: "16px",
+    width: "100%",
+    border: "none",
+    borderRadius: "14px",
+    padding: "12px",
+    background: done ? "#22c55e" : "white",
+    color: done ? "white" : "#1e3a8a",
+    fontWeight: "bold"
+  };
+}
+
+const requirementProgressBox = { background: "var(--card-bg)", border: "1px solid var(--card-border)", borderRadius: "18px", padding: "16px", marginBottom: "16px", boxShadow: "var(--shadow)", color: "var(--text)" };
+const progressBarLight = { height: "10px", background: "var(--soft-bg)", borderRadius: "999px", overflow: "hidden" };
+const progressFillBlue = { height: "100%", background: "#2563eb", borderRadius: "999px" };
+const requirementProgressText = { margin: "8px 0 0", fontSize: "12px", color: "var(--muted)" };
+
+function requirementItem(checked) {
+  return {
+    width: "100%",
+    background: checked ? "rgba(37, 99, 235, 0.14)" : "var(--card-bg)",
+    border: checked ? "2px solid #2563eb" : "1px solid var(--card-border)",
+    borderRadius: "14px",
+    padding: "14px",
+    marginBottom: "10px",
+    color: "var(--text)",
+    boxShadow: "var(--shadow)",
+    display: "flex",
+    alignItems: "flex-start",
+    gap: "12px",
+    textAlign: "left"
+  };
+}
+
+function requirementCircle(checked) {
+  return {
+    width: "26px",
+    height: "26px",
+    borderRadius: "999px",
+    border: checked ? "2px solid #2563eb" : "2px solid #94a3b8",
+    background: checked ? "#2563eb" : "var(--card-bg)",
+    color: "white",
+    fontWeight: "bold",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    flexShrink: 0,
+    marginTop: "1px"
+  };
+}
+
+function requirementText(checked) {
+  return {
+    color: checked ? "#60a5fa" : "var(--text)",
+    textDecoration: checked ? "line-through" : "none",
+    lineHeight: 1.4
+  };
+}
+
 const bottomNav = { position: "fixed", left: "50%", bottom: "18px", transform: "translateX(-50%)", width: "calc(100% - 32px)", maxWidth: "430px", background: "var(--card-bg)", border: "1px solid var(--card-border)", borderRadius: "24px", padding: "8px", display: "grid", gridTemplateColumns: "repeat(6, 1fr)", gap: "4px", boxShadow: "0 12px 30px rgba(0,0,0,0.25)", zIndex: 10 };
 const navButton = { border: "none", background: "transparent", color: "var(--muted)", borderRadius: "16px", padding: "9px 1px", fontWeight: "bold", fontSize: "9px", display: "flex", flexDirection: "column", alignItems: "center", gap: "3px" };
 const activeNavButton = { ...navButton, background: "rgba(37, 99, 235, 0.18)", color: "#60a5fa" };
@@ -965,3 +1006,5 @@ const closeButton = { border: "none", background: "var(--soft-bg)", color: "var(
 const drillReferenceCard = { width: "100%", background: "var(--card-bg)", border: "1px solid var(--card-border)", borderRadius: "18px", padding: "14px", marginBottom: "10px", display: "flex", justifyContent: "space-between", alignItems: "center", gap: "12px", boxShadow: "var(--shadow)", color: "var(--text)", textAlign: "left" };
 const notesBox = { background: "var(--soft-bg)", borderRadius: "14px", padding: "12px", marginTop: "12px" };
 const notesText = { margin: "4px 0 0", color: "var(--text)", fontSize: "14px", lineHeight: 1.45, whiteSpace: "pre-wrap" };
+const listItem = { background: "var(--card-bg)", border: "1px solid var(--card-border)", borderRadius: "14px", padding: "14px", marginBottom: "10px", color: "var(--text)", boxShadow: "var(--shadow)" };
+const docCard = { width: "100%", background: "var(--card-bg)", border: "1px solid var(--card-border)", borderRadius: "18px", padding: "16px", marginBottom: "12px", textAlign: "left", display: "flex", justifyContent: "space-between", alignItems: "center", boxShadow: "var(--shadow)", color: "var(--text)", textDecoration: "none" };
