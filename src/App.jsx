@@ -517,6 +517,16 @@ function AchievementDetail({ selected, onBack, completedIds, toggleCompleted, re
 function DrillTab() {
   const [selectedMovement, setSelectedMovement] = useState(null);
 
+  function openMovement(item, category) {
+    setSelectedMovement({
+      name: item.name || "Drill Movement",
+      command: item.command || "Command not listed",
+      purpose: item.purpose || "Purpose not listed.",
+      notes: Array.isArray(item.notes) ? item.notes : [],
+      category: category || "Drill"
+    });
+  }
+
   return (
     <>
       <div style={hero}>
@@ -525,9 +535,11 @@ function DrillTab() {
         <p style={subtitle}>Study commands, movements, and cadet leadership.</p>
       </div>
 
-      {selectedMovement && (
+      {selectedMovement ? (
         <div style={commandCard}>
-          <button style={closeButton} onClick={() => setSelectedMovement(null)}>Close</button>
+          <button style={closeButton} onClick={() => setSelectedMovement(null)}>
+            Close
+          </button>
 
           <p style={smallLabel}>{selectedMovement.category}</p>
           <h2 style={profileName}>{selectedMovement.name}</h2>
@@ -541,13 +553,17 @@ function DrillTab() {
 
           <p style={smallLabel}>Quick Notes</p>
 
-          {selectedMovement.notes.map((note, index) => (
-            <div key={index} style={listItem}>• {note}</div>
-          ))}
+          {selectedMovement.notes.length > 0 ? (
+            selectedMovement.notes.map((note, index) => (
+              <div key={index} style={listItem}>
+                • {note}
+              </div>
+            ))
+          ) : (
+            <div style={listItem}>No notes listed for this movement.</div>
+          )}
         </div>
-      )}
-
-      {!selectedMovement && (
+      ) : (
         <>
           <div style={simpleCard}>
             <div>
@@ -565,9 +581,9 @@ function DrillTab() {
 
               {group.items.map((item) => (
                 <button
-                  key={item.name}
+                  key={`${group.category}-${item.name}`}
                   style={drillReferenceCard}
-                  onClick={() => setSelectedMovement({ ...item, category: group.category })}
+                  onClick={() => openMovement(item, group.category)}
                 >
                   <div>
                     <strong style={blueText}>{item.name}</strong>
