@@ -609,6 +609,10 @@ export default function App() {
     loadSaved("cap_requirement_checks", {})
   );
 
+  const [theme, setTheme] = useState(() => {
+    return localStorage.getItem("cap_theme") || "light";
+  });
+
   useEffect(() => {
     localStorage.setItem("cap_completed_ids", JSON.stringify(completedIds));
   }, [completedIds]);
@@ -620,12 +624,19 @@ export default function App() {
     );
   }, [requirementChecks]);
 
+  useEffect(() => {
+    localStorage.setItem("cap_theme", theme);
+  }, [theme]);
+
   const validCompletedIds = completedIds.filter((id) =>
     ACHIEVEMENTS.some((a) => a.id === id)
   );
 
   const completedCount = validCompletedIds.length;
   const progress = Math.round((completedCount / ACHIEVEMENTS.length) * 100);
+
+  const isDark = theme === "dark";
+  const themeVars = getThemeVars(isDark);
 
   const currentAchievement =
     ACHIEVEMENTS.find((a) => !validCompletedIds.includes(a.id)) ||
@@ -640,10 +651,36 @@ export default function App() {
   function toggleRequirement(achievementId, index) {
     const key = `${achievementId}-${index}`;
 
-    setRequirementChecks((prev) => ({
-      ...prev,
-      [key]: !prev[key]
-    }));
+    setRequirementChecks((prev) => {
+      const next = {
+        ...prev,
+        [key]: !prev[key]
+      };
+
+      const achievement = ACHIEVEMENTS.find((a) => a.id === achievementId);
+
+      if (achievement) {
+        const allRequirementsChecked = achievement.requirements.every(
+          (_, reqIndex) => next[`${achievementId}-${reqIndex}`]
+        );
+
+        setCompletedIds((current) => {
+          if (allRequirementsChecked) {
+            return current.includes(achievementId)
+              ? current
+              : [...current, achievementId];
+          }
+
+          return current.filter((id) => id !== achievementId);
+        });
+      }
+
+      return next;
+    });
+  }
+
+  function toggleTheme() {
+    setTheme((current) => (current === "light" ? "dark" : "light"));
   }
 
   function openAchievement(achievement) {
@@ -657,7 +694,11 @@ export default function App() {
   }
 
   return (
-    <div style={page}>
+    <div style={{ ...page, ...themeVars }}>
+      <button style={themeButton} onClick={toggleTheme}>
+        {isDark ? "☀️ Light" : "🌙 Dark"}
+      </button>
+
       <div style={container}>
         {selected ? (
           <AchievementDetail
@@ -665,7 +706,7 @@ export default function App() {
             detailTab={detailTab}
             setDetailTab={setDetailTab}
             onBack={() => setSelected(null)}
-            completedIds={completedIds}
+            completedIds={validCompletedIds}
             toggleCompleted={toggleCompleted}
             requirementChecks={requirementChecks}
             toggleRequirement={toggleRequirement}
@@ -780,7 +821,7 @@ function RankTab({
                 ? "2px solid #2563eb"
                 : done
                 ? "2px solid #22c55e"
-                : "1px solid #e5e7eb"
+                : "1px solid var(--card-border)"
             }}
           >
             <button
@@ -1001,15 +1042,56 @@ function DocsTab() {
   );
 }
 
+function getThemeVars(isDark) {
+  return isDark
+    ? {
+        "--app-bg": "#020617",
+        "--card-bg": "#0f172a",
+        "--card-border": "#1e293b",
+        "--text": "#f8fafc",
+        "--muted": "#94a3b8",
+        "--soft-bg": "#1e293b",
+        "--soft-text": "#cbd5e1",
+        "--shadow": "0 8px 22px rgba(0,0,0,0.35)"
+      }
+    : {
+        "--app-bg": "#f9fafb",
+        "--card-bg": "#ffffff",
+        "--card-border": "#e5e7eb",
+        "--text": "#111827",
+        "--muted": "#6b7280",
+        "--soft-bg": "#e5e7eb",
+        "--soft-text": "#374151",
+        "--shadow": "0 6px 16px rgba(0,0,0,0.05)"
+      };
+}
+
 const page = {
   minHeight: "100vh",
-  background: "#f9fafb",
-  padding: "24px 24px 110px"
+  background: "var(--app-bg)",
+  padding: "24px 24px 110px",
+  color: "var(--text)",
+  transition: "background 0.2s ease, color 0.2s ease"
 };
 
 const container = {
   maxWidth: "430px",
   margin: "0 auto"
+};
+
+const themeButton = {
+  position: "fixed",
+  top: "14px",
+  right: "14px",
+  zIndex: 20,
+  border: "1px solid var(--card-border)",
+  background: "var(--card-bg)",
+  color: "var(--text)",
+  borderRadius: "999px",
+  padding: "9px 12px",
+  fontWeight: "bold",
+  fontSize: "13px",
+  boxShadow: "var(--shadow)"
 };
 
 const hero = {
@@ -1059,7 +1141,7 @@ const progressHeaderDark = {
   justifyContent: "space-between",
   fontSize: "14px",
   marginBottom: "8px",
-  color: "#111827"
+  color: "var(--text)"
 };
 
 const progressBar = {
@@ -1082,12 +1164,13 @@ const progressText = {
 };
 
 const currentBox = {
-  background: "white",
-  border: "1px solid #dbeafe",
+  background: "var(--card-bg)",
+  border: "1px solid var(--card-border)",
   borderRadius: "18px",
   padding: "16px",
   marginBottom: "20px",
-  boxShadow: "0 6px 16px rgba(0,0,0,0.05)"
+  boxShadow: "var(--shadow)",
+  color: "var(--text)"
 };
 
 const smallLabel = {
@@ -1099,35 +1182,35 @@ const smallLabel = {
 };
 
 const sectionTitle = {
-  color: "#111827",
+  color: "var(--text)",
   marginBottom: "12px"
 };
 
 const card = {
   width: "100%",
-  background: "white",
+  background: "var(--card-bg)",
   borderRadius: "18px",
   padding: "14px",
   marginBottom: "12px",
   display: "flex",
   alignItems: "center",
   gap: "12px",
-  boxShadow: "0 6px 16px rgba(0,0,0,0.05)",
-  color: "#111827"
+  boxShadow: "var(--shadow)",
+  color: "var(--text)"
 };
 
 const simpleCard = {
   width: "100%",
-  background: "white",
-  border: "1px solid #e5e7eb",
+  background: "var(--card-bg)",
+  border: "1px solid var(--card-border)",
   borderRadius: "18px",
   padding: "16px",
   marginBottom: "12px",
   display: "flex",
   alignItems: "center",
   gap: "12px",
-  boxShadow: "0 6px 16px rgba(0,0,0,0.05)",
-  color: "#111827"
+  boxShadow: "var(--shadow)",
+  color: "var(--text)"
 };
 
 const cardMainButton = {
@@ -1138,7 +1221,7 @@ const cardMainButton = {
   display: "flex",
   justifyContent: "space-between",
   alignItems: "center",
-  color: "#111827",
+  color: "var(--text)",
   padding: 0
 };
 
@@ -1147,8 +1230,8 @@ function checkButton(done) {
     width: "34px",
     height: "34px",
     borderRadius: "999px",
-    border: done ? "2px solid #22c55e" : "2px solid #d1d5db",
-    background: done ? "#22c55e" : "white",
+    border: done ? "2px solid #22c55e" : "2px solid #94a3b8",
+    background: done ? "#22c55e" : "var(--card-bg)",
     color: "white",
     fontWeight: "bold",
     fontSize: "18px",
@@ -1170,17 +1253,18 @@ function detailCompleteButton(done) {
 }
 
 const requirementProgressBox = {
-  background: "white",
-  border: "1px solid #e5e7eb",
+  background: "var(--card-bg)",
+  border: "1px solid var(--card-border)",
   borderRadius: "18px",
   padding: "16px",
   marginBottom: "16px",
-  boxShadow: "0 6px 16px rgba(0,0,0,0.05)"
+  boxShadow: "var(--shadow)",
+  color: "var(--text)"
 };
 
 const progressBarLight = {
   height: "10px",
-  background: "#e5e7eb",
+  background: "var(--soft-bg)",
   borderRadius: "999px",
   overflow: "hidden"
 };
@@ -1194,19 +1278,19 @@ const progressFillBlue = {
 const requirementProgressText = {
   margin: "8px 0 0",
   fontSize: "12px",
-  color: "#6b7280"
+  color: "var(--muted)"
 };
 
 function requirementItem(checked) {
   return {
     width: "100%",
-    background: checked ? "#eff6ff" : "white",
-    border: checked ? "2px solid #2563eb" : "1px solid #e5e7eb",
+    background: checked ? "rgba(37, 99, 235, 0.14)" : "var(--card-bg)",
+    border: checked ? "2px solid #2563eb" : "1px solid var(--card-border)",
     borderRadius: "14px",
     padding: "14px",
     marginBottom: "10px",
-    color: "#111827",
-    boxShadow: "0 4px 10px rgba(0,0,0,0.04)",
+    color: "var(--text)",
+    boxShadow: "var(--shadow)",
     display: "flex",
     alignItems: "flex-start",
     gap: "12px",
@@ -1219,8 +1303,8 @@ function requirementCircle(checked) {
     width: "26px",
     height: "26px",
     borderRadius: "999px",
-    border: checked ? "2px solid #2563eb" : "2px solid #d1d5db",
-    background: checked ? "#2563eb" : "white",
+    border: checked ? "2px solid #2563eb" : "2px solid #94a3b8",
+    background: checked ? "#2563eb" : "var(--card-bg)",
     color: "white",
     fontWeight: "bold",
     display: "flex",
@@ -1233,7 +1317,7 @@ function requirementCircle(checked) {
 
 function requirementText(checked) {
   return {
-    color: checked ? "#1e3a8a" : "#111827",
+    color: checked ? "#60a5fa" : "var(--text)",
     textDecoration: checked ? "line-through" : "none",
     lineHeight: 1.4
   };
@@ -1241,8 +1325,8 @@ function requirementText(checked) {
 
 const docCard = {
   width: "100%",
-  background: "white",
-  border: "1px solid #e5e7eb",
+  background: "var(--card-bg)",
+  border: "1px solid var(--card-border)",
   borderRadius: "18px",
   padding: "16px",
   marginBottom: "12px",
@@ -1250,8 +1334,8 @@ const docCard = {
   display: "flex",
   justifyContent: "space-between",
   alignItems: "center",
-  boxShadow: "0 6px 16px rgba(0,0,0,0.05)",
-  color: "#111827",
+  boxShadow: "var(--shadow)",
+  color: "var(--text)",
   textDecoration: "none"
 };
 
@@ -1261,7 +1345,7 @@ const blueText = {
 
 const cardText = {
   margin: "6px 0 0",
-  color: "#6b7280",
+  color: "var(--muted)",
   fontSize: "14px"
 };
 
@@ -1302,14 +1386,14 @@ const arrow = {
 const backButton = {
   border: "none",
   background: "transparent",
-  color: "#2563eb",
+  color: "#60a5fa",
   fontWeight: "bold",
   marginBottom: "12px",
   fontSize: "16px"
 };
 
 const overview = {
-  color: "#374151",
+  color: "var(--muted)",
   lineHeight: 1.5,
   marginBottom: "16px"
 };
@@ -1335,19 +1419,19 @@ const inactiveTabStyle = {
   padding: "12px",
   borderRadius: "12px",
   border: "none",
-  background: "#e5e7eb",
-  color: "#374151",
+  background: "var(--soft-bg)",
+  color: "var(--soft-text)",
   fontWeight: "bold"
 };
 
 const listItem = {
-  background: "white",
-  border: "1px solid #e5e7eb",
+  background: "var(--card-bg)",
+  border: "1px solid var(--card-border)",
   borderRadius: "14px",
   padding: "14px",
   marginBottom: "10px",
-  color: "#111827",
-  boxShadow: "0 4px 10px rgba(0,0,0,0.04)"
+  color: "var(--text)",
+  boxShadow: "var(--shadow)"
 };
 
 const bottomNav = {
@@ -1357,21 +1441,21 @@ const bottomNav = {
   transform: "translateX(-50%)",
   width: "calc(100% - 32px)",
   maxWidth: "430px",
-  background: "white",
-  border: "1px solid #e5e7eb",
+  background: "var(--card-bg)",
+  border: "1px solid var(--card-border)",
   borderRadius: "24px",
   padding: "8px",
   display: "grid",
   gridTemplateColumns: "repeat(4, 1fr)",
   gap: "6px",
-  boxShadow: "0 12px 30px rgba(0,0,0,0.15)",
+  boxShadow: "0 12px 30px rgba(0,0,0,0.25)",
   zIndex: 10
 };
 
 const navButton = {
   border: "none",
   background: "transparent",
-  color: "#6b7280",
+  color: "var(--muted)",
   borderRadius: "16px",
   padding: "10px 4px",
   fontWeight: "bold",
@@ -1384,8 +1468,8 @@ const navButton = {
 
 const activeNavButton = {
   ...navButton,
-  background: "#dbeafe",
-  color: "#1d4ed8"
+  background: "rgba(37, 99, 235, 0.18)",
+  color: "#60a5fa"
 };
 
 const navIcon = {
@@ -1400,16 +1484,16 @@ const statsRow = {
 };
 
 const statCard = {
-  background: "white",
-  border: "1px solid #e5e7eb",
+  background: "var(--card-bg)",
+  border: "1px solid var(--card-border)",
   borderRadius: "18px",
   padding: "16px",
-  boxShadow: "0 6px 16px rgba(0,0,0,0.05)"
+  boxShadow: "var(--shadow)"
 };
 
 const statLabel = {
   margin: 0,
-  color: "#6b7280",
+  color: "var(--muted)",
   fontSize: "12px",
   fontWeight: "bold",
   textTransform: "uppercase"
@@ -1417,6 +1501,6 @@ const statLabel = {
 
 const statNumber = {
   margin: "6px 0 0",
-  color: "#1e3a8a",
+  color: "#60a5fa",
   fontSize: "34px"
 };
