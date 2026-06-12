@@ -1,28 +1,81 @@
 import { useEffect, useState } from "react";
 
-const RIBBONS = [
-  ["#1e3a8a", "#facc15", "#1e3a8a"],
-  ["#ef4444", "#ffffff", "#1e3a8a"],
-  ["#2563eb", "#facc15", "#ffffff", "#facc15", "#2563eb"],
-  ["#ffffff", "#dc2626", "#1e3a8a", "#dc2626", "#ffffff"],
-  ["#16a34a", "#ffffff", "#2563eb"],
-  ["#7c3aed", "#facc15", "#7c3aed"],
-  ["#f97316", "#ffffff", "#1e3a8a"],
-  ["#0f172a", "#facc15", "#0f172a"],
-  ["#2563eb", "#ffffff", "#dc2626"],
-  ["#facc15", "#1e3a8a", "#facc15"],
-  ["#16a34a", "#facc15", "#ffffff", "#facc15", "#16a34a"],
-  ["#7c2d12", "#facc15", "#7c2d12"],
-  ["#0ea5e9", "#ffffff", "#0ea5e9"],
-  ["#dc2626", "#facc15", "#1e3a8a", "#facc15", "#dc2626"],
-  ["#1e40af", "#93c5fd", "#ffffff", "#93c5fd", "#1e40af"],
-  ["#581c87", "#ffffff", "#facc15", "#ffffff", "#581c87"],
-  ["#166534", "#facc15", "#166534"],
-  ["#7f1d1d", "#ffffff", "#facc15", "#ffffff", "#7f1d1d"],
-  ["#0f172a", "#e5e7eb", "#facc15", "#e5e7eb", "#0f172a"],
-  ["#1e3a8a", "#facc15", "#ffffff", "#facc15", "#1e3a8a"],
-  ["#020617", "#facc15", "#ffffff", "#facc15", "#020617"]
-];
+/*
+  Ribbon order based on the image you sent:
+  The far-right purple ribbon is Curry.
+  The app uses a 10-ribbon cadet rack pattern and maps the 21 achievements to those standard ribbon visuals.
+*/
+
+const CADET_RIBBONS = {
+  curry: {
+    label: "Curry Award Ribbon",
+    colors: ["#4b155f", "#ffffff", "#4b155f", "#6f2a86"]
+  },
+  arnold: {
+    label: "Arnold Achievement Ribbon",
+    colors: ["#3b0f5f", "#ffffff", "#3b0f5f"]
+  },
+  feik: {
+    label: "Feik Achievement Ribbon",
+    colors: ["#0b3f1f", "#ffffff", "#0b3f1f", "#ffffff", "#0b3f1f"]
+  },
+  wrightBrothers: {
+    label: "Wright Brothers Award Ribbon",
+    colors: ["#7f1d1d", "#ffffff", "#d1d5db", "#0f172a", "#d1d5db", "#ffffff", "#7f1d1d"]
+  },
+  mitchell: {
+    label: "Billy Mitchell Award Ribbon",
+    colors: ["#0f172a", "#ffffff", "#9ca3af", "#0f172a"]
+  },
+  earhart: {
+    label: "Amelia Earhart Award Ribbon",
+    colors: ["#f97316", "#ffffff", "#f97316", "#ffffff", "#f97316"]
+  },
+  eaker: {
+    label: "Ira C. Eaker Award Ribbon",
+    colors: ["#d9a122", "#ffffff", "#d9a122", "#ffffff", "#d9a122"]
+  },
+  spaatz: {
+    label: "Carl A. Spaatz Award Ribbon",
+    colors: ["#0f172a", "#ffffff", "#dc2626", "#ffffff", "#0f172a", "#0b5f86"]
+  },
+  achievementBlue: {
+    label: "Cadet Achievement Ribbon",
+    colors: ["#0b1f5f", "#8b1e3f", "#0b1f5f"]
+  },
+  achievementGold: {
+    label: "Cadet Achievement Ribbon",
+    colors: ["#facc15", "#0f172a", "#facc15", "#0f172a", "#facc15"]
+  }
+};
+
+function getRibbonForAchievement(index) {
+  const map = [
+    "curry",
+    "arnold",
+    "feik",
+    "wrightBrothers",
+    "achievementGold",
+    "achievementBlue",
+    "achievementBlue",
+    "achievementBlue",
+    "achievementBlue",
+    "mitchell",
+    "achievementBlue",
+    "achievementBlue",
+    "achievementBlue",
+    "earhart",
+    "achievementBlue",
+    "achievementBlue",
+    "achievementBlue",
+    "achievementBlue",
+    "achievementBlue",
+    "eaker",
+    "spaatz"
+  ];
+
+  return CADET_RIBBONS[map[index]] || CADET_RIBBONS.achievementBlue;
+}
 
 const ACHIEVEMENTS = [
   ["Curry Achievement", "Cadet Airman", "C/Amn", "Phase I", ["Be a current CAP cadet", "Recite the Cadet Oath", "Complete Cadet Welcome Course", "Complete Learn to Lead Chapter 1", "Attempt CPFT", "Participate in character development"], ["Fall In", "Attention", "Parade Rest", "Present Arms", "Order Arms", "Right Face", "Left Face", "About Face", "Forward March", "Flight Halt"]],
@@ -55,7 +108,7 @@ const ACHIEVEMENTS = [
   overview: `${a[0]} promotion tracker for ${a[1]}.`,
   requirements: a[4],
   drill: a[5],
-  ribbon: RIBBONS[i]
+  ribbon: getRibbonForAchievement(i)
 }));
 
 const DRILL_LIBRARY = [
@@ -105,15 +158,8 @@ const DRILL_LIBRARY = [
   }
 ];
 
-const DEFAULT_EVENTS = [
-  { id: 1, title: "Weekly Squadron Meeting", date: "2026-06-16", time: "19:00", location: "Squadron HQ", type: "Meeting", notes: "Uniform of the day, announcements, and weekly cadet training." },
-  { id: 2, title: "Aerospace Education Night", date: "2026-06-23", time: "18:30", location: "Classroom", type: "Education", notes: "Bring notebook and be ready for aerospace discussion." }
-];
-
-const DEFAULT_FLIGHTS = [
-  { id: 1, aircraft: "Cessna 172", date: "2026-05-10", duration: "1.2", type: "Orientation Flight" },
-  { id: 2, aircraft: "Cessna 172", date: "2026-05-28", duration: "0.9", type: "Orientation Flight" }
-];
+const DEFAULT_EVENTS = [];
+const DEFAULT_FLIGHTS = [];
 
 const DEFAULT_PROFILE = {
   name: "Lawrence",
@@ -136,7 +182,8 @@ const DOCS = [
 function loadSaved(key, fallback) {
   try {
     const saved = localStorage.getItem(key);
-    return saved ? JSON.parse(saved) : fallback;
+    if (saved === null || saved === undefined) return fallback;
+    return JSON.parse(saved);
   } catch {
     return fallback;
   }
@@ -154,8 +201,10 @@ function formatDate(value) {
 
 function getCurrentCadetRank(completedIds) {
   if (!completedIds || completedIds.length === 0) return { rank: "Cadet Recruit", abbr: "C/Rec" };
+
   const highestCompletedId = Math.max(...completedIds);
   const achievement = ACHIEVEMENTS.find((a) => a.id === highestCompletedId);
+
   return achievement ? { rank: achievement.rank, abbr: achievement.abbr } : { rank: "Cadet Recruit", abbr: "C/Rec" };
 }
 
@@ -168,15 +217,19 @@ function formatCadetDisplayName(name, currentCadetRank) {
   return `${currentCadetRank.abbr} ${cleanedName || "Cadet"}`;
 }
 
-function RibbonBar({ colors, size = "small" }) {
-  const height = size === "large" ? 42 : 26;
-  const width = size === "large" ? 142 : 76;
+function RibbonBar({ ribbon, size = "small" }) {
+  const height = size === "large" ? 46 : 28;
+  const width = size === "large" ? 150 : 82;
 
   return (
-    <div style={{ ...ribbonShell, width, height }}>
-      {colors.map((color, index) => (
-        <div key={index} style={{ flex: 1, background: color }} />
-      ))}
+    <div>
+      <div style={{ ...ribbonShell, width, height }}>
+        {ribbon.colors.map((color, index) => (
+          <div key={index} style={{ flex: 1, background: color }} />
+        ))}
+      </div>
+
+      {size === "large" && <p style={ribbonLabel}>{ribbon.label}</p>}
     </div>
   );
 }
@@ -224,12 +277,44 @@ export default function App() {
           if (allRequirementsChecked && allDrillChecked) {
             return current.includes(achievementId) ? current : [...current, achievementId];
           }
+
           return current.filter((id) => id !== achievementId);
         });
       }
 
       return next;
     });
+  }
+
+  function resetAppData() {
+    const confirmed = window.confirm("Reset all saved cadet data on this device?");
+    if (!confirmed) return;
+
+    localStorage.removeItem("cap_completed_ids");
+    localStorage.removeItem("cap_requirement_checks");
+    localStorage.removeItem("cap_events");
+    localStorage.removeItem("cap_flights");
+    localStorage.removeItem("cap_profile");
+
+    setCompletedIds([]);
+    setRequirementChecks({});
+    setEvents([]);
+    setFlights([]);
+    setProfile(DEFAULT_PROFILE);
+    setSelected(null);
+    setActiveTab("dashboard");
+  }
+
+  function restoreBackup(data) {
+    if (!data || typeof data !== "object") return;
+
+    setCompletedIds(Array.isArray(data.completedIds) ? data.completedIds : []);
+    setRequirementChecks(data.requirementChecks && typeof data.requirementChecks === "object" ? data.requirementChecks : {});
+    setEvents(Array.isArray(data.events) ? data.events : []);
+    setFlights(Array.isArray(data.flights) ? data.flights : []);
+    setProfile(data.profile && typeof data.profile === "object" ? { ...DEFAULT_PROFILE, ...data.profile } : DEFAULT_PROFILE);
+    setSelected(null);
+    setActiveTab("dashboard");
   }
 
   return (
@@ -280,7 +365,17 @@ export default function App() {
             {activeTab === "drill" && <DrillTab />}
             {activeTab === "calendar" && <CalendarTab events={events} setEvents={setEvents} />}
             {activeTab === "flights" && <FlightsTab flights={flights} setFlights={setFlights} />}
-            {activeTab === "docs" && <DocsTab />}
+            {activeTab === "docs" && (
+              <DocsTab
+                completedIds={validCompletedIds}
+                requirementChecks={requirementChecks}
+                events={events}
+                flights={flights}
+                profile={profile}
+                restoreBackup={restoreBackup}
+                resetAppData={resetAppData}
+              />
+            )}
           </>
         )}
       </div>
@@ -341,7 +436,7 @@ function DashboardTab({ profile, currentCadetRank, progress, currentAchievement,
       <div style={dashboardGrid}>
         <div style={miniCard}>
           <p style={statLabel}>Target</p>
-          <RibbonBar colors={currentAchievement.ribbon} />
+          <RibbonBar ribbon={currentAchievement.ribbon} />
           <h3 style={miniTitle}>{currentAchievement.name}</h3>
           <p style={cardText}>{currentAchievement.rank}</p>
         </div>
@@ -384,7 +479,7 @@ function DashboardTab({ profile, currentCadetRank, progress, currentAchievement,
         <button style={quickButton} onClick={() => setActiveTab("drill")}>🪖 Drill Library</button>
         <button style={quickButton} onClick={() => setActiveTab("calendar")}>📅 Add Event</button>
         <button style={quickButton} onClick={() => setActiveTab("flights")}>✈️ Log Flight</button>
-        <button style={quickButton} onClick={() => setActiveTab("docs")}>🔐 eServices</button>
+        <button style={quickButton} onClick={() => setActiveTab("docs")}>💾 Backup</button>
       </div>
     </>
   );
@@ -450,9 +545,10 @@ function RankTab({ profile, currentCadetRank, setProfile, onSelect, completedIds
 
       <div style={currentBox}>
         <p style={smallLabel}>Current Target</p>
-        <RibbonBar colors={currentAchievement.ribbon} />
+        <RibbonBar ribbon={currentAchievement.ribbon} />
         <strong>{currentAchievement.name}</strong>
         <p style={cardText}>{currentAchievement.rank} · {currentAchievement.abbr}</p>
+        <p style={phaseText}>{currentAchievement.ribbon.label}</p>
       </div>
 
       <h2 style={sectionTitle}>Achievement Path</h2>
@@ -469,7 +565,7 @@ function RankTab({ profile, currentCadetRank, setProfile, onSelect, completedIds
 
             <button style={cardMainButton} onClick={() => onSelect(achievement)}>
               <div style={{ flex: 1 }}>
-                <RibbonBar colors={achievement.ribbon} />
+                <RibbonBar ribbon={achievement.ribbon} />
                 <strong style={blueText}>{achievement.name}</strong>
                 <p style={cardText}>{achievement.rank} · {achievement.abbr}</p>
                 <p style={phaseText}>{achievement.phase}</p>
@@ -499,7 +595,7 @@ function AchievementDetail({ selected, onBack, completedIds, toggleCompleted, re
 
       <div style={hero}>
         <p style={eyebrow}>{selected.phase}</p>
-        <RibbonBar colors={selected.ribbon} size="large" />
+        <RibbonBar ribbon={selected.ribbon} size="large" />
         <h1 style={title}>{selected.name}</h1>
         <p style={subtitle}>{selected.rank} · {selected.abbr}</p>
 
@@ -615,11 +711,7 @@ function DrillTab() {
               <h2 style={sectionTitle}>{group.category}</h2>
 
               {group.items.map((item) => (
-                <button
-                  key={`${group.category}-${item.name}`}
-                  style={drillReferenceCard}
-                  onClick={() => openMovement(item, group.category)}
-                >
+                <button key={`${group.category}-${item.name}`} style={drillReferenceCard} onClick={() => openMovement(item, group.category)}>
                   <div>
                     <strong style={blueText}>{item.name}</strong>
                     <p style={cardText}>{item.command}</p>
@@ -767,6 +859,7 @@ function FlightsTab({ flights, setFlights }) {
       duration: flight.duration || "",
       type: flight.type || "Orientation Flight"
     });
+
     setEditingId(flight.id);
     setShowForm(true);
   }
@@ -841,20 +934,74 @@ function FlightsTab({ flights, setFlights }) {
   );
 }
 
-function DocsTab() {
+function DocsTab({ completedIds, requirementChecks, events, flights, profile, restoreBackup, resetAppData }) {
+  const [backupText, setBackupText] = useState("");
+
+  function exportBackup() {
+    const backup = {
+      app: "CAP Cadet Hub",
+      version: 2,
+      exportedAt: new Date().toISOString(),
+      completedIds,
+      requirementChecks,
+      events,
+      flights,
+      profile
+    };
+
+    const text = JSON.stringify(backup, null, 2);
+    setBackupText(text);
+
+    navigator.clipboard?.writeText(text).catch(() => {});
+  }
+
+  function importBackupFromText() {
+    try {
+      const parsed = JSON.parse(backupText);
+      restoreBackup(parsed);
+      alert("Backup restored.");
+    } catch {
+      alert("Could not read backup. Make sure the backup text is valid JSON.");
+    }
+  }
+
   return (
     <>
       <div style={hero}>
         <p style={eyebrow}>Official CAP Resources</p>
         <h1 style={title}>Docs</h1>
-        <p style={subtitle}>Quick links for cadets and parents.</p>
+        <p style={subtitle}>Quick links, backup tools, and data safety.</p>
+      </div>
+
+      <div style={simpleCard}>
+        <div>
+          <strong style={blueText}>Data Backup</strong>
+          <p style={cardText}>
+            This app saves on this device using browser storage. Clearing Safari website data, deleting the home-screen app, or clearing cache can erase saved info.
+          </p>
+          <p style={phaseText}>
+            Use Export Backup before clearing anything.
+          </p>
+
+          <button style={primaryButton} onClick={exportBackup}>Export Backup / Copy Data</button>
+
+          <textarea
+            style={textArea}
+            placeholder="Backup data will appear here. Paste backup data here to restore."
+            value={backupText}
+            onChange={(e) => setBackupText(e.target.value)}
+          />
+
+          <button style={primaryButton} onClick={importBackupFromText}>Import / Restore Backup</button>
+          <button style={dangerWideButton} onClick={resetAppData}>Reset App Data</button>
+        </div>
       </div>
 
       <div style={simpleCard}>
         <div>
           <strong style={blueText}>Legal / Safety Note</strong>
           <p style={cardText}>
-            This app is an unofficial tracker. Ribbon bars are simplified learning visuals and may not exactly match official CAP ribbon graphics.
+            This app is an unofficial tracker. Ribbon bars are visual learning references based on the rack image you provided.
           </p>
           <p style={phaseText}>
             Use official CAP resources for real records, tests, regulations, and award verification.
@@ -929,7 +1076,8 @@ const doneTag = { margin: "8px 0 0", color: "#ffffff", background: "#22c55e", di
 const arrow = { fontSize: "32px", color: "#9ca3af" };
 const backButton = { border: "none", background: "transparent", color: "#60a5fa", fontWeight: "bold", marginBottom: "12px", fontSize: "16px" };
 const overview = { color: "var(--muted)", lineHeight: 1.5, marginBottom: "16px" };
-const ribbonShell = { display: "flex", overflow: "hidden", border: "2px solid #d1d5db", borderRadius: "4px", margin: "0 0 10px", boxShadow: "0 2px 6px rgba(0,0,0,0.22)", background: "#fff" };
+const ribbonShell = { display: "flex", overflow: "hidden", border: "2px solid #d1d5db", borderRadius: "3px", margin: "0 0 10px", boxShadow: "0 2px 6px rgba(0,0,0,0.22)", background: "#fff" };
+const ribbonLabel = { margin: "0 0 8px", fontSize: "12px", fontWeight: "bold", color: "#dbeafe" };
 
 function checkButton(done) {
   return {
@@ -1022,6 +1170,7 @@ const smallActionButton = { border: "none", background: "#2563eb", color: "white
 const actionRow = { display: "flex", gap: "8px", marginTop: "12px" };
 const editButton = { border: "none", background: "#2563eb", color: "white", borderRadius: "10px", padding: "8px 12px", fontWeight: "bold", fontSize: "13px" };
 const deleteButton = { border: "none", background: "#dc2626", color: "white", borderRadius: "10px", padding: "8px 12px", fontWeight: "bold", fontSize: "13px" };
+const dangerWideButton = { width: "100%", border: "none", background: "#dc2626", color: "white", borderRadius: "14px", padding: "13px", fontWeight: "bold", marginBottom: "4px", fontSize: "15px" };
 const dashboardProfileCard = { background: "var(--card-bg)", border: "1px solid var(--card-border)", borderRadius: "18px", padding: "16px", marginBottom: "14px", boxShadow: "var(--shadow)", color: "var(--text)" };
 const dashboardGrid = { display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px", marginBottom: "14px" };
 const miniCard = { background: "var(--card-bg)", border: "1px solid var(--card-border)", borderRadius: "18px", padding: "16px", boxShadow: "var(--shadow)", color: "var(--text)" };
