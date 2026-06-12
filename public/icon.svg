@@ -1,39 +1,53 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
-  <!-- Background -->
-  <rect width="512" height="512" rx="96" fill="#0f172a"/>
+  <!-- App background -->
+  <rect width="512" height="512" rx="96" fill="#020617"/>
 
-  <!-- Outer shield -->
+  <!-- Shield base -->
   <path
-    d="M256 54 L410 112 V232 C410 338 342 426 256 466 C170 426 102 338 102 232 V112 Z"
+    d="M256 48 L410 112 V232 C410 340 342 430 256 468 C170 430 102 340 102 232 V112 Z"
     fill="#1e3a8a"
   />
 
   <!-- Inner shield -->
   <path
-    d="M256 86 L374 132 V232 C374 318 323 391 256 428 C189 391 138 318 138 232 V132 Z"
+    d="M256 84 L374 132 V232 C374 318 324 392 256 428 C188 392 138 318 138 232 V132 Z"
     fill="#2563eb"
+  />
+
+  <!-- Gold trim -->
+  <path
+    d="M256 60 L397 116 V231 C397 333 333 414 256 451 C179 414 115 333 115 231 V116 Z"
+    fill="none"
+    stroke="#facc15"
+    stroke-width="12"
+    stroke-linejoin="round"
   />
 
   <!-- Wings -->
   <path
-    d="M82 230 C120 194 164 174 216 166 L204 190 C158 198 118 216 82 246 Z"
+    d="M72 224 C122 178 172 156 226 150 L210 180 C160 188 116 208 72 246 Z"
     fill="#f8fafc"
   />
   <path
-    d="M430 230 C392 194 348 174 296 166 L308 190 C354 198 394 216 430 246 Z"
+    d="M440 224 C390 178 340 156 286 150 L302 180 C352 188 396 208 440 246 Z"
     fill="#f8fafc"
   />
 
-  <!-- Center circle -->
-  <circle cx="256" cy="208" r="58" fill="#facc15"/>
-  <circle cx="256" cy="208" r="40" fill="#0f172a"/>
+  <!-- Cadet Colonel / Spaatz inspired three diamonds -->
+  <g fill="#facc15" stroke="#ffffff" stroke-width="8" stroke-linejoin="round">
+    <path d="M256 122 L300 166 L256 210 L212 166 Z"/>
+    <path d="M202 214 L246 258 L202 302 L158 258 Z"/>
+    <path d="M310 214 L354 258 L310 302 L266 258 Z"/>
+  </g>
 
-  <!-- CAP text -->
+  <!-- CAP text bar -->
+  <rect x="154" y="328" width="204" height="62" rx="18" fill="#020617" stroke="#93c5fd" stroke-width="6"/>
+
   <text
     x="256"
-    y="220"
+    y="370"
     text-anchor="middle"
-    font-size="34"
+    font-size="42"
     font-family="Arial, Helvetica, sans-serif"
     font-weight="900"
     fill="#ffffff"
@@ -41,16 +55,17 @@
     CAP
   </text>
 
-  <!-- Cadet chevrons -->
-  <path d="M176 292 L256 252 L336 292 L316 316 L256 286 L196 316 Z" fill="#facc15"/>
-  <path d="M188 344 L256 310 L324 344 L304 368 L256 344 L208 368 Z" fill="#facc15"/>
-
-  <!-- Bottom highlight -->
-  <path
-    d="M180 392 C210 414 232 426 256 438 C280 426 302 414 332 392"
-    fill="none"
-    stroke="#93c5fd"
-    stroke-width="10"
-    stroke-linecap="round"
-  />
+  <!-- Spaatz / top cadet feel -->
+  <text
+    x="256"
+    y="420"
+    text-anchor="middle"
+    font-size="24"
+    font-family="Arial, Helvetica, sans-serif"
+    font-weight="800"
+    fill="#facc15"
+    letter-spacing="2"
+  >
+    CADET
+  </text>
 </svg>
