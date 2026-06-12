@@ -523,6 +523,7 @@ const ACHIEVEMENTS = [
     ]
   }
 ];
+
 const EVENTS = [
   {
     id: 1,
@@ -586,30 +587,63 @@ const DOCS = [
   }
 ];
 
+function loadSaved(key, fallback) {
+  try {
+    const saved = localStorage.getItem(key);
+    return saved ? JSON.parse(saved) : fallback;
+  } catch {
+    return fallback;
+  }
+}
+
 export default function App() {
   const [activeTab, setActiveTab] = useState("rank");
   const [selected, setSelected] = useState(null);
   const [detailTab, setDetailTab] = useState("requirements");
 
-  const [completedIds, setCompletedIds] = useState(() => {
-    const saved = localStorage.getItem("cap_completed_ids");
-    return saved ? JSON.parse(saved) : [];
-  });
+  const [completedIds, setCompletedIds] = useState(() =>
+    loadSaved("cap_completed_ids", [])
+  );
+
+  const [requirementChecks, setRequirementChecks] = useState(() =>
+    loadSaved("cap_requirement_checks", {})
+  );
 
   useEffect(() => {
     localStorage.setItem("cap_completed_ids", JSON.stringify(completedIds));
   }, [completedIds]);
 
-  const completedCount = completedIds.length;
+  useEffect(() => {
+    localStorage.setItem(
+      "cap_requirement_checks",
+      JSON.stringify(requirementChecks)
+    );
+  }, [requirementChecks]);
+
+  const validCompletedIds = completedIds.filter((id) =>
+    ACHIEVEMENTS.some((a) => a.id === id)
+  );
+
+  const completedCount = validCompletedIds.length;
   const progress = Math.round((completedCount / ACHIEVEMENTS.length) * 100);
+
   const currentAchievement =
-    ACHIEVEMENTS.find((a) => !completedIds.includes(a.id)) ||
+    ACHIEVEMENTS.find((a) => !validCompletedIds.includes(a.id)) ||
     ACHIEVEMENTS[ACHIEVEMENTS.length - 1];
 
   function toggleCompleted(id) {
     setCompletedIds((prev) =>
       prev.includes(id) ? prev.filter((item) => item !== id) : [...prev, id]
     );
+  }
+
+  function toggleRequirement(achievementId, index) {
+    const key = `${achievementId}-${index}`;
+
+    setRequirementChecks((prev) => ({
+      ...prev,
+      [key]: !prev[key]
+    }));
   }
 
   function openAchievement(achievement) {
@@ -633,13 +667,15 @@ export default function App() {
             onBack={() => setSelected(null)}
             completedIds={completedIds}
             toggleCompleted={toggleCompleted}
+            requirementChecks={requirementChecks}
+            toggleRequirement={toggleRequirement}
           />
         ) : (
           <>
             {activeTab === "rank" && (
               <RankTab
                 onSelect={openAchievement}
-                completedIds={completedIds}
+                completedIds={validCompletedIds}
                 toggleCompleted={toggleCompleted}
                 progress={progress}
                 currentAchievement={currentAchievement}
@@ -779,9 +815,19 @@ function AchievementDetail({
   setDetailTab,
   onBack,
   completedIds,
-  toggleCompleted
+  toggleCompleted,
+  requirementChecks,
+  toggleRequirement
 }) {
   const done = completedIds.includes(selected.id);
+
+  const checkedRequirements = selected.requirements.filter((_, index) => {
+    return requirementChecks[`${selected.id}-${index}`];
+  }).length;
+
+  const requirementProgress = Math.round(
+    (checkedRequirements / selected.requirements.length) * 100
+  );
 
   return (
     <>
@@ -796,12 +842,31 @@ function AchievementDetail({
           {selected.rank} · {selected.abbr}
         </p>
 
-        <button style={detailCompleteButton(done)} onClick={() => toggleCompleted(selected.id)}>
+        <button
+          style={detailCompleteButton(done)}
+          onClick={() => toggleCompleted(selected.id)}
+        >
           {done ? "✓ Marked Complete" : "Mark Achievement Complete"}
         </button>
       </div>
 
       <p style={overview}>{selected.overview}</p>
+
+      <div style={requirementProgressBox}>
+        <div style={progressHeaderDark}>
+          <span>Requirement Progress</span>
+          <strong>{requirementProgress}%</strong>
+        </div>
+
+        <div style={progressBarLight}>
+          <div style={{ ...progressFillBlue, width: `${requirementProgress}%` }} />
+        </div>
+
+        <p style={requirementProgressText}>
+          {checkedRequirements} of {selected.requirements.length} requirements
+          checked
+        </p>
+      </div>
 
       <div style={tabRow}>
         <button
@@ -819,11 +884,23 @@ function AchievementDetail({
       </div>
 
       {detailTab === "requirements" &&
-        selected.requirements.map((item, index) => (
-          <div key={index} style={listItem}>
-            ✅ {item}
-          </div>
-        ))}
+        selected.requirements.map((item, index) => {
+          const checked = requirementChecks[`${selected.id}-${index}`];
+
+          return (
+            <button
+              key={index}
+              style={requirementItem(checked)}
+              onClick={() => toggleRequirement(selected.id, index)}
+            >
+              <span style={requirementCircle(checked)}>
+                {checked ? "✓" : ""}
+              </span>
+
+              <span style={requirementText(checked)}>{item}</span>
+            </button>
+          );
+        })}
 
       {detailTab === "drill" &&
         selected.drill.map((item, index) => (
@@ -845,7 +922,7 @@ function CalendarTab() {
       </div>
 
       {EVENTS.map((event) => (
-        <div key={event.id} style={card}>
+        <div key={event.id} style={simpleCard}>
           <div>
             <strong style={blueText}>{event.title}</strong>
             <p style={cardText}>
@@ -882,7 +959,7 @@ function FlightsTab() {
       </div>
 
       {FLIGHTS.map((flight) => (
-        <div key={flight.id} style={card}>
+        <div key={flight.id} style={simpleCard}>
           <div>
             <strong style={blueText}>{flight.aircraft}</strong>
             <p style={cardText}>
@@ -977,6 +1054,14 @@ const progressHeader = {
   marginBottom: "8px"
 };
 
+const progressHeaderDark = {
+  display: "flex",
+  justifyContent: "space-between",
+  fontSize: "14px",
+  marginBottom: "8px",
+  color: "#111827"
+};
+
 const progressBar = {
   height: "10px",
   background: "rgba(255,255,255,0.25)",
@@ -1031,6 +1116,20 @@ const card = {
   color: "#111827"
 };
 
+const simpleCard = {
+  width: "100%",
+  background: "white",
+  border: "1px solid #e5e7eb",
+  borderRadius: "18px",
+  padding: "16px",
+  marginBottom: "12px",
+  display: "flex",
+  alignItems: "center",
+  gap: "12px",
+  boxShadow: "0 6px 16px rgba(0,0,0,0.05)",
+  color: "#111827"
+};
+
 const cardMainButton = {
   flex: 1,
   border: "none",
@@ -1067,6 +1166,76 @@ function detailCompleteButton(done) {
     background: done ? "#22c55e" : "white",
     color: done ? "white" : "#1e3a8a",
     fontWeight: "bold"
+  };
+}
+
+const requirementProgressBox = {
+  background: "white",
+  border: "1px solid #e5e7eb",
+  borderRadius: "18px",
+  padding: "16px",
+  marginBottom: "16px",
+  boxShadow: "0 6px 16px rgba(0,0,0,0.05)"
+};
+
+const progressBarLight = {
+  height: "10px",
+  background: "#e5e7eb",
+  borderRadius: "999px",
+  overflow: "hidden"
+};
+
+const progressFillBlue = {
+  height: "100%",
+  background: "#2563eb",
+  borderRadius: "999px"
+};
+
+const requirementProgressText = {
+  margin: "8px 0 0",
+  fontSize: "12px",
+  color: "#6b7280"
+};
+
+function requirementItem(checked) {
+  return {
+    width: "100%",
+    background: checked ? "#eff6ff" : "white",
+    border: checked ? "2px solid #2563eb" : "1px solid #e5e7eb",
+    borderRadius: "14px",
+    padding: "14px",
+    marginBottom: "10px",
+    color: "#111827",
+    boxShadow: "0 4px 10px rgba(0,0,0,0.04)",
+    display: "flex",
+    alignItems: "flex-start",
+    gap: "12px",
+    textAlign: "left"
+  };
+}
+
+function requirementCircle(checked) {
+  return {
+    width: "26px",
+    height: "26px",
+    borderRadius: "999px",
+    border: checked ? "2px solid #2563eb" : "2px solid #d1d5db",
+    background: checked ? "#2563eb" : "white",
+    color: "white",
+    fontWeight: "bold",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    flexShrink: 0,
+    marginTop: "1px"
+  };
+}
+
+function requirementText(checked) {
+  return {
+    color: checked ? "#1e3a8a" : "#111827",
+    textDecoration: checked ? "line-through" : "none",
+    lineHeight: 1.4
   };
 }
 
