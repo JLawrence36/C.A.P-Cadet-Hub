@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 const ACHIEVEMENTS = [
   {
@@ -176,6 +176,27 @@ export default function App() {
   const [selected, setSelected] = useState(null);
   const [detailTab, setDetailTab] = useState("requirements");
 
+  const [completedIds, setCompletedIds] = useState(() => {
+    const saved = localStorage.getItem("cap_completed_ids");
+    return saved ? JSON.parse(saved) : [];
+  });
+
+  useEffect(() => {
+    localStorage.setItem("cap_completed_ids", JSON.stringify(completedIds));
+  }, [completedIds]);
+
+  const completedCount = completedIds.length;
+  const progress = Math.round((completedCount / ACHIEVEMENTS.length) * 100);
+  const currentAchievement =
+    ACHIEVEMENTS.find((a) => !completedIds.includes(a.id)) ||
+    ACHIEVEMENTS[ACHIEVEMENTS.length - 1];
+
+  function toggleCompleted(id) {
+    setCompletedIds((prev) =>
+      prev.includes(id) ? prev.filter((item) => item !== id) : [...prev, id]
+    );
+  }
+
   function openAchievement(achievement) {
     setSelected(achievement);
     setDetailTab("requirements");
@@ -195,10 +216,21 @@ export default function App() {
             detailTab={detailTab}
             setDetailTab={setDetailTab}
             onBack={() => setSelected(null)}
+            completedIds={completedIds}
+            toggleCompleted={toggleCompleted}
           />
         ) : (
           <>
-            {activeTab === "rank" && <RankTab onSelect={openAchievement} />}
+            {activeTab === "rank" && (
+              <RankTab
+                onSelect={openAchievement}
+                completedIds={completedIds}
+                toggleCompleted={toggleCompleted}
+                progress={progress}
+                currentAchievement={currentAchievement}
+                completedCount={completedCount}
+              />
+            )}
             {activeTab === "calendar" && <CalendarTab />}
             {activeTab === "flights" && <FlightsTab />}
             {activeTab === "docs" && <DocsTab />}
@@ -245,38 +277,97 @@ export default function App() {
   );
 }
 
-function RankTab({ onSelect }) {
+function RankTab({
+  onSelect,
+  completedIds,
+  toggleCompleted,
+  progress,
+  currentAchievement,
+  completedCount
+}) {
   return (
     <>
       <div style={hero}>
         <p style={eyebrow}>Civil Air Patrol Companion</p>
         <h1 style={title}>CAP Cadet Hub</h1>
         <p style={subtitle}>Track ranks, requirements, and drill.</p>
+
+        <div style={progressBox}>
+          <div style={progressHeader}>
+            <span>Progress</span>
+            <strong>{progress}%</strong>
+          </div>
+          <div style={progressBar}>
+            <div style={{ ...progressFill, width: `${progress}%` }} />
+          </div>
+          <p style={progressText}>
+            {completedCount} of {ACHIEVEMENTS.length} completed
+          </p>
+        </div>
+      </div>
+
+      <div style={currentBox}>
+        <p style={smallLabel}>Current Target</p>
+        <strong>{currentAchievement.name}</strong>
+        <p style={cardText}>
+          {currentAchievement.rank} · {currentAchievement.abbr}
+        </p>
       </div>
 
       <h2 style={sectionTitle}>Rank Tracker</h2>
 
-      {ACHIEVEMENTS.map((achievement) => (
-        <button
-          key={achievement.id}
-          style={card}
-          onClick={() => onSelect(achievement)}
-        >
-          <div>
-            <strong style={blueText}>{achievement.name}</strong>
-            <p style={cardText}>
-              {achievement.rank} · {achievement.abbr}
-            </p>
-            <p style={phaseText}>{achievement.phase}</p>
+      {ACHIEVEMENTS.map((achievement) => {
+        const done = completedIds.includes(achievement.id);
+        const isCurrent = currentAchievement.id === achievement.id && !done;
+
+        return (
+          <div
+            key={achievement.id}
+            style={{
+              ...card,
+              border: isCurrent
+                ? "2px solid #2563eb"
+                : done
+                ? "2px solid #22c55e"
+                : "1px solid #e5e7eb"
+            }}
+          >
+            <button
+              style={checkButton(done)}
+              onClick={() => toggleCompleted(achievement.id)}
+            >
+              {done ? "✓" : ""}
+            </button>
+
+            <button style={cardMainButton} onClick={() => onSelect(achievement)}>
+              <div>
+                <strong style={blueText}>{achievement.name}</strong>
+                <p style={cardText}>
+                  {achievement.rank} · {achievement.abbr}
+                </p>
+                <p style={phaseText}>{achievement.phase}</p>
+                {isCurrent && <p style={currentTag}>Current Target</p>}
+                {done && <p style={doneTag}>Completed</p>}
+              </div>
+              <span style={arrow}>›</span>
+            </button>
           </div>
-          <span style={arrow}>›</span>
-        </button>
-      ))}
+        );
+      })}
     </>
   );
 }
 
-function AchievementDetail({ selected, detailTab, setDetailTab, onBack }) {
+function AchievementDetail({
+  selected,
+  detailTab,
+  setDetailTab,
+  onBack,
+  completedIds,
+  toggleCompleted
+}) {
+  const done = completedIds.includes(selected.id);
+
   return (
     <>
       <button style={backButton} onClick={onBack}>
@@ -289,6 +380,10 @@ function AchievementDetail({ selected, detailTab, setDetailTab, onBack }) {
         <p style={subtitle}>
           {selected.rank} · {selected.abbr}
         </p>
+
+        <button style={detailCompleteButton(done)} onClick={() => toggleCompleted(selected.id)}>
+          {done ? "✓ Marked Complete" : "Mark Achievement Complete"}
+        </button>
       </div>
 
       <p style={overview}>{selected.overview}</p>
@@ -453,6 +548,56 @@ const subtitle = {
   color: "#dbeafe"
 };
 
+const progressBox = {
+  marginTop: "18px",
+  background: "rgba(255,255,255,0.14)",
+  borderRadius: "16px",
+  padding: "14px"
+};
+
+const progressHeader = {
+  display: "flex",
+  justifyContent: "space-between",
+  fontSize: "14px",
+  marginBottom: "8px"
+};
+
+const progressBar = {
+  height: "10px",
+  background: "rgba(255,255,255,0.25)",
+  borderRadius: "999px",
+  overflow: "hidden"
+};
+
+const progressFill = {
+  height: "100%",
+  background: "#facc15",
+  borderRadius: "999px"
+};
+
+const progressText = {
+  margin: "8px 0 0",
+  fontSize: "12px",
+  color: "#dbeafe"
+};
+
+const currentBox = {
+  background: "white",
+  border: "1px solid #dbeafe",
+  borderRadius: "18px",
+  padding: "16px",
+  marginBottom: "20px",
+  boxShadow: "0 6px 16px rgba(0,0,0,0.05)"
+};
+
+const smallLabel = {
+  margin: "0 0 6px",
+  color: "#2563eb",
+  fontSize: "12px",
+  fontWeight: "bold",
+  textTransform: "uppercase"
+};
+
 const sectionTitle = {
   color: "#111827",
   marginBottom: "12px"
@@ -461,17 +606,54 @@ const sectionTitle = {
 const card = {
   width: "100%",
   background: "white",
-  border: "1px solid #e5e7eb",
   borderRadius: "18px",
-  padding: "16px",
+  padding: "14px",
   marginBottom: "12px",
+  display: "flex",
+  alignItems: "center",
+  gap: "12px",
+  boxShadow: "0 6px 16px rgba(0,0,0,0.05)",
+  color: "#111827"
+};
+
+const cardMainButton = {
+  flex: 1,
+  border: "none",
+  background: "transparent",
   textAlign: "left",
   display: "flex",
   justifyContent: "space-between",
   alignItems: "center",
-  boxShadow: "0 6px 16px rgba(0,0,0,0.05)",
-  color: "#111827"
+  color: "#111827",
+  padding: 0
 };
+
+function checkButton(done) {
+  return {
+    width: "34px",
+    height: "34px",
+    borderRadius: "999px",
+    border: done ? "2px solid #22c55e" : "2px solid #d1d5db",
+    background: done ? "#22c55e" : "white",
+    color: "white",
+    fontWeight: "bold",
+    fontSize: "18px",
+    flexShrink: 0
+  };
+}
+
+function detailCompleteButton(done) {
+  return {
+    marginTop: "16px",
+    width: "100%",
+    border: "none",
+    borderRadius: "14px",
+    padding: "12px",
+    background: done ? "#22c55e" : "white",
+    color: done ? "white" : "#1e3a8a",
+    fontWeight: "bold"
+  };
+}
 
 const docCard = {
   width: "100%",
@@ -503,6 +685,28 @@ const phaseText = {
   margin: "8px 0 0",
   color: "#2563eb",
   fontSize: "12px",
+  fontWeight: "bold"
+};
+
+const currentTag = {
+  margin: "8px 0 0",
+  color: "#ffffff",
+  background: "#2563eb",
+  display: "inline-block",
+  padding: "4px 8px",
+  borderRadius: "999px",
+  fontSize: "11px",
+  fontWeight: "bold"
+};
+
+const doneTag = {
+  margin: "8px 0 0",
+  color: "#ffffff",
+  background: "#22c55e",
+  display: "inline-block",
+  padding: "4px 8px",
+  borderRadius: "999px",
+  fontSize: "11px",
   fontWeight: "bold"
 };
 
