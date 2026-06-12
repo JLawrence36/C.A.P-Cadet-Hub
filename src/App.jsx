@@ -1272,6 +1272,13 @@ const notesText = { margin: "8px 0 0", color: "var(--text)", fontSize: "14px", l
 const listItem = { background: "var(--card-bg)", border: "1px solid var(--card-border)", borderRadius: "14px", padding: "14px", marginBottom: "10px", color: "var(--text)", boxShadow: "var(--shadow)" };
 const docCard = { width: "100%", background: "var(--card-bg)", border: "1px solid var(--card-border)", borderRadius: "18px", padding: "16px", marginBottom: "12px", textAlign: "left", display: "flex", justifyContent: "space-between", alignItems: "center", boxShadow: "var(--shadow)", color: "var(--text)", textDecoration: "none" };
 const timelineItem = { display: "flex", flexDirection: "column", gap: "3px", marginTop: "12px", padding: "10px", borderRadius: "12px", background: "var(--soft-bg)", color: "var(--text)" };
+const statLabel = {
+  margin: 0,
+  color: "var(--muted)",
+  fontSize: "12px",
+  fontWeight: "bold",
+  textTransform: "uppercase"
+};
 
 function checkButton(done) {
   return {
