@@ -2,69 +2,81 @@
   <!-- App background -->
   <rect width="512" height="512" rx="96" fill="#020617"/>
 
-  <!-- Shield base -->
+  <!-- Subtle background glow -->
+  <circle cx="256" cy="230" r="250" fill="#0b3a75" opacity="0.28"/>
+
+  <!-- Left wing -->
+  <g fill="#e5e7eb" stroke="#94a3b8" stroke-width="6" stroke-linejoin="round">
+    <path d="M52 168 C104 140 158 128 218 132 L196 164 C144 164 96 176 52 206 Z"/>
+    <path d="M70 220 C112 202 154 194 196 198 L180 228 C140 226 104 234 70 252 Z"/>
+    <path d="M96 270 C128 258 160 254 188 260 L176 288 C146 284 120 290 96 304 Z"/>
+  </g>
+
+  <!-- Right wing -->
+  <g fill="#e5e7eb" stroke="#94a3b8" stroke-width="6" stroke-linejoin="round">
+    <path d="M460 168 C408 140 354 128 294 132 L316 164 C368 164 416 176 460 206 Z"/>
+    <path d="M442 220 C400 202 358 194 316 198 L332 228 C372 226 408 234 442 252 Z"/>
+    <path d="M416 270 C384 258 352 254 324 260 L336 288 C366 284 392 290 416 304 Z"/>
+  </g>
+
+  <!-- Shield outer gold trim -->
   <path
-    d="M256 48 L410 112 V232 C410 340 342 430 256 468 C170 430 102 340 102 232 V112 Z"
+    d="M256 72 L382 126 V228 C382 326 322 406 256 444 C190 406 130 326 130 228 V126 Z"
+    fill="#facc15"
+  />
+
+  <!-- Shield dark outline -->
+  <path
+    d="M256 90 L364 138 V228 C364 312 313 382 256 416 C199 382 148 312 148 228 V138 Z"
+    fill="#020617"
+  />
+
+  <!-- Shield blue body -->
+  <path
+    d="M256 108 L346 148 V228 C346 298 304 358 256 390 C208 358 166 298 166 228 V148 Z"
     fill="#1e3a8a"
   />
 
-  <!-- Inner shield -->
+  <!-- Inner shield highlight -->
   <path
-    d="M256 84 L374 132 V232 C374 318 324 392 256 428 C188 392 138 318 138 232 V132 Z"
+    d="M256 124 L330 158 V226 C330 282 296 334 256 362 C216 334 182 282 182 226 V158 Z"
     fill="#2563eb"
+    opacity="0.72"
   />
 
-  <!-- Gold trim -->
-  <path
-    d="M256 60 L397 116 V231 C397 333 333 414 256 451 C179 414 115 333 115 231 V116 Z"
-    fill="none"
-    stroke="#facc15"
-    stroke-width="12"
-    stroke-linejoin="round"
-  />
+  <!-- Three Cadet Colonel / Spaatz style diamonds -->
+  <g stroke="#fff7cc" stroke-width="5" stroke-linejoin="round">
+    <!-- Top diamond -->
+    <path d="M256 132 L296 172 L256 212 L216 172 Z" fill="#facc15"/>
+    <path d="M256 132 L256 212 L216 172 Z" fill="#fde68a" opacity="0.75"/>
+    <path d="M256 132 L296 172 L256 212 Z" fill="#b45309" opacity="0.35"/>
 
-  <!-- Wings -->
-  <path
-    d="M72 224 C122 178 172 156 226 150 L210 180 C160 188 116 208 72 246 Z"
-    fill="#f8fafc"
-  />
-  <path
-    d="M440 224 C390 178 340 156 286 150 L302 180 C352 188 396 208 440 246 Z"
-    fill="#f8fafc"
-  />
+    <!-- Left diamond -->
+    <path d="M206 224 L246 264 L206 304 L166 264 Z" fill="#facc15"/>
+    <path d="M206 224 L206 304 L166 264 Z" fill="#fde68a" opacity="0.75"/>
+    <path d="M206 224 L246 264 L206 304 Z" fill="#b45309" opacity="0.35"/>
 
-  <!-- Cadet Colonel / Spaatz inspired three diamonds -->
-  <g fill="#facc15" stroke="#ffffff" stroke-width="8" stroke-linejoin="round">
-    <path d="M256 122 L300 166 L256 210 L212 166 Z"/>
-    <path d="M202 214 L246 258 L202 302 L158 258 Z"/>
-    <path d="M310 214 L354 258 L310 302 L266 258 Z"/>
+    <!-- Right diamond -->
+    <path d="M306 224 L346 264 L306 304 L266 264 Z" fill="#facc15"/>
+    <path d="M306 224 L306 304 L266 264 Z" fill="#fde68a" opacity="0.75"/>
+    <path d="M306 224 L346 264 L306 304 Z" fill="#b45309" opacity="0.35"/>
   </g>
 
-  <!-- CAP text bar -->
-  <rect x="154" y="328" width="204" height="62" rx="18" fill="#020617" stroke="#93c5fd" stroke-width="6"/>
+  <!-- Divider star / wings under shield -->
+  <path d="M256 410 L272 438 L256 430 L240 438 Z" fill="#facc15"/>
+  <path d="M145 418 L234 410 L244 420 L145 424 Z" fill="#facc15"/>
+  <path d="M367 418 L278 410 L268 420 L367 424 Z" fill="#facc15"/>
 
+  <!-- CADET text -->
   <text
     x="256"
-    y="370"
+    y="482"
     text-anchor="middle"
-    font-size="42"
+    font-size="54"
     font-family="Arial, Helvetica, sans-serif"
     font-weight="900"
-    fill="#ffffff"
-  >
-    CAP
-  </text>
-
-  <!-- Spaatz / top cadet feel -->
-  <text
-    x="256"
-    y="420"
-    text-anchor="middle"
-    font-size="24"
-    font-family="Arial, Helvetica, sans-serif"
-    font-weight="800"
+    letter-spacing="6"
     fill="#facc15"
-    letter-spacing="2"
   >
     CADET
   </text>
