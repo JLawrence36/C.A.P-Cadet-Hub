@@ -81,7 +81,7 @@ function formatDate(value) {
 }
 
 export default function App() {
-  const [activeTab, setActiveTab] = useState("rank");
+  const [activeTab, setActiveTab] = useState("dashboard");
   const [selected, setSelected] = useState(null);
   const [detailTab, setDetailTab] = useState("requirements");
 
@@ -149,6 +149,18 @@ export default function App() {
           />
         ) : (
           <>
+            {activeTab === "dashboard" && (
+              <DashboardTab
+                profile={profile}
+                progress={progress}
+                currentAchievement={currentAchievement}
+                completedCount={completedCount}
+                events={events}
+                flights={flights}
+                setActiveTab={setActiveTab}
+              />
+            )}
+
             {activeTab === "rank" && (
               <RankTab
                 profile={profile}
@@ -164,6 +176,7 @@ export default function App() {
                 completedCount={completedCount}
               />
             )}
+
             {activeTab === "calendar" && <CalendarTab events={events} setEvents={setEvents} />}
             {activeTab === "flights" && <FlightsTab flights={flights} setFlights={setFlights} />}
             {activeTab === "docs" && <DocsTab />}
@@ -174,8 +187,9 @@ export default function App() {
       {!selected && (
         <nav style={bottomNav}>
           {[
+            ["dashboard", "🏠", "Home"],
             ["rank", "⭐", "Rank"],
-            ["calendar", "📅", "Calendar"],
+            ["calendar", "📅", "Events"],
             ["flights", "✈️", "Flights"],
             ["docs", "📁", "Docs"]
           ].map(([id, icon, label]) => (
@@ -187,6 +201,81 @@ export default function App() {
         </nav>
       )}
     </div>
+  );
+}
+
+function DashboardTab({ profile, progress, currentAchievement, completedCount, events, flights, setActiveTab }) {
+  const sortedEvents = [...events].sort((a, b) => String(a.date).localeCompare(String(b.date)));
+  const nextEvent = sortedEvents[0];
+  const totalHours = flights.reduce((sum, f) => sum + (parseFloat(f.duration) || 0), 0).toFixed(1);
+
+  return (
+    <>
+      <div style={hero}>
+        <p style={eyebrow}>Cadet Dashboard</p>
+        <h1 style={title}>CAP Cadet Hub</h1>
+        <p style={subtitle}>Your cadet’s progress at a glance.</p>
+
+        <div style={progressBox}>
+          <div style={progressHeader}>
+            <span>Overall Progress</span>
+            <strong>{progress}%</strong>
+          </div>
+          <div style={progressBar}>
+            <div style={{ ...progressFill, width: `${progress}%` }} />
+          </div>
+          <p style={progressText}>{completedCount} of {ACHIEVEMENTS.length} achievements completed</p>
+        </div>
+      </div>
+
+      <div style={dashboardProfileCard}>
+        <p style={smallLabel}>Cadet</p>
+        <h2 style={profileName}>{profile.name}</h2>
+        {profile.capId ? <p style={phaseText}>CAP ID: {profile.capId}</p> : <p style={cardText}>CAP ID: Not entered</p>}
+        <p style={cardText}>{profile.squadron}</p>
+        <p style={goalText}>Goal: {profile.goal}</p>
+      </div>
+
+      <div style={dashboardGrid}>
+        <div style={miniCard}>
+          <p style={statLabel}>Target</p>
+          <h3 style={miniTitle}>{currentAchievement.name}</h3>
+          <p style={cardText}>{currentAchievement.rank}</p>
+        </div>
+
+        <div style={miniCard}>
+          <p style={statLabel}>Flights</p>
+          <h3 style={miniNumber}>{flights.length}</h3>
+          <p style={cardText}>{totalHours} total hrs</p>
+        </div>
+      </div>
+
+      <div style={simpleCard}>
+        <div style={{ flex: 1 }}>
+          <p style={smallLabel}>Next Event</p>
+
+          {nextEvent ? (
+            <>
+              <strong style={blueText}>{nextEvent.title}</strong>
+              <p style={cardText}>{formatDate(nextEvent.date)} · {nextEvent.time || "No time"}</p>
+              <p style={phaseText}>{nextEvent.type} · {nextEvent.location || "No location"}</p>
+            </>
+          ) : (
+            <>
+              <strong style={blueText}>No events added</strong>
+              <p style={cardText}>Add the next squadron meeting or activity.</p>
+            </>
+          )}
+        </div>
+      </div>
+
+      <div style={quickButtonGrid}>
+        <button style={quickButton} onClick={() => setActiveTab("rank")}>⭐ View Ranks</button>
+        <button style={quickButton} onClick={() => setActiveTab("calendar")}>📅 Add Event</button>
+        <button style={quickButton} onClick={() => setActiveTab("flights")}>✈️ Log Flight</button>
+        <button style={quickButton} onClick={() => setActiveTab("docs")}>🔐 eServices</button>
+      </div>
+    </>
   );
 }
 
@@ -340,21 +429,13 @@ function AchievementDetail({ selected, detailTab, setDetailTab, onBack, complete
 function CalendarTab({ events, setEvents }) {
   const [showForm, setShowForm] = useState(false);
   const [editingId, setEditingId] = useState(null);
-  const [form, setForm] = useState({
-    title: "",
-    date: "",
-    time: "",
-    location: "",
-    type: "Meeting"
-  });
+  const [form, setForm] = useState({ title: "", date: "", time: "", location: "", type: "Meeting" });
 
   function saveEvent() {
     if (!form.title || !form.date) return;
 
     if (editingId) {
-      setEvents(events.map((event) => (
-        event.id === editingId ? { ...form, id: editingId } : event
-      )));
+      setEvents(events.map((event) => event.id === editingId ? { ...form, id: editingId } : event));
     } else {
       setEvents([...events, { ...form, id: Date.now() }]);
     }
@@ -378,12 +459,6 @@ function CalendarTab({ events, setEvents }) {
 
   function deleteEvent(id) {
     setEvents(events.filter((event) => event.id !== id));
-
-    if (editingId === id) {
-      setEditingId(null);
-      setShowForm(false);
-      setForm({ title: "", date: "", time: "", location: "", type: "Meeting" });
-    }
   }
 
   function cancelForm() {
@@ -400,16 +475,11 @@ function CalendarTab({ events, setEvents }) {
         <p style={subtitle}>Track meetings, activities, and training.</p>
       </div>
 
-      {!showForm && (
-        <button style={primaryButton} onClick={() => setShowForm(true)}>
-          + Add Event
-        </button>
-      )}
+      {!showForm && <button style={primaryButton} onClick={() => setShowForm(true)}>+ Add Event</button>}
 
       {showForm && (
         <div style={formCard}>
           <p style={smallLabel}>{editingId ? "Edit Event" : "Add Event"}</p>
-
           <input style={input} placeholder="Event title" value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} />
           <input style={input} type="date" value={form.date} onChange={(e) => setForm({ ...form, date: e.target.value })} />
           <input style={input} type="time" value={form.time} onChange={(e) => setForm({ ...form, time: e.target.value })} />
@@ -424,13 +494,8 @@ function CalendarTab({ events, setEvents }) {
             <option>Other</option>
           </select>
 
-          <button style={primaryButton} onClick={saveEvent}>
-            {editingId ? "Save Changes" : "Save Event"}
-          </button>
-
-          <button style={secondaryButton} onClick={cancelForm}>
-            Cancel
-          </button>
+          <button style={primaryButton} onClick={saveEvent}>{editingId ? "Save Changes" : "Save Event"}</button>
+          <button style={secondaryButton} onClick={cancelForm}>Cancel</button>
         </div>
       )}
 
@@ -455,12 +520,7 @@ function CalendarTab({ events, setEvents }) {
 function FlightsTab({ flights, setFlights }) {
   const [showForm, setShowForm] = useState(false);
   const [editingId, setEditingId] = useState(null);
-  const [form, setForm] = useState({
-    aircraft: "",
-    date: "",
-    duration: "",
-    type: "Orientation Flight"
-  });
+  const [form, setForm] = useState({ aircraft: "", date: "", duration: "", type: "Orientation Flight" });
 
   const totalHours = flights.reduce((sum, f) => sum + (parseFloat(f.duration) || 0), 0).toFixed(1);
 
@@ -468,9 +528,7 @@ function FlightsTab({ flights, setFlights }) {
     if (!form.aircraft || !form.date) return;
 
     if (editingId) {
-      setFlights(flights.map((flight) => (
-        flight.id === editingId ? { ...form, id: editingId } : flight
-      )));
+      setFlights(flights.map((flight) => flight.id === editingId ? { ...form, id: editingId } : flight));
     } else {
       setFlights([...flights, { ...form, id: Date.now() }]);
     }
@@ -493,12 +551,6 @@ function FlightsTab({ flights, setFlights }) {
 
   function deleteFlight(id) {
     setFlights(flights.filter((flight) => flight.id !== id));
-
-    if (editingId === id) {
-      setEditingId(null);
-      setShowForm(false);
-      setForm({ aircraft: "", date: "", duration: "", type: "Orientation Flight" });
-    }
   }
 
   function cancelForm() {
@@ -527,16 +579,11 @@ function FlightsTab({ flights, setFlights }) {
         </div>
       </div>
 
-      {!showForm && (
-        <button style={primaryButton} onClick={() => setShowForm(true)}>
-          + Log Flight
-        </button>
-      )}
+      {!showForm && <button style={primaryButton} onClick={() => setShowForm(true)}>+ Log Flight</button>}
 
       {showForm && (
         <div style={formCard}>
           <p style={smallLabel}>{editingId ? "Edit Flight" : "Log Flight"}</p>
-
           <input style={input} placeholder="Aircraft" value={form.aircraft} onChange={(e) => setForm({ ...form, aircraft: e.target.value })} />
           <input style={input} type="date" value={form.date} onChange={(e) => setForm({ ...form, date: e.target.value })} />
           <input style={input} type="number" step="0.1" placeholder="Duration hours" value={form.duration} onChange={(e) => setForm({ ...form, duration: e.target.value })} />
@@ -549,13 +596,8 @@ function FlightsTab({ flights, setFlights }) {
             <option>Other</option>
           </select>
 
-          <button style={primaryButton} onClick={saveFlight}>
-            {editingId ? "Save Changes" : "Save Flight"}
-          </button>
-
-          <button style={secondaryButton} onClick={cancelForm}>
-            Cancel
-          </button>
+          <button style={primaryButton} onClick={saveFlight}>{editingId ? "Save Changes" : "Save Flight"}</button>
+          <button style={secondaryButton} onClick={cancelForm}>Cancel</button>
         </div>
       )}
 
@@ -745,8 +787,8 @@ const tabRow = { display: "flex", gap: "8px", marginBottom: "16px" };
 const activeTabStyle = { flex: 1, padding: "12px", borderRadius: "12px", border: "none", background: "#111827", color: "white", fontWeight: "bold" };
 const inactiveTabStyle = { flex: 1, padding: "12px", borderRadius: "12px", border: "none", background: "var(--soft-bg)", color: "var(--soft-text)", fontWeight: "bold" };
 const listItem = { background: "var(--card-bg)", border: "1px solid var(--card-border)", borderRadius: "14px", padding: "14px", marginBottom: "10px", color: "var(--text)", boxShadow: "var(--shadow)" };
-const bottomNav = { position: "fixed", left: "50%", bottom: "18px", transform: "translateX(-50%)", width: "calc(100% - 32px)", maxWidth: "430px", background: "var(--card-bg)", border: "1px solid var(--card-border)", borderRadius: "24px", padding: "8px", display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: "6px", boxShadow: "0 12px 30px rgba(0,0,0,0.25)", zIndex: 10 };
-const navButton = { border: "none", background: "transparent", color: "var(--muted)", borderRadius: "16px", padding: "10px 4px", fontWeight: "bold", fontSize: "11px", display: "flex", flexDirection: "column", alignItems: "center", gap: "3px" };
+const bottomNav = { position: "fixed", left: "50%", bottom: "18px", transform: "translateX(-50%)", width: "calc(100% - 32px)", maxWidth: "430px", background: "var(--card-bg)", border: "1px solid var(--card-border)", borderRadius: "24px", padding: "8px", display: "grid", gridTemplateColumns: "repeat(5, 1fr)", gap: "6px", boxShadow: "0 12px 30px rgba(0,0,0,0.25)", zIndex: 10 };
+const navButton = { border: "none", background: "transparent", color: "var(--muted)", borderRadius: "16px", padding: "10px 2px", fontWeight: "bold", fontSize: "10px", display: "flex", flexDirection: "column", alignItems: "center", gap: "3px" };
 const activeNavButton = { ...navButton, background: "rgba(37, 99, 235, 0.18)", color: "#60a5fa" };
 const navIcon = { fontSize: "18px" };
 const statsRow = { display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px", marginBottom: "14px" };
@@ -761,3 +803,60 @@ const smallActionButton = { border: "none", background: "#2563eb", color: "white
 const actionRow = { display: "flex", gap: "8px", marginTop: "12px" };
 const editButton = { border: "none", background: "#2563eb", color: "white", borderRadius: "10px", padding: "8px 12px", fontWeight: "bold", fontSize: "13px" };
 const deleteButton = { border: "none", background: "#dc2626", color: "white", borderRadius: "10px", padding: "8px 12px", fontWeight: "bold", fontSize: "13px" };
+
+const dashboardProfileCard = {
+  background: "var(--card-bg)",
+  border: "1px solid var(--card-border)",
+  borderRadius: "18px",
+  padding: "16px",
+  marginBottom: "14px",
+  boxShadow: "var(--shadow)",
+  color: "var(--text)"
+};
+
+const dashboardGrid = {
+  display: "grid",
+  gridTemplateColumns: "1fr 1fr",
+  gap: "12px",
+  marginBottom: "14px"
+};
+
+const miniCard = {
+  background: "var(--card-bg)",
+  border: "1px solid var(--card-border)",
+  borderRadius: "18px",
+  padding: "16px",
+  boxShadow: "var(--shadow)",
+  color: "var(--text)"
+};
+
+const miniTitle = {
+  margin: "8px 0 0",
+  color: "#60a5fa",
+  fontSize: "16px",
+  lineHeight: 1.2
+};
+
+const miniNumber = {
+  margin: "8px 0 0",
+  color: "#60a5fa",
+  fontSize: "34px"
+};
+
+const quickButtonGrid = {
+  display: "grid",
+  gridTemplateColumns: "1fr 1fr",
+  gap: "10px",
+  marginTop: "14px"
+};
+
+const quickButton = {
+  border: "none",
+  background: "#2563eb",
+  color: "white",
+  borderRadius: "16px",
+  padding: "14px 10px",
+  fontWeight: "bold",
+  fontSize: "14px",
+  boxShadow: "var(--shadow)"
+};
