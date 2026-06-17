@@ -1,101 +1,5 @@
-import { useEffect, useMemo, useState } from "react";
-
-const ACHIEVEMENTS = [
-  ["Curry Achievement", "Cadet Airman", "C/Amn", "Phase I", ["Be a current CAP cadet", "Recite the Cadet Oath", "Complete Cadet Welcome Course", "Complete Learn to Lead Chapter 1", "Attempt CPFT", "Participate in character development"], ["Fall In", "Attention", "Parade Rest", "Present Arms", "Order Arms", "Right Face", "Left Face", "About Face", "Forward March", "Flight Halt"]],
-  ["Arnold Achievement", "Cadet Airman First Class", "C/A1C", "Phase I", ["Minimum 8 weeks after Curry", "Wear uniform properly", "Complete Learn to Lead Chapter 2", "Complete aerospace module", "Continue CPFT progress", "Attend character development"], ["All Curry drill", "Column Right", "Column Left", "To the Rear March", "Change Step March"]],
-  ["Feik Achievement", "Cadet Senior Airman", "C/SrA", "Phase I", ["Minimum 8 weeks after Arnold", "Complete Learn to Lead Chapter 3", "Complete aerospace module", "Continue CPFT progress", "Attend character development"], ["All previous drill", "Open Ranks", "Close Ranks", "Count Off"]],
-  ["Wright Brothers Award", "Cadet Staff Sergeant", "C/SSgt", "Phase I Milestone", ["Minimum 8 weeks after Feik", "Pass Wright Brothers exam", "Complete aerospace work", "Meet fitness requirement", "Complete drill evaluation"], ["Form the Flight", "Report to Commander", "Stationary commands", "Marching commands"]],
-  ["Rickenbacker Achievement", "Cadet Technical Sergeant", "C/TSgt", "Phase II", ["Minimum 8 weeks after Wright Brothers", "Complete Learn to Lead Chapter 4", "Complete aerospace module", "Meet HFZ", "Attend character development"], ["NCO drill leadership", "Form and align flight"]],
-  ["Achievement 5", "Cadet Master Sergeant", "C/MSgt", "Phase II", ["Minimum 8 weeks after Rickenbacker", "Complete Learn to Lead Chapter 5", "Complete aerospace module", "Meet HFZ", "Attend character development"], ["Lead basic flight drill", "Mentor junior cadets"]],
-  ["Doolittle Achievement", "Cadet Senior Master Sergeant", "C/SMSgt", "Phase II", ["Minimum 8 weeks after Achievement 5", "Complete Learn to Lead Chapter 6", "Complete aerospace module", "Meet HFZ", "Attend character development"], ["Advanced NCO drill", "Correct junior cadet drill errors"]],
-  ["Goddard Achievement", "Cadet Chief Master Sergeant", "C/CMSgt", "Phase II", ["Minimum 8 weeks after Doolittle", "Complete Learn to Lead Chapter 7", "Complete aerospace module", "Meet HFZ", "Attend character development"], ["Senior NCO drill", "Teach facing and marching movements"]],
-  ["Armstrong Achievement", "Cadet Chief Master Sergeant", "C/CMSgt", "Phase II", ["Minimum 8 weeks after Goddard", "Complete Learn to Lead Chapter 8", "Complete aerospace module", "Meet HFZ", "Complete speech and essay"], ["Flight sergeant duties", "Mentor junior NCOs"]],
-  ["Billy Mitchell Award", "Cadet Second Lieutenant", "C/2d Lt", "Phase II Milestone", ["Minimum 8 weeks after Armstrong", "Pass Mitchell leadership exam", "Pass aerospace exam", "Meet HFZ", "Graduate encampment"], ["Master Phase II drill", "Prepare for officer leadership"]],
-  ["Achievement 9", "Cadet Second Lieutenant", "C/2d Lt", "Phase III", ["Minimum 8 weeks after Mitchell", "Complete Learn to Lead Chapter 9", "Complete SDA requirement", "Complete aerospace block test", "Meet HFZ"], ["No new drill test", "Teach junior cadets"]],
-  ["Willa Brown Achievement", "Cadet First Lieutenant", "C/1st Lt", "Phase III", ["Minimum 8 weeks after Achievement 9", "Complete Learn to Lead Chapter 10", "Complete SDA requirement", "Complete aerospace block test", "Meet HFZ"], ["No new drill test", "Supervise drill instruction"]],
-  ["Achievement 11", "Cadet First Lieutenant", "C/1st Lt", "Phase III", ["Minimum 8 weeks after Willa Brown", "Complete Learn to Lead Chapter 11", "Complete SDA requirement", "Complete aerospace block test", "Meet HFZ"], ["No new drill test", "Support ceremonies"]],
-  ["Amelia Earhart Award", "Cadet Captain", "C/Capt", "Phase III Milestone", ["Minimum 8 weeks after Achievement 11", "Pass Earhart leadership exam", "Meet HFZ", "Meet general advancement requirements"], ["No new drill test", "Mentor junior cadets"]],
-  ["Achievement 12", "Cadet Captain", "C/Capt", "Phase IV", ["Minimum 8 weeks after Earhart", "Complete Learn to Lead Chapter 12", "Complete SDA requirement", "Meet HFZ", "Attend character development"], ["No new drill test", "Oversee training"]],
-  ["Achievement 13", "Cadet Captain", "C/Capt", "Phase IV", ["Minimum 8 weeks after Achievement 12", "Complete Learn to Lead Chapter 13", "Complete SDA requirement", "Meet HFZ", "Attend character development"], ["No new drill test", "Mentor cadet officers and NCOs"]],
-  ["Boyd Achievement", "Cadet Major", "C/Maj", "Phase IV", ["Minimum 8 weeks after Achievement 13", "Complete Learn to Lead Chapter 14", "Complete SDA requirement", "Complete aerospace block test", "Meet HFZ"], ["No new drill test", "Supervise unit drill training"]],
-  ["Sally Ride Achievement", "Cadet Major", "C/Maj", "Phase IV", ["Minimum 8 weeks after Boyd", "Complete Learn to Lead Chapter 15", "Complete SDA requirement", "Complete aerospace block test", "Meet HFZ"], ["No new drill test", "Manage and mentor cadet leaders"]],
-  ["Achievement 16", "Cadet Major", "C/Maj", "Phase IV", ["Minimum 8 weeks after Sally Ride", "Complete Learn to Lead Chapter 16", "Complete SDA requirement", "Complete aerospace block test", "Meet HFZ"], ["No new drill test", "Model senior cadet leadership"]],
-  ["Ira C. Eaker Award", "Cadet Lieutenant Colonel", "C/Lt Col", "Phase IV Milestone", ["Minimum 8 weeks after Achievement 16", "Complete required speech and essay", "Meet HFZ", "Graduate leadership academy", "Meet general advancement requirements"], ["No new drill test", "Guide cadet staff"]],
-  ["Carl A. Spaatz Award", "Cadet Colonel", "C/Col", "Pinnacle Award", ["Earn Eaker Award", "Pass comprehensive leadership exam", "Pass comprehensive aerospace exam", "Pass fitness assessment", "Complete essay exam"], ["No additional drill test", "Represent highest cadet standard"]]
-].map((item, index) => ({
-  id: index + 1,
-  name: item[0],
-  rank: item[1],
-  abbr: item[2],
-  phase: item[3],
-  requirements: item[4],
-  drill: item[5],
-  overview: `${item[0]} tracker for ${item[1]}.`
-}));
-
-const DRILL_GROUPS = [
-  {
-    category: "Stationary Movements",
-    items: [
-      ["Attention", "Flight, ATTENTION", "Basic position of military bearing."],
-      ["Parade Rest", "Parade, REST", "Disciplined rest position."],
-      ["Present Arms", "Present, ARMS", "Render a salute."],
-      ["Order Arms", "Order, ARMS", "Return from salute."],
-      ["Right Face", "Right, FACE", "Turn 90 degrees right."],
-      ["Left Face", "Left, FACE", "Turn 90 degrees left."],
-      ["About Face", "About, FACE", "Turn 180 degrees."]
-    ]
-  },
-  {
-    category: "Marching Movements",
-    items: [
-      ["Forward March", "Forward, MARCH", "Move the flight forward in step."],
-      ["Flight Halt", "Flight, HALT", "Stop the flight while marching."],
-      ["Column Right", "Column Right, MARCH", "Turn the flight right while marching."],
-      ["Column Left", "Column Left, MARCH", "Turn the flight left while marching."],
-      ["To the Rear March", "To the Rear, MARCH", "Reverse direction."],
-      ["Change Step March", "Change Step, MARCH", "Correct cadence without stopping."]
-    ]
-  },
-  {
-    category: "Flight Formation",
-    items: [
-      ["Fall In", "FALL IN", "Form the flight."],
-      ["Dress Right Dress", "Dress Right, DRESS", "Align the flight."],
-      ["Ready Front", "Ready, FRONT", "Return from alignment."],
-      ["Open Ranks", "Open Ranks, MARCH", "Open formation for inspection."],
-      ["Close Ranks", "Close Ranks, MARCH", "Return to normal formation."],
-      ["Count Off", "Count, OFF", "Number cadets in formation."]
-    ]
-  },
-  {
-    category: "Leadership",
-    items: [
-      ["Form the Flight", "FALL IN", "Take control and organize the flight."],
-      ["Report to Commander", "Sir/Ma’am, flight is prepared for inspection", "Report flight status."],
-      ["Give Commands", "Preparatory command + command of execution", "Lead cadets through movements."],
-      ["Teach Junior Cadets", "Demonstrate, explain, practice, correct", "Train newer cadets."]
-    ]
-  }
-];
-
-const CHECKLISTS = {
-  blues: ["Blues shirt", "Blues pants", "Belt and buckle", "Black dress shoes", "Black socks", "Nameplate", "Grade insignia", "Flight cap", "Undershirt", "Uniform clean and pressed"],
-  field: ["Field uniform top", "Field uniform pants", "Boots", "Boot socks", "Belt", "Cover / cap", "Name tapes", "CAP tapes", "Grade insignia", "Water bottle"],
-  gear: ["Name tapes ordered", "Grade insignia ordered", "Blues items purchased", "Field uniform items purchased", "Shoes or boots ready", "PT gear ready", "Notebook and pen", "Haircut / grooming squared away", "Laundry plan"],
-  encampment: ["Application complete", "Parent forms complete", "Medical forms complete", "Packing list reviewed", "Uniforms inspected", "Boots broken in", "PT clothes packed", "Toiletries packed", "Water bottle packed", "Travel plan confirmed", "Emergency contact info ready"]
-};
-
-const DOCS = [
-  { id: 1, name: "eServices Login", category: "Official Login", url: "https://www.capnhq.gov/" },
-  { id: 2, name: "Parent / Guardian Portal", category: "Official Parent Portal", url: "https://www.gocivilairpatrol.com/programs/cadets/parents/parent-guardian-portal" },
-  { id: 3, name: "Cadet Achievement Requirements", category: "Cadet Program", url: "https://www.gocivilairpatrol.com/programs/cadets/stripes-to-diamonds" },
-  { id: 4, name: "Cadet Tests & Exams", category: "Testing", url: "https://www.gocivilairpatrol.com/programs/cadets/stripes-to-diamonds/cadet-tests--exams" },
-  { id: 5, name: "Drill & Ceremonies Library", category: "Drill", url: "https://www.gocivilairpatrol.com/programs/cadets/library/drill" },
-  { id: 6, name: "CAPP 60-33 Drill & Ceremonies", category: "Drill PDF", url: "https://www.gocivilairpatrol.com/media/cms/CAPP6020_5_AUG_16_07A0C6200BA4C.pdf" },
-  { id: 7, name: "CAPP 60-34 Practical Drill Tests", category: "Drill Tests PDF", url: "https://www.gocivilairpatrol.com/media/cms/CAPP_6034_Sept_24_3e0cc652c818b.pdf" },
-  { id: 8, name: "Vanguard Civil Air Patrol Store", category: "Uniforms / Insignia / CAP Gear", url: "https://www.vanguardmil.com/pages/cap-landing-page-insignia" }
-];
+import React, { useEffect, useMemo, useState } from "react";
+import ReactDOM from "react-dom/client";
 
 const DEFAULT_PROFILE = {
   name: "Lawrence",
@@ -105,48 +9,1187 @@ const DEFAULT_PROFILE = {
   goal: "Earn Wright Brothers Award"
 };
 
-function loadSaved(key, fallback) {
+const ACHIEVEMENTS = [
+  {
+    id: 1,
+    name: "Curry Achievement",
+    rank: "Cadet Airman",
+    abbr: "C/Amn",
+    phase: "Phase I",
+    requirements: [
+      "Be a current CAP cadet",
+      "Recite the Cadet Oath",
+      "Complete Cadet Welcome Course",
+      "Complete Learn to Lead Chapter 1",
+      "Attempt CPFT",
+      "Participate in character development"
+    ],
+    drill: [
+      "Fall In",
+      "Attention",
+      "Parade Rest",
+      "Present Arms",
+      "Order Arms",
+      "Right Face",
+      "Left Face",
+      "About Face",
+      "Forward March",
+      "Flight Halt"
+    ]
+  },
+  {
+    id: 2,
+    name: "Arnold Achievement",
+    rank: "Cadet Airman First Class",
+    abbr: "C/A1C",
+    phase: "Phase I",
+    requirements: [
+      "Minimum 8 weeks after Curry",
+      "Wear uniform properly",
+      "Complete Learn to Lead Chapter 2",
+      "Complete aerospace module",
+      "Continue CPFT progress",
+      "Attend character development"
+    ],
+    drill: [
+      "All Curry drill",
+      "Column Right",
+      "Column Left",
+      "To the Rear March",
+      "Change Step March"
+    ]
+  },
+  {
+    id: 3,
+    name: "Feik Achievement",
+    rank: "Cadet Senior Airman",
+    abbr: "C/SrA",
+    phase: "Phase I",
+    requirements: [
+      "Minimum 8 weeks after Arnold",
+      "Complete Learn to Lead Chapter 3",
+      "Complete aerospace module",
+      "Continue CPFT progress",
+      "Attend character development"
+    ],
+    drill: [
+      "All previous drill",
+      "Open Ranks",
+      "Close Ranks",
+      "Count Off",
+      "Dress Right Dress",
+      "Ready Front"
+    ]
+  },
+  {
+    id: 4,
+    name: "Wright Brothers Award",
+    rank: "Cadet Staff Sergeant",
+    abbr: "C/SSgt",
+    phase: "Phase I Milestone",
+    requirements: [
+      "Minimum 8 weeks after Feik",
+      "Pass Wright Brothers leadership exam",
+      "Complete aerospace work",
+      "Meet fitness requirement",
+      "Complete drill evaluation"
+    ],
+    drill: [
+      "Form the Flight",
+      "Report to Commander",
+      "Give Stationary Commands",
+      "Give Marching Commands",
+      "Lead Basic Flight Drill"
+    ]
+  },
+  {
+    id: 5,
+    name: "Rickenbacker Achievement",
+    rank: "Cadet Technical Sergeant",
+    abbr: "C/TSgt",
+    phase: "Phase II",
+    requirements: [
+      "Minimum 8 weeks after Wright Brothers",
+      "Complete Learn to Lead Chapter 4",
+      "Complete aerospace module",
+      "Meet HFZ",
+      "Attend character development"
+    ],
+    drill: ["NCO drill leadership", "Form and align flight"]
+  },
+  {
+    id: 6,
+    name: "Achievement 5",
+    rank: "Cadet Master Sergeant",
+    abbr: "C/MSgt",
+    phase: "Phase II",
+    requirements: [
+      "Minimum 8 weeks after Rickenbacker",
+      "Complete Learn to Lead Chapter 5",
+      "Complete aerospace module",
+      "Meet HFZ",
+      "Attend character development"
+    ],
+    drill: ["Lead basic flight drill", "Mentor junior cadets"]
+  },
+  {
+    id: 7,
+    name: "Doolittle Achievement",
+    rank: "Cadet Senior Master Sergeant",
+    abbr: "C/SMSgt",
+    phase: "Phase II",
+    requirements: [
+      "Minimum 8 weeks after Achievement 5",
+      "Complete Learn to Lead Chapter 6",
+      "Complete aerospace module",
+      "Meet HFZ",
+      "Attend character development"
+    ],
+    drill: ["Advanced NCO drill", "Correct junior cadet drill errors"]
+  },
+  {
+    id: 8,
+    name: "Goddard Achievement",
+    rank: "Cadet Chief Master Sergeant",
+    abbr: "C/CMSgt",
+    phase: "Phase II",
+    requirements: [
+      "Minimum 8 weeks after Doolittle",
+      "Complete Learn to Lead Chapter 7",
+      "Complete aerospace module",
+      "Meet HFZ",
+      "Attend character development"
+    ],
+    drill: ["Senior NCO drill", "Teach facing and marching movements"]
+  },
+  {
+    id: 9,
+    name: "Armstrong Achievement",
+    rank: "Cadet Chief Master Sergeant",
+    abbr: "C/CMSgt",
+    phase: "Phase II",
+    requirements: [
+      "Minimum 8 weeks after Goddard",
+      "Complete Learn to Lead Chapter 8",
+      "Complete aerospace module",
+      "Meet HFZ",
+      "Complete speech and essay"
+    ],
+    drill: ["Flight sergeant duties", "Mentor junior NCOs"]
+  },
+  {
+    id: 10,
+    name: "Billy Mitchell Award",
+    rank: "Cadet Second Lieutenant",
+    abbr: "C/2d Lt",
+    phase: "Phase II Milestone",
+    requirements: [
+      "Minimum 8 weeks after Armstrong",
+      "Pass Mitchell leadership exam",
+      "Pass aerospace exam",
+      "Meet HFZ",
+      "Graduate encampment"
+    ],
+    drill: ["Master Phase II drill", "Prepare for officer leadership"]
+  },
+  {
+    id: 11,
+    name: "Achievement 9",
+    rank: "Cadet Second Lieutenant",
+    abbr: "C/2d Lt",
+    phase: "Phase III",
+    requirements: [
+      "Minimum 8 weeks after Mitchell",
+      "Complete Learn to Lead Chapter 9",
+      "Complete SDA requirement",
+      "Complete aerospace block test",
+      "Meet HFZ"
+    ],
+    drill: ["No new drill test", "Teach junior cadets"]
+  },
+  {
+    id: 12,
+    name: "Willa Brown Achievement",
+    rank: "Cadet First Lieutenant",
+    abbr: "C/1st Lt",
+    phase: "Phase III",
+    requirements: [
+      "Minimum 8 weeks after Achievement 9",
+      "Complete Learn to Lead Chapter 10",
+      "Complete SDA requirement",
+      "Complete aerospace block test",
+      "Meet HFZ"
+    ],
+    drill: ["No new drill test", "Supervise drill instruction"]
+  },
+  {
+    id: 13,
+    name: "Achievement 11",
+    rank: "Cadet First Lieutenant",
+    abbr: "C/1st Lt",
+    phase: "Phase III",
+    requirements: [
+      "Minimum 8 weeks after Willa Brown",
+      "Complete Learn to Lead Chapter 11",
+      "Complete SDA requirement",
+      "Complete aerospace block test",
+      "Meet HFZ"
+    ],
+    drill: ["No new drill test", "Support ceremonies"]
+  },
+  {
+    id: 14,
+    name: "Amelia Earhart Award",
+    rank: "Cadet Captain",
+    abbr: "C/Capt",
+    phase: "Phase III Milestone",
+    requirements: [
+      "Minimum 8 weeks after Achievement 11",
+      "Pass Earhart leadership exam",
+      "Meet HFZ",
+      "Meet general advancement requirements"
+    ],
+    drill: ["No new drill test", "Mentor junior cadets"]
+  },
+  {
+    id: 15,
+    name: "Achievement 12",
+    rank: "Cadet Captain",
+    abbr: "C/Capt",
+    phase: "Phase IV",
+    requirements: [
+      "Minimum 8 weeks after Earhart",
+      "Complete Learn to Lead Chapter 12",
+      "Complete SDA requirement",
+      "Meet HFZ",
+      "Attend character development"
+    ],
+    drill: ["No new drill test", "Oversee training"]
+  },
+  {
+    id: 16,
+    name: "Achievement 13",
+    rank: "Cadet Captain",
+    abbr: "C/Capt",
+    phase: "Phase IV",
+    requirements: [
+      "Minimum 8 weeks after Achievement 12",
+      "Complete Learn to Lead Chapter 13",
+      "Complete SDA requirement",
+      "Meet HFZ",
+      "Attend character development"
+    ],
+    drill: ["No new drill test", "Mentor cadet officers and NCOs"]
+  },
+  {
+    id: 17,
+    name: "Boyd Achievement",
+    rank: "Cadet Major",
+    abbr: "C/Maj",
+    phase: "Phase IV",
+    requirements: [
+      "Minimum 8 weeks after Achievement 13",
+      "Complete Learn to Lead Chapter 14",
+      "Complete SDA requirement",
+      "Complete aerospace block test",
+      "Meet HFZ"
+    ],
+    drill: ["No new drill test", "Supervise unit drill training"]
+  },
+  {
+    id: 18,
+    name: "Sally Ride Achievement",
+    rank: "Cadet Major",
+    abbr: "C/Maj",
+    phase: "Phase IV",
+    requirements: [
+      "Minimum 8 weeks after Boyd",
+      "Complete Learn to Lead Chapter 15",
+      "Complete SDA requirement",
+      "Complete aerospace block test",
+      "Meet HFZ"
+    ],
+    drill: ["No new drill test", "Manage and mentor cadet leaders"]
+  },
+  {
+    id: 19,
+    name: "Achievement 16",
+    rank: "Cadet Major",
+    abbr: "C/Maj",
+    phase: "Phase IV",
+    requirements: [
+      "Minimum 8 weeks after Sally Ride",
+      "Complete Learn to Lead Chapter 16",
+      "Complete SDA requirement",
+      "Complete aerospace block test",
+      "Meet HFZ"
+    ],
+    drill: ["No new drill test", "Model senior cadet leadership"]
+  },
+  {
+    id: 20,
+    name: "Ira C. Eaker Award",
+    rank: "Cadet Lieutenant Colonel",
+    abbr: "C/Lt Col",
+    phase: "Phase IV Milestone",
+    requirements: [
+      "Minimum 8 weeks after Achievement 16",
+      "Complete required speech and essay",
+      "Meet HFZ",
+      "Graduate leadership academy",
+      "Meet general advancement requirements"
+    ],
+    drill: ["No new drill test", "Guide cadet staff"]
+  },
+  {
+    id: 21,
+    name: "Carl A. Spaatz Award",
+    rank: "Cadet Colonel",
+    abbr: "C/Col",
+    phase: "Pinnacle Award",
+    requirements: [
+      "Earn Eaker Award",
+      "Pass comprehensive leadership exam",
+      "Pass comprehensive aerospace exam",
+      "Pass fitness assessment",
+      "Complete essay exam"
+    ],
+    drill: ["No additional drill test", "Represent highest cadet standard"]
+  }
+];
+
+const DRILL_GROUPS = [
+  {
+    category: "Stationary Movements",
+    items: [
+      {
+        name: "Attention",
+        command: "Flight, ATTENTION",
+        purpose: "The basic position of military bearing. Cadets stand still, silent, and ready for the next command.",
+        steps: [
+          "Heels together and on line.",
+          "Feet turned out evenly.",
+          "Legs straight without locking the knees.",
+          "Body upright with shoulders level.",
+          "Arms hang naturally with thumbs along trouser seams.",
+          "Hands are cupped with fingers joined.",
+          "Head and eyes straight forward.",
+          "Remain silent and still."
+        ],
+        mistakes: [
+          "Looking around.",
+          "Talking.",
+          "Feet too wide.",
+          "Hands flat instead of cupped.",
+          "Moving after the command."
+        ],
+        tips: [
+          "Practice holding attention for 30 seconds.",
+          "Check feet, hands, eyes, and posture every time."
+        ]
+      },
+      {
+        name: "Parade Rest",
+        command: "Parade, REST",
+        purpose: "A disciplined rest position used while remaining in formation.",
+        steps: [
+          "Move the left foot about shoulder width to the left.",
+          "Place hands behind the back.",
+          "Right hand rests in the palm of the left hand.",
+          "Keep head and eyes forward.",
+          "Remain silent."
+        ],
+        mistakes: [
+          "Feet too wide.",
+          "Hands placed incorrectly.",
+          "Slouching.",
+          "Talking at parade rest."
+        ],
+        tips: [
+          "Move the foot and hands at the same time.",
+          "Freeze once in position."
+        ]
+      },
+      {
+        name: "Present Arms",
+        command: "Present, ARMS",
+        purpose: "Used to render a salute.",
+        steps: [
+          "Start from attention.",
+          "Raise the right hand smartly.",
+          "Fingers and thumb are joined.",
+          "Palm is slightly down.",
+          "Hold the salute until Order Arms."
+        ],
+        mistakes: [
+          "Palm facing out.",
+          "Fingers separated.",
+          "Elbow too low.",
+          "Dropping the salute early."
+        ],
+        tips: [
+          "Practice in front of a mirror.",
+          "Make the salute sharp, not rushed."
+        ]
+      },
+      {
+        name: "Order Arms",
+        command: "Order, ARMS",
+        purpose: "Returns the cadet from salute to attention.",
+        steps: [
+          "Lower the right hand smartly.",
+          "Return hand to the side.",
+          "Resume attention.",
+          "Remain still."
+        ],
+        mistakes: [
+          "Dropping the hand lazily.",
+          "Slapping the leg.",
+          "Moving the feet."
+        ],
+        tips: [
+          "Practice Present Arms and Order Arms together."
+        ]
+      },
+      {
+        name: "Right Face",
+        command: "Right, FACE",
+        purpose: "Turns the cadet 90 degrees to the right.",
+        steps: [
+          "Start at attention.",
+          "Pivot right on the right heel and left toe.",
+          "Keep arms pinned to the sides.",
+          "Bring the left foot beside the right foot.",
+          "Finish at attention."
+        ],
+        mistakes: [
+          "Swinging arms.",
+          "Taking extra steps.",
+          "Turning too far or not far enough.",
+          "Looking down."
+        ],
+        tips: [
+          "Practice slowly first.",
+          "Finish square and still."
+        ]
+      },
+      {
+        name: "Left Face",
+        command: "Left, FACE",
+        purpose: "Turns the cadet 90 degrees to the left.",
+        steps: [
+          "Start at attention.",
+          "Pivot left on the left heel and right toe.",
+          "Keep arms still.",
+          "Bring the right foot beside the left foot.",
+          "Finish at attention."
+        ],
+        mistakes: [
+          "Stepping instead of pivoting.",
+          "Feet not coming together.",
+          "Moving arms.",
+          "Finishing crooked."
+        ],
+        tips: [
+          "Practice Right Face and Left Face in sets."
+        ]
+      },
+      {
+        name: "About Face",
+        command: "About, FACE",
+        purpose: "Turns the cadet 180 degrees to face the opposite direction.",
+        steps: [
+          "Start at attention.",
+          "Place the ball of the right foot behind and slightly left of the left heel.",
+          "Pivot 180 degrees to the right.",
+          "Bring heels together.",
+          "Finish at attention."
+        ],
+        mistakes: [
+          "Turning left.",
+          "Taking extra steps.",
+          "Feet too far apart after turning.",
+          "Arms moving."
+        ],
+        tips: [
+          "Use a floor line to practice finishing square."
+        ]
+      }
+    ]
+  },
+  {
+    category: "Marching Movements",
+    items: [
+      {
+        name: "Forward March",
+        command: "Forward, MARCH",
+        purpose: "Moves the cadet or flight forward in step.",
+        steps: [
+          "Start at attention or from a halt.",
+          "Step off with the left foot.",
+          "March in cadence.",
+          "Keep eyes forward.",
+          "Maintain proper distance and alignment."
+        ],
+        mistakes: [
+          "Stepping off with the right foot.",
+          "Looking down.",
+          "Getting out of step.",
+          "Uneven steps."
+        ],
+        tips: [
+          "Use left-right-left cadence.",
+          "Practice stepping off cleanly."
+        ]
+      },
+      {
+        name: "Flight Halt",
+        command: "Flight, HALT",
+        purpose: "Stops a marching flight in a controlled manner.",
+        steps: [
+          "Command is given while marching.",
+          "Take the proper final step.",
+          "Bring the trailing foot beside the lead foot.",
+          "Stop at attention.",
+          "Maintain formation."
+        ],
+        mistakes: [
+          "Stopping too early.",
+          "Taking extra steps.",
+          "Feet not together.",
+          "Cadets stopping at different times."
+        ],
+        tips: [
+          "Practice marching 8 steps, then halting."
+        ]
+      },
+      {
+        name: "Column Right",
+        command: "Column Right, MARCH",
+        purpose: "Turns the flight 90 degrees to the right while marching.",
+        steps: [
+          "Command is given while marching.",
+          "The flight turns as a unit.",
+          "Inside cadets shorten steps.",
+          "Outside cadets maintain cadence and spacing.",
+          "Continue marching in the new direction."
+        ],
+        mistakes: [
+          "Cutting the corner.",
+          "Losing spacing.",
+          "Breaking cadence.",
+          "Cadets turning at different times."
+        ],
+        tips: [
+          "Use cones or a sidewalk corner for practice."
+        ]
+      },
+      {
+        name: "Column Left",
+        command: "Column Left, MARCH",
+        purpose: "Turns the flight 90 degrees to the left while marching.",
+        steps: [
+          "Command is given while marching.",
+          "The flight turns as a unit.",
+          "Inside cadets shorten steps.",
+          "Outside cadets adjust to maintain formation.",
+          "Continue marching in the new direction."
+        ],
+        mistakes: [
+          "Overrunning the turn.",
+          "Spacing opens up.",
+          "Cadets watch their feet.",
+          "Formation gets crooked."
+        ],
+        tips: [
+          "Practice both left and right column movements."
+        ]
+      },
+      {
+        name: "To the Rear March",
+        command: "To the Rear, MARCH",
+        purpose: "Reverses direction while marching.",
+        steps: [
+          "Command is given while marching.",
+          "Pivot to the right.",
+          "Turn 180 degrees without stopping.",
+          "Step off in the new direction.",
+          "Maintain cadence."
+        ],
+        mistakes: [
+          "Turning left.",
+          "Stopping before turning.",
+          "Losing cadence.",
+          "Swinging arms."
+        ],
+        tips: [
+          "Practice individually before doing it as a flight."
+        ]
+      },
+      {
+        name: "Change Step March",
+        command: "Change Step, MARCH",
+        purpose: "Corrects cadence without stopping.",
+        steps: [
+          "Command is given while marching.",
+          "Shorten one step.",
+          "Bring the trailing foot near the lead foot.",
+          "Step off again with the correct foot.",
+          "Return to normal cadence."
+        ],
+        mistakes: [
+          "Stopping completely.",
+          "Hopping.",
+          "Looking down.",
+          "Overcorrecting."
+        ],
+        tips: [
+          "Practice alone first, then behind another cadet."
+        ]
+      }
+    ]
+  },
+  {
+    category: "Flight Formation",
+    items: [
+      {
+        name: "Fall In",
+        command: "FALL IN",
+        purpose: "Forms the flight into ranks and elements.",
+        steps: [
+          "Cadets move quickly and quietly into formation.",
+          "Element leaders establish position.",
+          "Cadets form in assigned order.",
+          "Maintain proper interval and distance.",
+          "Come to attention."
+        ],
+        mistakes: [
+          "Talking.",
+          "Slow movement.",
+          "Wrong spacing.",
+          "Wrong order in formation."
+        ],
+        tips: [
+          "Practice forming from different starting points."
+        ]
+      },
+      {
+        name: "Dress Right Dress",
+        command: "Dress Right, DRESS",
+        purpose: "Aligns the flight side-to-side.",
+        steps: [
+          "Raise the left arm as required.",
+          "Turn head and eyes to the right unless in the base file.",
+          "Adjust position with short steps.",
+          "Maintain proper interval.",
+          "Hold until Ready Front."
+        ],
+        mistakes: [
+          "Large steps.",
+          "Bent arm.",
+          "Looking the wrong way.",
+          "Moving after alignment."
+        ],
+        tips: [
+          "Use a floor line or sidewalk crack for practice."
+        ]
+      },
+      {
+        name: "Ready Front",
+        command: "Ready, FRONT",
+        purpose: "Returns the flight from alignment to attention.",
+        steps: [
+          "Lower the arm smartly.",
+          "Snap head and eyes front.",
+          "Stop moving.",
+          "Resume attention."
+        ],
+        mistakes: [
+          "Lowering arm slowly.",
+          "Still shuffling feet.",
+          "Looking around."
+        ],
+        tips: [
+          "Practice directly after Dress Right Dress."
+        ]
+      },
+      {
+        name: "Open Ranks",
+        command: "Open Ranks, MARCH",
+        purpose: "Opens the formation for inspection.",
+        steps: [
+          "Start from a properly formed flight.",
+          "Ranks move to inspection spacing.",
+          "Cadets halt and dress.",
+          "Flight commander or sergeant checks alignment.",
+          "Hold position for inspection."
+        ],
+        mistakes: [
+          "Wrong number of steps by rank.",
+          "Poor alignment.",
+          "Cadets forget to dress.",
+          "Talking during inspection."
+        ],
+        tips: [
+          "Practice with rank labels first.",
+          "Use official evaluator guidance for exact test standard."
+        ]
+      },
+      {
+        name: "Close Ranks",
+        command: "Close Ranks, MARCH",
+        purpose: "Returns the flight from open ranks to normal formation.",
+        steps: [
+          "Command is given after open ranks.",
+          "Ranks close back to normal distance.",
+          "Cadets halt together.",
+          "Return to attention."
+        ],
+        mistakes: [
+          "Wrong rank moving first.",
+          "Extra steps.",
+          "Poor distance between ranks.",
+          "Moving after halt."
+        ],
+        tips: [
+          "Practice Open Ranks and Close Ranks together."
+        ]
+      },
+      {
+        name: "Count Off",
+        command: "Count, OFF",
+        purpose: "Numbers cadets in formation for accountability or drill control.",
+        steps: [
+          "Start at attention.",
+          "Cadets count in sequence.",
+          "Speak loudly and clearly.",
+          "Turn head as required.",
+          "Return head and eyes forward."
+        ],
+        mistakes: [
+          "Counting too quietly.",
+          "Skipping numbers.",
+          "Turning the wrong way.",
+          "Speaking over another cadet."
+        ],
+        tips: [
+          "Practice with a small group first."
+        ]
+      }
+    ]
+  },
+  {
+    category: "Leadership",
+    items: [
+      {
+        name: "Form the Flight",
+        command: "FALL IN",
+        purpose: "The cadet leader takes control and organizes the flight.",
+        steps: [
+          "Choose a clear formation area.",
+          "Call the flight to fall in.",
+          "Position element leaders and ranks.",
+          "Check dress, cover, interval, and distance.",
+          "Give follow-on commands clearly."
+        ],
+        mistakes: [
+          "Weak command voice.",
+          "Standing in the wrong position.",
+          "Not correcting spacing.",
+          "Giving commands before the flight is ready."
+        ],
+        tips: [
+          "Practice command voice outside.",
+          "Know where to stand before calling the command."
+        ]
+      },
+      {
+        name: "Report to Commander",
+        command: "Sir/Ma’am, flight is prepared for inspection.",
+        purpose: "Reports flight status to a commander or evaluator.",
+        steps: [
+          "Ensure the flight is formed and ready.",
+          "Salute when appropriate.",
+          "Give the report clearly.",
+          "Maintain bearing.",
+          "Hold position until directed."
+        ],
+        mistakes: [
+          "Forgetting the salute.",
+          "Speaking too quietly.",
+          "Looking back at the flight.",
+          "Wrong wording."
+        ],
+        tips: [
+          "Practice the report out loud."
+        ]
+      },
+      {
+        name: "Give Commands",
+        command: "Preparatory command + command of execution",
+        purpose: "Leads cadets through drill movements.",
+        steps: [
+          "Give a clear preparatory command.",
+          "Pause briefly.",
+          "Give the command of execution sharply.",
+          "Use enough volume.",
+          "Watch the flight and correct mistakes."
+        ],
+        mistakes: [
+          "Mumbling.",
+          "No pause between commands.",
+          "Command of execution not sharp.",
+          "Giving commands too fast."
+        ],
+        tips: [
+          "Record yourself and listen for clarity."
+        ]
+      },
+      {
+        name: "Teach Junior Cadets",
+        command: "Demonstrate, explain, practice, correct",
+        purpose: "Helps new cadets learn drill safely and correctly.",
+        steps: [
+          "Demonstrate the movement.",
+          "Explain the command and purpose.",
+          "Break the movement into steps.",
+          "Let cadets practice.",
+          "Correct one or two things at a time."
+        ],
+        mistakes: [
+          "Explaining too much at once.",
+          "Not demonstrating.",
+          "Correcting harshly.",
+          "Letting bad reps continue."
+        ],
+        tips: [
+          "Praise effort, then correct the biggest issue."
+        ]
+      }
+    ]
+  }
+];
+
+const CHECKLIST_SECTIONS = [
+  {
+    id: "blues",
+    title: "Blues Uniform Checklist",
+    items: [
+      "Blues shirt",
+      "Blues pants / slacks",
+      "Blue belt and buckle",
+      "Black dress shoes",
+      "Black dress socks",
+      "White V-neck undershirt",
+      "Nameplate",
+      "Grade insignia",
+      "Flight cap",
+      "Ribbons / rack if required",
+      "Uniform clean, pressed, and inspected",
+      "Haircut / grooming meets CAP standards"
+    ]
+  },
+  {
+    id: "field",
+    title: "Field Uniform Checklist",
+    items: [
+      "Authorized field uniform blouse",
+      "Authorized field uniform trousers",
+      "Tan undershirts",
+      "Boots",
+      "Boot socks",
+      "Uniform belt",
+      "Patrol cap / authorized cover",
+      "Name tape",
+      "CAP tape",
+      "Grade insignia",
+      "Boots broken in",
+      "Uniform marked with cadet name"
+    ]
+  },
+  {
+    id: "gear",
+    title: "Gear / Buy List",
+    items: [
+      "Name tapes ordered",
+      "Grade insignia ordered",
+      "Blues items purchased",
+      "Field uniform items purchased",
+      "Shoes or boots ready",
+      "PT gear ready",
+      "Notebook and pen",
+      "Haircut / grooming squared away",
+      "Laundry plan",
+      "All required items labeled with name"
+    ]
+  },
+  {
+    id: "encampmentCarry",
+    title: "Encampment: Carry at Check-In",
+    items: [
+      "CAP membership card",
+      "Printed health history / medical forms",
+      "Emergency contact information",
+      "OTC medication permission form if required",
+      "Prescription medication in original container if applicable",
+      "Any required check-in paperwork",
+      "Travel itinerary / arrival instructions",
+      "Small folder or envelope for check-in documents",
+      "Do not bury check-in items inside luggage"
+    ]
+  },
+  {
+    id: "encampmentArrivalUniform",
+    title: "Encampment: Arrival Uniform",
+    items: [
+      "Arrive in the uniform required by the encampment packing list",
+      "Uniform blouse",
+      "Uniform trousers",
+      "Tan undershirt",
+      "Boots",
+      "Boot socks",
+      "Belt",
+      "Cover / patrol cap",
+      "Name tape",
+      "CAP tape",
+      "Grade insignia",
+      "Hair and nails within regulations before check-in"
+    ]
+  },
+  {
+    id: "encampmentField",
+    title: "Encampment: Field Uniforms",
+    items: [
+      "Extra field uniform blouse",
+      "Extra field uniform trousers",
+      "Extra tan undershirts",
+      "Extra boot socks",
+      "Extra belt if available",
+      "Cold weather layer if authorized",
+      "Rain gear or poncho if listed",
+      "Laundry bag",
+      "Uniform repair items if allowed",
+      "All clothing marked with cadet name"
+    ]
+  },
+  {
+    id: "encampmentBlues",
+    title: "Encampment: Blues Uniform",
+    items: [
+      "Blues shirt",
+      "Blues pants / slacks",
+      "Blue belt and buckle",
+      "Black dress shoes",
+      "Black socks",
+      "White V-neck undershirts",
+      "Flight cap",
+      "Nameplate",
+      "Grade insignia",
+      "Ribbons / rack if required",
+      "Shirt stays if used",
+      "Lint roller if allowed"
+    ]
+  },
+  {
+    id: "encampmentPt",
+    title: "Encampment: PT Gear / Clothing",
+    items: [
+      "PT shirts",
+      "PT shorts",
+      "PT pants / sweats if required",
+      "Athletic socks",
+      "Running shoes",
+      "Extra underwear",
+      "Extra socks",
+      "Sleepwear",
+      "Civilian travel clothes if authorized",
+      "Plastic bag for dirty or wet clothes"
+    ]
+  },
+  {
+    id: "encampmentHygiene",
+    title: "Encampment: Hygiene",
+    items: [
+      "Toothbrush",
+      "Toothpaste",
+      "Deodorant",
+      "Shampoo",
+      "Soap / body wash",
+      "Towels",
+      "Washcloth",
+      "Shower shoes",
+      "Comb or brush",
+      "Razor / shaving items if needed",
+      "Feminine hygiene items if needed",
+      "Nail clippers",
+      "Sunscreen",
+      "Lip balm",
+      "Insect repellent"
+    ]
+  },
+  {
+    id: "encampmentGearRequired",
+    title: "Encampment: Required Gear",
+    items: [
+      "Water bottle / hydration item",
+      "Notebook",
+      "Pens",
+      "Pencils",
+      "Small ruler",
+      "Flashlight",
+      "Extra batteries if needed",
+      "Hangers",
+      "Shoe shine / boot care items if required",
+      "Moleskin / blister care",
+      "Laundry bag",
+      "Watch if allowed",
+      "Eyeglasses / contacts and supplies if needed"
+    ]
+  },
+  {
+    id: "encampmentOptional",
+    title: "Encampment: Optional Items",
+    items: [
+      "Small sewing kit if allowed",
+      "Small mirror if allowed",
+      "Extra boot laces",
+      "Stamped envelope / notepad if desired",
+      "Religious text or small reading material if allowed",
+      "Disposable camera if allowed",
+      "Iron / starch only if specifically allowed",
+      "Extra name-marking tape or laundry marker"
+    ]
+  },
+  {
+    id: "encampmentNoBring",
+    title: "Encampment: Do Not Bring / Verify",
+    items: [
+      "Do not bring items prohibited by the encampment packing list",
+      "Do not bring weapons or knives",
+      "Do not bring tobacco, vape products, alcohol, or drugs",
+      "Do not bring unnecessary electronics if restricted",
+      "Do not bring excess snacks or food unless authorized",
+      "Do not bring valuables that can be lost or damaged",
+      "Verify phone policy before arrival",
+      "Verify medication turn-in rules before arrival"
+    ]
+  }
+];
+
+const DOCS = [
+  { name: "eServices Login", category: "Official Login", url: "https://www.capnhq.gov/" },
+  { name: "Parent / Guardian Portal", category: "Official Parent Portal", url: "https://www.gocivilairpatrol.com/programs/cadets/parents/parent-guardian-portal" },
+  { name: "Cadet Achievement Requirements", category: "Cadet Program", url: "https://www.gocivilairpatrol.com/programs/cadets/stripes-to-diamonds" },
+  { name: "Cadet Tests & Exams", category: "Testing", url: "https://www.gocivilairpatrol.com/programs/cadets/stripes-to-diamonds/cadet-tests--exams" },
+  { name: "Drill & Ceremonies Library", category: "Drill", url: "https://www.gocivilairpatrol.com/programs/cadets/library/drill" },
+  { name: "CAPP 60-33 Drill & Ceremonies", category: "Drill PDF", url: "https://www.gocivilairpatrol.com/media/cms/CAPP6020_5_AUG_16_07A0C6200BA4C.pdf" },
+  { name: "CAPP 60-34 Practical Drill Tests", category: "Drill Tests PDF", url: "https://www.gocivilairpatrol.com/media/cms/CAPP_6034_Sept_24_3e0cc652c818b.pdf" },
+  { name: "Vanguard Civil Air Patrol Store", category: "Uniforms / Insignia / CAP Gear", url: "https://www.vanguardmil.com/pages/cap-landing-page-insignia" }
+];
+
+const STORAGE_KEY = "cap_cadet_hub_v10";
+
+const DEFAULT_DATA = {
+  dark: false,
+  profile: DEFAULT_PROFILE,
+  completedIds: [],
+  checks: {},
+  notes: {},
+  listChecks: {},
+  events: []
+};
+
+function loadData() {
   try {
-    const raw = localStorage.getItem(key);
-    if (raw === null || raw === undefined) return fallback;
-    return JSON.parse(raw);
+    const saved = localStorage.getItem(STORAGE_KEY);
+    if (saved) return { ...DEFAULT_DATA, ...JSON.parse(saved) };
+
+    return {
+      ...DEFAULT_DATA,
+      profile: JSON.parse(localStorage.getItem("cap_profile") || "null") || DEFAULT_PROFILE,
+      completedIds: JSON.parse(localStorage.getItem("cap_completed_ids") || "[]"),
+      checks: JSON.parse(localStorage.getItem("cap_checks") || "{}"),
+      notes: JSON.parse(localStorage.getItem("cap_notes") || "{}"),
+      listChecks: JSON.parse(localStorage.getItem("cap_list_checks") || "{}"),
+      events: JSON.parse(localStorage.getItem("cap_events") || "[]"),
+      dark: JSON.parse(localStorage.getItem("cap_dark") || "false")
+    };
   } catch {
-    return fallback;
+    return DEFAULT_DATA;
   }
 }
 
 function formatDate(value) {
   if (!value) return "No date";
-  if (!String(value).includes("-")) return value;
-
-  return new Date(value + "T12:00:00").toLocaleDateString("en-US", {
-    month: "short",
-    day: "numeric",
-    year: "numeric"
-  });
+  try {
+    return new Date(value + "T12:00:00").toLocaleDateString("en-US", {
+      month: "short",
+      day: "numeric",
+      year: "numeric"
+    });
+  } catch {
+    return value;
+  }
 }
 
 function addWeeks(dateValue, weeks) {
-  const base = dateValue ? new Date(dateValue) : new Date();
+  const base = dateValue ? new Date(dateValue + "T12:00:00") : new Date();
   if (Number.isNaN(base.getTime())) return "";
   base.setDate(base.getDate() + weeks * 7);
   return base.toISOString().slice(0, 10);
 }
 
-function getCurrentCadetRank(completedIds) {
-  if (!completedIds || completedIds.length === 0) return { rank: "Cadet Recruit", abbr: "C/Rec" };
+function getCurrentRank(completedIds) {
+  if (!completedIds.length) return { rank: "Cadet Recruit", abbr: "C/Rec" };
   const highest = Math.max(...completedIds);
-  const achievement = ACHIEVEMENTS.find((item) => item.id === highest);
-  return achievement ? { rank: achievement.rank, abbr: achievement.abbr } : { rank: "Cadet Recruit", abbr: "C/Rec" };
+  const item = ACHIEVEMENTS.find((a) => a.id === highest);
+  return item ? { rank: item.rank, abbr: item.abbr } : { rank: "Cadet Recruit", abbr: "C/Rec" };
 }
 
-function formatCadetName(name, rank) {
+function cleanCadetName(name, rank) {
   const clean = String(name || "Cadet")
     .replace(/^cadet\s+/i, "")
     .replace(/^c\/[a-z0-9]+\s+/i, "")
     .trim();
 
   return `${rank.abbr} ${clean || "Cadet"}`;
+}
+
+function buildReport(data, currentRank, currentAchievement, progress, nextStep) {
+  const eventText =
+    data.events
+      .slice(0, 8)
+      .map((e) => `- ${formatDate(e.date)}: ${e.title} (${e.type})`)
+      .join("\n") || "- No events logged";
+
+  return `CAP Cadet Parent Report
+
+Cadet: ${cleanCadetName(data.profile.name, currentRank)}
+CAP ID: ${data.profile.capId || "Not entered"}
+Squadron: ${data.profile.squadron}
+Goal: ${data.profile.goal}
+
+Progress:
+- Completed: ${data.completedIds.length} of ${ACHIEVEMENTS.length}
+- Overall: ${progress}%
+- Current target: ${currentAchievement.name}
+- Next step: ${nextStep}
+
+Events:
+${eventText}
+
+Generated: ${new Date().toLocaleString()}
+`;
+}
+
+function downloadText(filename, text) {
+  const blob = new Blob([text], { type: "text/plain" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = filename;
+  a.click();
+  URL.revokeObjectURL(url);
 }
 
 function getNextStep(achievement, checks) {
@@ -163,266 +1206,231 @@ function getNextStep(achievement, checks) {
   return "Ready to mark complete.";
 }
 
-function downloadText(filename, text) {
-  const blob = new Blob([text], { type: "text/plain" });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement("a");
-  a.href = url;
-  a.download = filename;
-  a.click();
-  URL.revokeObjectURL(url);
-}
-
-export default function App() {
+function App() {
+  const [data, setData] = useState(loadData);
   const [tab, setTab] = useState("home");
-  const [selected, setSelected] = useState(null);
-  const [dark, setDark] = useState(() => loadSaved("cap_dark", false));
-  const [profile, setProfile] = useState(() => loadSaved("cap_profile", DEFAULT_PROFILE));
-  const [completedIds, setCompletedIds] = useState(() => loadSaved("cap_completed_ids", []));
-  const [checks, setChecks] = useState(() => loadSaved("cap_checks", {}));
-  const [events, setEvents] = useState(() => loadSaved("cap_events", []));
-  const [flights, setFlights] = useState(() => loadSaved("cap_flights", []));
-  const [attendance, setAttendance] = useState(() => loadSaved("cap_attendance", []));
-  const [fitness, setFitness] = useState(() => loadSaved("cap_fitness", []));
-  const [notes, setNotes] = useState(() => loadSaved("cap_notes", {}));
-  const [listChecks, setListChecks] = useState(() => loadSaved("cap_list_checks", {}));
   const [search, setSearch] = useState("");
+  const [selectedAchievement, setSelectedAchievement] = useState(null);
+  const [selectedDrill, setSelectedDrill] = useState(null);
 
-  useEffect(() => localStorage.setItem("cap_dark", JSON.stringify(dark)), [dark]);
-  useEffect(() => localStorage.setItem("cap_profile", JSON.stringify(profile)), [profile]);
-  useEffect(() => localStorage.setItem("cap_completed_ids", JSON.stringify(completedIds)), [completedIds]);
-  useEffect(() => localStorage.setItem("cap_checks", JSON.stringify(checks)), [checks]);
-  useEffect(() => localStorage.setItem("cap_events", JSON.stringify(events)), [events]);
-  useEffect(() => localStorage.setItem("cap_flights", JSON.stringify(flights)), [flights]);
-  useEffect(() => localStorage.setItem("cap_attendance", JSON.stringify(attendance)), [attendance]);
-  useEffect(() => localStorage.setItem("cap_fitness", JSON.stringify(fitness)), [fitness]);
-  useEffect(() => localStorage.setItem("cap_notes", JSON.stringify(notes)), [notes]);
-  useEffect(() => localStorage.setItem("cap_list_checks", JSON.stringify(listChecks)), [listChecks]);
+  useEffect(() => {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+  }, [data]);
 
-  const validCompleted = completedIds.filter((id) => ACHIEVEMENTS.some((item) => item.id === id));
-  const currentRank = getCurrentCadetRank(validCompleted);
-  const currentAchievement = ACHIEVEMENTS.find((item) => !validCompleted.includes(item.id)) || ACHIEVEMENTS[ACHIEVEMENTS.length - 1];
-  const progress = Math.round((validCompleted.length / ACHIEVEMENTS.length) * 100);
-  const nextStep = getNextStep(currentAchievement, checks);
+  const completedIds = data.completedIds.filter((id) => ACHIEVEMENTS.some((a) => a.id === id));
+  const currentRank = getCurrentRank(completedIds);
+  const currentAchievement = ACHIEVEMENTS.find((a) => !completedIds.includes(a.id)) || ACHIEVEMENTS[ACHIEVEMENTS.length - 1];
+  const progress = Math.round((completedIds.length / ACHIEVEMENTS.length) * 100);
+  const nextStep = getNextStep(currentAchievement, data.checks);
 
   const searchResults = useMemo(() => {
     const q = search.trim().toLowerCase();
     if (!q) return [];
 
-    const rankResults = ACHIEVEMENTS.filter((item) =>
-      [item.name, item.rank, item.abbr, item.phase, ...item.requirements, ...item.drill].join(" ").toLowerCase().includes(q)
-    ).map((item) => ({ kind: "Rank", title: item.name, sub: `${item.rank} · ${item.phase}`, item }));
+    const ranks = ACHIEVEMENTS.filter((a) =>
+      [a.name, a.rank, a.abbr, a.phase, ...a.requirements, ...a.drill].join(" ").toLowerCase().includes(q)
+    ).map((a) => ({ type: "Rank", title: a.name, sub: `${a.rank} · ${a.phase}`, action: () => setSelectedAchievement(a) }));
 
-    const drillResults = DRILL_GROUPS.flatMap((group) =>
+    const drill = DRILL_GROUPS.flatMap((group) =>
       group.items
-        .filter((item) => item.join(" ").toLowerCase().includes(q))
-        .map((item) => ({ kind: "Drill", title: item[0], sub: `${group.category} · ${item[1]}` }))
+        .filter((d) =>
+          [d.name, d.command, d.purpose, ...d.steps, ...d.mistakes, ...d.tips].join(" ").toLowerCase().includes(q)
+        )
+        .map((d) => ({
+          type: "Drill",
+          title: d.name,
+          sub: `${group.category} · ${d.command}`,
+          action: () => {
+            setSelectedDrill({ ...d, category: group.category });
+            setTab("drill");
+          }
+        }))
     );
 
-    const docResults = DOCS.filter((doc) =>
-      [doc.name, doc.category].join(" ").toLowerCase().includes(q)
-    ).map((doc) => ({ kind: "Doc", title: doc.name, sub: doc.category, url: doc.url }));
+    const docs = DOCS.filter((d) => [d.name, d.category].join(" ").toLowerCase().includes(q)).map((d) => ({
+      type: "Doc",
+      title: d.name,
+      sub: d.category,
+      action: () => window.open(d.url, "_blank", "noreferrer")
+    }));
 
-    return [...rankResults, ...drillResults, ...docResults].slice(0, 10);
+    return [...ranks, ...drill, ...docs].slice(0, 12);
   }, [search]);
 
-  function toggleComplete(id) {
-    setCompletedIds((prev) => prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]);
+  function updateData(patch) {
+    setData((prev) => ({ ...prev, ...patch }));
   }
 
-  function toggleCheck(achievementId, type, index) {
-    const key = `${achievementId}-${type}-${index}`;
-
-    setChecks((prev) => {
-      const next = { ...prev, [key]: !prev[key] };
-      const achievement = ACHIEVEMENTS.find((item) => item.id === achievementId);
-
-      if (achievement) {
-        const reqDone = achievement.requirements.every((_, i) => next[`${achievementId}-req-${i}`]);
-        const drillDone = achievement.drill.every((_, i) => next[`${achievementId}-drill-${i}`]);
-
-        setCompletedIds((current) => {
-          if (reqDone && drillDone) return current.includes(achievementId) ? current : [...current, achievementId];
-          return current.filter((id) => id !== achievementId);
-        });
-      }
-
-      return next;
+  function toggleAchievement(id) {
+    updateData({
+      completedIds: completedIds.includes(id)
+        ? completedIds.filter((x) => x !== id)
+        : [...completedIds, id].sort((a, b) => a - b)
     });
   }
 
-  function toggleListCheck(category, item) {
-    const key = `${category}-${item}`;
-    setListChecks((prev) => ({ ...prev, [key]: !prev[key] }));
+  function toggleCheck(achievement, type, index) {
+    const key = `${achievement.id}-${type}-${index}`;
+    const nextChecks = { ...data.checks, [key]: !data.checks[key] };
+
+    const reqDone = achievement.requirements.every((_, i) => nextChecks[`${achievement.id}-req-${i}`]);
+    const drillDone = achievement.drill.every((_, i) => nextChecks[`${achievement.id}-drill-${i}`]);
+
+    let nextCompleted = [...completedIds];
+
+    if (reqDone && drillDone && !nextCompleted.includes(achievement.id)) {
+      nextCompleted.push(achievement.id);
+    }
+
+    if ((!reqDone || !drillDone) && nextCompleted.includes(achievement.id)) {
+      nextCompleted = nextCompleted.filter((id) => id !== achievement.id);
+    }
+
+    updateData({
+      checks: nextChecks,
+      completedIds: nextCompleted.sort((a, b) => a - b)
+    });
+  }
+
+  function toggleList(sectionId, item) {
+    const key = `${sectionId}-${item}`;
+    updateData({
+      listChecks: { ...data.listChecks, [key]: !data.listChecks[key] }
+    });
   }
 
   function resetAll() {
-    if (!window.confirm("Reset all app data on this device?")) return;
-
-    [
-      "cap_dark",
-      "cap_profile",
-      "cap_completed_ids",
-      "cap_checks",
-      "cap_events",
-      "cap_flights",
-      "cap_attendance",
-      "cap_fitness",
-      "cap_notes",
-      "cap_list_checks"
-    ].forEach((key) => localStorage.removeItem(key));
-
-    setDark(false);
-    setProfile(DEFAULT_PROFILE);
-    setCompletedIds([]);
-    setChecks({});
-    setEvents([]);
-    setFlights([]);
-    setAttendance([]);
-    setFitness([]);
-    setNotes({});
-    setListChecks({});
-    setSelected(null);
+    if (!window.confirm("Reset all CAP Cadet Hub data on this device?")) return;
+    localStorage.removeItem(STORAGE_KEY);
+    setData(DEFAULT_DATA);
+    setSelectedAchievement(null);
+    setSelectedDrill(null);
     setTab("home");
   }
 
-  function restoreBackup(data) {
-    if (!data || typeof data !== "object") return;
-
-    setProfile(data.profile && typeof data.profile === "object" ? { ...DEFAULT_PROFILE, ...data.profile } : DEFAULT_PROFILE);
-    setCompletedIds(Array.isArray(data.completedIds) ? data.completedIds : []);
-    setChecks(data.checks && typeof data.checks === "object" ? data.checks : {});
-    setEvents(Array.isArray(data.events) ? data.events : []);
-    setFlights(Array.isArray(data.flights) ? data.flights : []);
-    setAttendance(Array.isArray(data.attendance) ? data.attendance : []);
-    setFitness(Array.isArray(data.fitness) ? data.fitness : []);
-    setNotes(data.notes && typeof data.notes === "object" ? data.notes : {});
-    setListChecks(data.listChecks && typeof data.listChecks === "object" ? data.listChecks : {});
-    setSelected(null);
-    setTab("home");
+  function exportBackup() {
+    const text = JSON.stringify({ app: "CAP Cadet Hub", version: 10, exportedAt: new Date().toISOString(), ...data }, null, 2);
+    navigator.clipboard?.writeText(text).catch(() => {});
+    downloadText("cap-cadet-hub-backup.json", text);
   }
 
   function exportReport() {
-    const report = buildReport({
-      profile,
-      currentRank,
-      currentAchievement,
-      progress,
-      completedCount: validCompleted.length,
-      nextStep,
-      events,
-      attendance,
-      fitness,
-      notes
-    });
+    const text = buildReport(data, currentRank, currentAchievement, progress, nextStep);
+    downloadText("cap-cadet-parent-report.txt", text);
+  }
 
-    downloadText("cap-cadet-report.txt", report);
+  function importBackup(text) {
+    try {
+      const parsed = JSON.parse(text);
+      setData({
+        ...DEFAULT_DATA,
+        ...parsed,
+        profile: { ...DEFAULT_PROFILE, ...(parsed.profile || {}) },
+        completedIds: Array.isArray(parsed.completedIds) ? parsed.completedIds : [],
+        checks: parsed.checks || {},
+        notes: parsed.notes || {},
+        listChecks: parsed.listChecks || {},
+        events: Array.isArray(parsed.events) ? parsed.events : []
+      });
+      alert("Backup restored.");
+    } catch {
+      alert("Backup text is not valid JSON.");
+    }
   }
 
   const appStyle = {
     ...styles.page,
-    ...(dark ? styles.darkVars : styles.lightVars)
+    ...(data.dark ? styles.darkVars : styles.lightVars)
   };
 
   return (
     <div style={appStyle}>
-      <button style={styles.themeButton} onClick={() => setDark(!dark)}>
-        {dark ? "☀️ Light" : "🌙 Dark"}
+      <button style={styles.themeButton} onClick={() => updateData({ dark: !data.dark })}>
+        {data.dark ? "☀️ Light" : "🌙 Dark"}
       </button>
 
       <main style={styles.container}>
-        {selected ? (
+        {selectedAchievement ? (
           <AchievementDetail
-            achievement={selected}
-            completedIds={validCompleted}
-            checks={checks}
-            notes={notes}
-            setNotes={setNotes}
-            onBack={() => setSelected(null)}
-            toggleComplete={toggleComplete}
+            achievement={selectedAchievement}
+            completedIds={completedIds}
+            checks={data.checks}
+            notes={data.notes}
+            updateData={updateData}
+            onBack={() => setSelectedAchievement(null)}
+            toggleAchievement={toggleAchievement}
             toggleCheck={toggleCheck}
           />
         ) : (
           <>
-            <SearchBar search={search} setSearch={setSearch} results={searchResults} setSelected={setSelected} />
+            <SearchBar search={search} setSearch={setSearch} results={searchResults} />
 
             {tab === "home" && (
               <HomeTab
-                profile={profile}
+                data={data}
                 currentRank={currentRank}
                 currentAchievement={currentAchievement}
+                completedCount={completedIds.length}
                 progress={progress}
-                completedCount={validCompleted.length}
                 nextStep={nextStep}
-                events={events}
-                flights={flights}
                 setTab={setTab}
                 exportReport={exportReport}
               />
             )}
 
-            {tab === "rank" && (
-              <RankTab
-                profile={profile}
-                setProfile={setProfile}
+            {tab === "ranks" && (
+              <RanksTab
+                data={data}
+                updateData={updateData}
                 currentRank={currentRank}
                 currentAchievement={currentAchievement}
-                completedIds={validCompleted}
+                completedIds={completedIds}
                 progress={progress}
-                checks={checks}
-                setSelected={setSelected}
-                toggleComplete={toggleComplete}
+                setSelectedAchievement={setSelectedAchievement}
+                toggleAchievement={toggleAchievement}
               />
             )}
 
-            {tab === "drill" && <DrillTab />}
-            {tab === "events" && <EventsTab events={events} setEvents={setEvents} />}
+            {tab === "drill" && (
+              <DrillTab selectedDrill={selectedDrill} setSelectedDrill={setSelectedDrill} />
+            )}
+
             {tab === "tools" && (
-              <ToolsTab
-                profile={profile}
-                completedCount={validCompleted.length}
-                flights={flights}
-                setFlights={setFlights}
-                attendance={attendance}
-                setAttendance={setAttendance}
-                fitness={fitness}
-                setFitness={setFitness}
-                listChecks={listChecks}
-                toggleListCheck={toggleListCheck}
-              />
+              <ToolsTab listChecks={data.listChecks} toggleList={toggleList} />
+            )}
+
+            {tab === "events" && (
+              <EventsTab events={data.events} updateData={updateData} />
             )}
 
             {tab === "docs" && (
               <DocsTab
-                profile={profile}
-                completedIds={validCompleted}
-                checks={checks}
-                events={events}
-                flights={flights}
-                attendance={attendance}
-                fitness={fitness}
-                notes={notes}
-                listChecks={listChecks}
-                restoreBackup={restoreBackup}
-                resetAll={resetAll}
+                data={data}
+                importBackup={importBackup}
+                exportBackup={exportBackup}
                 exportReport={exportReport}
+                resetAll={resetAll}
               />
             )}
           </>
         )}
       </main>
 
-      {!selected && (
+      {!selectedAchievement && (
         <nav style={styles.bottomNav}>
           {[
             ["home", "🏠", "Home"],
-            ["rank", "⭐", "Rank"],
+            ["ranks", "⭐", "Ranks"],
             ["drill", "🪖", "Drill"],
-            ["events", "📅", "Events"],
             ["tools", "🧰", "Tools"],
+            ["events", "📅", "Events"],
             ["docs", "📁", "Docs"]
           ].map(([id, icon, label]) => (
-            <button key={id} style={tab === id ? styles.activeNavButton : styles.navButton} onClick={() => setTab(id)}>
+            <button
+              key={id}
+              style={tab === id ? styles.activeNavButton : styles.navButton}
+              onClick={() => setTab(id)}
+            >
               <span style={styles.navIcon}>{icon}</span>
               <span>{label}</span>
             </button>
@@ -433,7 +1441,7 @@ export default function App() {
   );
 }
 
-function SearchBar({ search, setSearch, results, setSelected }) {
+function SearchBar({ search, setSearch, results }) {
   return (
     <div style={styles.searchWrap}>
       <input
@@ -450,13 +1458,12 @@ function SearchBar({ search, setSearch, results, setSelected }) {
               key={index}
               style={styles.searchResult}
               onClick={() => {
-                if (result.item) setSelected(result.item);
-                if (result.url) window.open(result.url, "_blank", "noreferrer");
+                result.action();
                 setSearch("");
               }}
             >
               <strong>{result.title}</strong>
-              <span>{result.kind} · {result.sub}</span>
+              <span>{result.type} · {result.sub}</span>
             </button>
           ))}
         </div>
@@ -465,20 +1472,25 @@ function SearchBar({ search, setSearch, results, setSelected }) {
   );
 }
 
-function HomeTab({ profile, currentRank, currentAchievement, progress, completedCount, nextStep, events, flights, setTab, exportReport }) {
-  const nextEvent = [...events].sort((a, b) => String(a.date).localeCompare(String(b.date)))[0];
-  const totalHours = flights.reduce((sum, item) => sum + (parseFloat(item.duration) || 0), 0).toFixed(1);
+function HomeTab({ data, currentRank, currentAchievement, completedCount, progress, nextStep, setTab, exportReport }) {
+  const nextEvent = [...data.events].sort((a, b) => String(a.date).localeCompare(String(b.date)))[0];
 
   return (
     <>
-      <Hero title="CAP Cadet Hub" eyebrow="Cadet Dashboard" subtitle="Progress, meetings, checklists, and parent tools." progress={progress} progressText={`${completedCount} of ${ACHIEVEMENTS.length} achievements completed`} />
+      <Hero
+        title="CAP Cadet Hub"
+        eyebrow="Cadet Dashboard"
+        subtitle="Progress, drill, encampment packing, events, and parent tools."
+        progress={progress}
+        progressText={`${completedCount} of ${ACHIEVEMENTS.length} achievements completed`}
+      />
 
       <Card>
         <p style={styles.label}>Cadet</p>
-        <h2 style={styles.profileName}>{formatCadetName(profile.name, currentRank)}</h2>
-        <p style={styles.cardText}>CAP ID: {profile.capId || "Not entered"}</p>
-        <p style={styles.cardText}>{profile.squadron}</p>
-        <p style={styles.phaseText}>Goal: {profile.goal}</p>
+        <h2 style={styles.profileName}>{cleanCadetName(data.profile.name, currentRank)}</h2>
+        <p style={styles.cardText}>CAP ID: {data.profile.capId || "Not entered"}</p>
+        <p style={styles.cardText}>{data.profile.squadron}</p>
+        <p style={styles.phaseText}>Goal: {data.profile.goal}</p>
       </Card>
 
       <Card>
@@ -486,11 +1498,6 @@ function HomeTab({ profile, currentRank, currentAchievement, progress, completed
         <strong style={styles.blueText}>{currentAchievement.name}</strong>
         <p style={styles.cardText}>{nextStep}</p>
       </Card>
-
-      <div style={styles.grid2}>
-        <MiniCard label="Target" value={currentAchievement.rank} sub={currentAchievement.abbr} />
-        <MiniCard label="Flights" value={flights.length} sub={`${totalHours} total hrs`} />
-      </div>
 
       <Card>
         <p style={styles.label}>Next Event</p>
@@ -501,58 +1508,61 @@ function HomeTab({ profile, currentRank, currentAchievement, progress, completed
             <p style={styles.phaseText}>{nextEvent.type} · {nextEvent.location || "No location"}</p>
           </>
         ) : (
-          <>
-            <strong style={styles.blueText}>No events added</strong>
-            <p style={styles.cardText}>Add the next squadron meeting or activity.</p>
-          </>
+          <p style={styles.cardText}>No events added yet.</p>
         )}
       </Card>
 
-      <TimelineCard profile={profile} completedCount={completedCount} />
+      <TimelineCard profile={data.profile} completedCount={completedCount} />
 
       <div style={styles.quickGrid}>
-        <button style={styles.quickButton} onClick={() => setTab("rank")}>⭐ View Ranks</button>
-        <button style={styles.quickButton} onClick={() => setTab("tools")}>🧰 Checklists</button>
-        <button style={styles.quickButton} onClick={() => setTab("events")}>📅 Add Event</button>
-        <button style={styles.quickButton} onClick={exportReport}>📝 Export Report</button>
+        <button style={styles.quickButton} onClick={() => setTab("ranks")}>⭐ Ranks</button>
+        <button style={styles.quickButton} onClick={() => setTab("drill")}>🪖 Drill</button>
+        <button style={styles.quickButton} onClick={() => setTab("tools")}>🎒 Packing</button>
+        <button style={styles.quickButton} onClick={exportReport}>📝 Report</button>
       </div>
     </>
   );
 }
 
-function RankTab({ profile, setProfile, currentRank, currentAchievement, completedIds, progress, checks, setSelected, toggleComplete }) {
+function RanksTab({ data, updateData, currentRank, currentAchievement, completedIds, progress, setSelectedAchievement, toggleAchievement }) {
   const [editing, setEditing] = useState(false);
-  const [form, setForm] = useState(profile);
+  const [form, setForm] = useState(data.profile);
 
-  function save() {
-    setProfile(form);
+  function saveProfile() {
+    updateData({ profile: { ...DEFAULT_PROFILE, ...form } });
     setEditing(false);
   }
 
   return (
     <>
-      <Hero title="Rank Tracker" eyebrow="Civil Air Patrol" subtitle="Track requirements, drill, and parent notes." progress={progress} progressText={`${completedIds.length} of ${ACHIEVEMENTS.length} completed`} />
+      <Hero
+        title="Rank Tracker"
+        eyebrow="Civil Air Patrol"
+        subtitle="Track requirements, drill items, and promotion path."
+        progress={progress}
+        progressText={`${completedIds.length} of ${ACHIEVEMENTS.length} completed`}
+      />
 
       <Card>
         {!editing ? (
           <>
             <p style={styles.label}>Cadet Profile</p>
-            <h2 style={styles.profileName}>{formatCadetName(profile.name, currentRank)}</h2>
-            <p style={styles.cardText}>CAP ID: {profile.capId || "Not entered"}</p>
-            <p style={styles.cardText}>{profile.squadron}</p>
-            <p style={styles.phaseText}>Joined: {formatDate(profile.joined)}</p>
-            <p style={styles.phaseText}>Goal: {profile.goal}</p>
-            <button style={styles.smallButton} onClick={() => { setForm(profile); setEditing(true); }}>Edit Profile</button>
+            <h2 style={styles.profileName}>{cleanCadetName(data.profile.name, currentRank)}</h2>
+            <p style={styles.cardText}>CAP ID: {data.profile.capId || "Not entered"}</p>
+            <p style={styles.cardText}>{data.profile.squadron}</p>
+            <p style={styles.phaseText}>Joined: {formatDate(data.profile.joined)}</p>
+            <p style={styles.phaseText}>Goal: {data.profile.goal}</p>
+            <button style={styles.smallButton} onClick={() => { setForm(data.profile); setEditing(true); }}>Edit Profile</button>
           </>
         ) : (
           <>
             <p style={styles.label}>Edit Profile</p>
             <input style={styles.input} value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} placeholder="Cadet last name" />
-            <input style={styles.input} value={form.capId} onChange={(e) => setForm({ ...form, capId: e.target.value })} placeholder="CAP ID only" />
+            <input style={styles.input} value={form.capId} onChange={(e) => setForm({ ...form, capId: e.target.value })} placeholder="CAP ID" />
             <input style={styles.input} value={form.squadron} onChange={(e) => setForm({ ...form, squadron: e.target.value })} placeholder="Squadron" />
             <input style={styles.input} type="date" value={form.joined} onChange={(e) => setForm({ ...form, joined: e.target.value })} />
             <input style={styles.input} value={form.goal} onChange={(e) => setForm({ ...form, goal: e.target.value })} placeholder="Goal" />
-            <button style={styles.primaryButton} onClick={save}>Save Profile</button>
+            <button style={styles.primaryButton} onClick={saveProfile}>Save Profile</button>
           </>
         )}
       </Card>
@@ -561,24 +1571,31 @@ function RankTab({ profile, setProfile, currentRank, currentAchievement, complet
         <p style={styles.label}>Current Target</p>
         <strong style={styles.blueText}>{currentAchievement.name}</strong>
         <p style={styles.cardText}>{currentAchievement.rank} · {currentAchievement.abbr}</p>
-        <p style={styles.phaseText}>{getNextStep(currentAchievement, checks)}</p>
+        <p style={styles.phaseText}>{getNextStep(currentAchievement, data.checks)}</p>
       </Card>
 
       <h2 style={styles.sectionTitle}>Achievement Path</h2>
 
       {ACHIEVEMENTS.map((item) => {
         const done = completedIds.includes(item.id);
-        const isCurrent = currentAchievement.id === item.id && !done;
+        const current = currentAchievement.id === item.id && !done;
 
         return (
-          <div key={item.id} style={{ ...styles.rankCard, border: isCurrent ? "2px solid #2563eb" : done ? "2px solid #22c55e" : "1px solid var(--card-border)" }}>
-            <button style={circleButton(done)} onClick={() => toggleComplete(item.id)}>{done ? "✓" : ""}</button>
-            <button style={styles.cardMainButton} onClick={() => setSelected(item)}>
+          <div
+            key={item.id}
+            style={{
+              ...styles.rankCard,
+              border: current ? "2px solid #2563eb" : done ? "2px solid #22c55e" : "1px solid var(--card-border)"
+            }}
+          >
+            <button style={circleButton(done)} onClick={() => toggleAchievement(item.id)}>{done ? "✓" : ""}</button>
+
+            <button style={styles.cardMainButton} onClick={() => setSelectedAchievement(item)}>
               <div>
                 <strong style={styles.blueText}>{item.name}</strong>
                 <p style={styles.cardText}>{item.rank} · {item.abbr}</p>
                 <p style={styles.phaseText}>{item.phase}</p>
-                {isCurrent && <span style={styles.currentTag}>Current Target</span>}
+                {current && <span style={styles.currentTag}>Current Target</span>}
                 {done && <span style={styles.doneTag}>Completed</span>}
               </div>
               <span style={styles.arrow}>›</span>
@@ -590,7 +1607,7 @@ function RankTab({ profile, setProfile, currentRank, currentAchievement, complet
   );
 }
 
-function AchievementDetail({ achievement, completedIds, checks, notes, setNotes, onBack, toggleComplete, toggleCheck }) {
+function AchievementDetail({ achievement, completedIds, checks, notes, updateData, onBack, toggleAchievement, toggleCheck }) {
   const done = completedIds.includes(achievement.id);
   const reqDone = achievement.requirements.filter((_, i) => checks[`${achievement.id}-req-${i}`]).length;
   const drillDone = achievement.drill.filter((_, i) => checks[`${achievement.id}-drill-${i}`]).length;
@@ -604,7 +1621,7 @@ function AchievementDetail({ achievement, completedIds, checks, notes, setNotes,
 
       <Hero title={achievement.name} eyebrow={achievement.phase} subtitle={`${achievement.rank} · ${achievement.abbr}`} />
 
-      <button style={completeButton(done)} onClick={() => toggleComplete(achievement.id)}>
+      <button style={completeButton(done)} onClick={() => toggleAchievement(achievement.id)}>
         {done ? "✓ Marked Complete" : "Mark Achievement Complete"}
       </button>
 
@@ -617,12 +1634,22 @@ function AchievementDetail({ achievement, completedIds, checks, notes, setNotes,
 
       <h2 style={styles.sectionTitle}>Requirements</h2>
       {achievement.requirements.map((item, index) => (
-        <CheckRow key={item} checked={!!checks[`${achievement.id}-req-${index}`]} onClick={() => toggleCheck(achievement.id, "req", index)} text={item} />
+        <CheckRow
+          key={item}
+          checked={!!checks[`${achievement.id}-req-${index}`]}
+          onClick={() => toggleCheck(achievement, "req", index)}
+          text={item}
+        />
       ))}
 
       <h2 style={styles.sectionTitle}>Drill</h2>
       {achievement.drill.map((item, index) => (
-        <CheckRow key={item} checked={!!checks[`${achievement.id}-drill-${index}`]} onClick={() => toggleCheck(achievement.id, "drill", index)} text={`🪖 ${item}`} />
+        <CheckRow
+          key={item}
+          checked={!!checks[`${achievement.id}-drill-${index}`]}
+          onClick={() => toggleCheck(achievement, "drill", index)}
+          text={`🪖 ${item}`}
+        />
       ))}
 
       <Card>
@@ -630,7 +1657,7 @@ function AchievementDetail({ achievement, completedIds, checks, notes, setNotes,
         <textarea
           style={styles.textArea}
           value={note}
-          onChange={(e) => setNotes({ ...notes, [achievement.id]: e.target.value })}
+          onChange={(e) => updateData({ notes: { ...notes, [achievement.id]: e.target.value } })}
           placeholder="Notes, reminders, questions for the squadron, what to practice..."
         />
       </Card>
@@ -638,33 +1665,55 @@ function AchievementDetail({ achievement, completedIds, checks, notes, setNotes,
   );
 }
 
-function DrillTab() {
-  const [selected, setSelected] = useState(null);
-
+function DrillTab({ selectedDrill, setSelectedDrill }) {
   return (
     <>
-      <Hero title="Drill Library" eyebrow="Drill Training" subtitle="Commands, movements, and cadet leadership." />
+      <Hero
+        title="Drill Library"
+        eyebrow="Drill Training"
+        subtitle="Commands, steps, common mistakes, and practice tips."
+      />
 
-      {selected ? (
+      {selectedDrill ? (
         <Card>
-          <button style={styles.closeButton} onClick={() => setSelected(null)}>Close</button>
-          <p style={styles.label}>{selected.category}</p>
-          <h2 style={styles.profileName}>{selected.name}</h2>
+          <button style={styles.closeButton} onClick={() => setSelectedDrill(null)}>Close</button>
+
+          <p style={styles.label}>{selectedDrill.category}</p>
+          <h2 style={styles.profileName}>{selectedDrill.name}</h2>
+
           <div style={styles.commandBox}>
             <p style={styles.label}>Command</p>
-            <strong>{selected.command}</strong>
+            <strong>{selectedDrill.command}</strong>
           </div>
-          <p style={styles.cardText}>{selected.purpose}</p>
+
+          <p style={styles.cardText}>{selectedDrill.purpose}</p>
+
+          <DetailList title="Steps" items={selectedDrill.steps} />
+          <DetailList title="Common Mistakes" items={selectedDrill.mistakes} />
+          <DetailList title="Practice Tips" items={selectedDrill.tips} />
+
+          <div style={styles.warningBox}>
+            <strong>Testing Note</strong>
+            <p style={styles.cardText}>
+              This is a parent-friendly practice guide. For official testing, use the current CAP drill manual, practical test, and evaluator instructions.
+            </p>
+          </div>
         </Card>
       ) : (
         DRILL_GROUPS.map((group) => (
           <div key={group.category}>
             <h2 style={styles.sectionTitle}>{group.category}</h2>
+
             {group.items.map((item) => (
-              <button key={item[0]} style={styles.listButton} onClick={() => setSelected({ category: group.category, name: item[0], command: item[1], purpose: item[2] })}>
+              <button
+                key={item.name}
+                style={styles.listButton}
+                onClick={() => setSelectedDrill({ ...item, category: group.category })}
+              >
                 <div>
-                  <strong style={styles.blueText}>{item[0]}</strong>
-                  <p style={styles.cardText}>{item[1]}</p>
+                  <strong style={styles.blueText}>{item.name}</strong>
+                  <p style={styles.cardText}>{item.command}</p>
+                  <p style={styles.phaseText}>{item.purpose}</p>
                 </div>
                 <span style={styles.arrow}>›</span>
               </button>
@@ -676,18 +1725,90 @@ function DrillTab() {
   );
 }
 
-function EventsTab({ events, setEvents }) {
+function DetailList({ title, items }) {
+  if (!items || !items.length) return null;
+
+  return (
+    <div style={styles.detailBlock}>
+      <h3 style={styles.detailTitle}>{title}</h3>
+      <ul style={styles.detailList}>
+        {items.map((item, index) => (
+          <li key={index} style={styles.detailListItem}>{item}</li>
+        ))}
+      </ul>
+    </div>
+  );
+}
+
+function ToolsTab({ listChecks, toggleList }) {
+  return (
+    <>
+      <Hero
+        title="Tools"
+        eyebrow="Parent Tools"
+        subtitle="Uniforms, gear, and full encampment packing checklists."
+      />
+
+      <Card>
+        <p style={styles.label}>Encampment Note</p>
+        <p style={styles.cardText}>
+          Always verify the exact packing list from your wing, region, or encampment staff. This checklist is a parent-friendly organizer and does not replace official instructions.
+        </p>
+        <p style={styles.phaseText}>
+          Mark everything with the cadet’s name. Keep check-in paperwork and medication easy to reach.
+        </p>
+      </Card>
+
+      {CHECKLIST_SECTIONS.map((section) => (
+        <ChecklistCard
+          key={section.id}
+          section={section}
+          checks={listChecks}
+          toggle={toggleList}
+        />
+      ))}
+    </>
+  );
+}
+
+function ChecklistCard({ section, checks, toggle }) {
+  const done = section.items.filter((item) => checks[`${section.id}-${item}`]).length;
+  const percent = Math.round((done / section.items.length) * 100);
+
+  return (
+    <Card>
+      <p style={styles.label}>{section.title}</p>
+      <Progress percent={percent} />
+      <p style={styles.cardText}>{done} of {section.items.length} complete</p>
+
+      {section.items.map((item) => (
+        <CheckRow
+          key={item}
+          checked={!!checks[`${section.id}-${item}`]}
+          onClick={() => toggle(section.id, item)}
+          text={item}
+        />
+      ))}
+    </Card>
+  );
+}
+
+function EventsTab({ events, updateData }) {
   const [form, setForm] = useState({ title: "", date: "", time: "", location: "", type: "Meeting", notes: "" });
 
   function addEvent() {
     if (!form.title || !form.date) return;
-    setEvents([{ ...form, id: Date.now() }, ...events]);
+    updateData({ events: [{ ...form, id: Date.now() }, ...events] });
     setForm({ title: "", date: "", time: "", location: "", type: "Meeting", notes: "" });
+  }
+
+  function deleteEvent(id) {
+    updateData({ events: events.filter((event) => event.id !== id) });
   }
 
   return (
     <>
-      <Hero title="Events" eyebrow="Calendar" subtitle="Track meetings, activities, training, and notes." />
+      <Hero title="Events" eyebrow="Calendar" subtitle="Track meetings, activities, encampment, PT, and notes." />
 
       <Card>
         <p style={styles.label}>Add Event</p>
@@ -697,9 +1818,9 @@ function EventsTab({ events, setEvents }) {
         <input style={styles.input} value={form.location} onChange={(e) => setForm({ ...form, location: e.target.value })} placeholder="Location" />
         <select style={styles.input} value={form.type} onChange={(e) => setForm({ ...form, type: e.target.value })}>
           <option>Meeting</option>
-          <option>Education</option>
-          <option>Activity</option>
           <option>PT</option>
+          <option>Activity</option>
+          <option>Training</option>
           <option>Encampment</option>
           <option>Other</option>
         </select>
@@ -713,157 +1834,61 @@ function EventsTab({ events, setEvents }) {
           <p style={styles.cardText}>{formatDate(event.date)} · {event.time || "No time"}</p>
           <p style={styles.phaseText}>{event.type} · {event.location || "No location"}</p>
           {event.notes && <p style={styles.notesText}>{event.notes}</p>}
-          <button style={styles.deleteButton} onClick={() => setEvents(events.filter((item) => item.id !== event.id))}>Delete</button>
+          <button style={styles.deleteButton} onClick={() => deleteEvent(event.id)}>Delete</button>
         </Card>
       ))}
     </>
   );
 }
 
-function ToolsTab({ profile, completedCount, flights, setFlights, attendance, setAttendance, fitness, setFitness, listChecks, toggleListCheck }) {
+function DocsTab({ data, importBackup, exportBackup, exportReport, resetAll }) {
+  const [backupText, setBackupText] = useState("");
+
+  function copyBackupToBox() {
+    const text = JSON.stringify({ app: "CAP Cadet Hub", version: 10, exportedAt: new Date().toISOString(), ...data }, null, 2);
+    setBackupText(text);
+    navigator.clipboard?.writeText(text).catch(() => {});
+  }
+
   return (
     <>
-      <Hero title="Tools" eyebrow="Parent Tools" subtitle="Uniforms, gear, encampment, attendance, fitness, and flights." />
+      <Hero title="Docs" eyebrow="Official CAP Resources" subtitle="Links, reports, backup, and data safety." />
 
-      <ChecklistCard title="Blues Uniform Checklist" category="blues" items={CHECKLISTS.blues} checks={listChecks} toggle={toggleListCheck} />
-      <ChecklistCard title="Field Uniform Checklist" category="field" items={CHECKLISTS.field} checks={listChecks} toggle={toggleListCheck} />
-      <ChecklistCard title="Gear / Buy List" category="gear" items={CHECKLISTS.gear} checks={listChecks} toggle={toggleListCheck} />
-      <ChecklistCard title="Encampment Prep Checklist" category="encampment" items={CHECKLISTS.encampment} checks={listChecks} toggle={toggleListCheck} />
+      <Card>
+        <p style={styles.label}>Reports & Backup</p>
+        <button style={styles.primaryButton} onClick={exportReport}>Export Parent Report</button>
+        <button style={styles.primaryButton} onClick={copyBackupToBox}>Show / Copy Backup</button>
+        <button style={styles.primaryButton} onClick={exportBackup}>Download Backup File</button>
+        <textarea
+          style={styles.textArea}
+          value={backupText}
+          onChange={(e) => setBackupText(e.target.value)}
+          placeholder="Backup data appears here. Paste backup data here to restore."
+        />
+        <button style={styles.primaryButton} onClick={() => importBackup(backupText)}>Import / Restore Backup</button>
+        <button style={styles.dangerButton} onClick={resetAll}>Reset App Data</button>
+      </Card>
 
-      <AttendanceLog attendance={attendance} setAttendance={setAttendance} />
-      <FitnessLog fitness={fitness} setFitness={setFitness} />
-      <FlightLog flights={flights} setFlights={setFlights} />
-      <TimelineCard profile={profile} completedCount={completedCount} />
+      <Card>
+        <strong style={styles.blueText}>Safety Note</strong>
+        <p style={styles.cardText}>
+          This is an unofficial parent/cadet tracker. It does not connect to eServices and does not store CAP passwords.
+        </p>
+        <p style={styles.phaseText}>
+          Use official CAP resources for real records, tests, regulations, uniforms, and account access.
+        </p>
+      </Card>
+
+      {DOCS.map((doc) => (
+        <a key={doc.name} href={doc.url} target="_blank" rel="noreferrer" style={styles.docCard}>
+          <div>
+            <strong style={styles.blueText}>{doc.name}</strong>
+            <p style={styles.phaseText}>{doc.category}</p>
+          </div>
+          <span style={styles.arrow}>↗</span>
+        </a>
+      ))}
     </>
-  );
-}
-
-function ChecklistCard({ title, category, items, checks, toggle }) {
-  const done = items.filter((item) => checks[`${category}-${item}`]).length;
-  const percent = Math.round((done / items.length) * 100);
-
-  return (
-    <Card>
-      <p style={styles.label}>{title}</p>
-      <Progress percent={percent} />
-      <p style={styles.cardText}>{done} of {items.length} complete</p>
-      {items.map((item) => (
-        <CheckRow key={item} checked={!!checks[`${category}-${item}`]} onClick={() => toggle(category, item)} text={item} />
-      ))}
-    </Card>
-  );
-}
-
-function AttendanceLog({ attendance, setAttendance }) {
-  const [form, setForm] = useState({ date: "", type: "Meeting", attended: "Yes", notes: "" });
-
-  function add() {
-    if (!form.date) return;
-    setAttendance([{ ...form, id: Date.now() }, ...attendance]);
-    setForm({ date: "", type: "Meeting", attended: "Yes", notes: "" });
-  }
-
-  return (
-    <Card>
-      <p style={styles.label}>Attendance Log</p>
-      <input style={styles.input} type="date" value={form.date} onChange={(e) => setForm({ ...form, date: e.target.value })} />
-      <select style={styles.input} value={form.type} onChange={(e) => setForm({ ...form, type: e.target.value })}>
-        <option>Meeting</option>
-        <option>PT</option>
-        <option>Activity</option>
-        <option>Training</option>
-        <option>Other</option>
-      </select>
-      <select style={styles.input} value={form.attended} onChange={(e) => setForm({ ...form, attended: e.target.value })}>
-        <option>Yes</option>
-        <option>No</option>
-      </select>
-      <textarea style={styles.textArea} value={form.notes} onChange={(e) => setForm({ ...form, notes: e.target.value })} placeholder="Notes..." />
-      <button style={styles.primaryButton} onClick={add}>Add Attendance</button>
-
-      {attendance.slice(0, 6).map((item) => (
-        <div key={item.id} style={styles.inlineItem}>
-          <strong>{formatDate(item.date)} · {item.attended}</strong>
-          <p style={styles.cardText}>{item.type}</p>
-          {item.notes && <p style={styles.notesText}>{item.notes}</p>}
-          <button style={styles.deleteButton} onClick={() => setAttendance(attendance.filter((x) => x.id !== item.id))}>Delete</button>
-        </div>
-      ))}
-    </Card>
-  );
-}
-
-function FitnessLog({ fitness, setFitness }) {
-  const [form, setForm] = useState({ date: "", run: "", pushups: "", curlups: "", sitReach: "", hfz: "Unknown", notes: "" });
-
-  function add() {
-    if (!form.date) return;
-    setFitness([{ ...form, id: Date.now() }, ...fitness]);
-    setForm({ date: "", run: "", pushups: "", curlups: "", sitReach: "", hfz: "Unknown", notes: "" });
-  }
-
-  return (
-    <Card>
-      <p style={styles.label}>CPFT / Fitness Tracker</p>
-      <input style={styles.input} type="date" value={form.date} onChange={(e) => setForm({ ...form, date: e.target.value })} />
-      <input style={styles.input} value={form.run} onChange={(e) => setForm({ ...form, run: e.target.value })} placeholder="Run time" />
-      <input style={styles.input} value={form.pushups} onChange={(e) => setForm({ ...form, pushups: e.target.value })} placeholder="Pushups" />
-      <input style={styles.input} value={form.curlups} onChange={(e) => setForm({ ...form, curlups: e.target.value })} placeholder="Curl-ups / sit-ups" />
-      <input style={styles.input} value={form.sitReach} onChange={(e) => setForm({ ...form, sitReach: e.target.value })} placeholder="Sit and reach" />
-      <select style={styles.input} value={form.hfz} onChange={(e) => setForm({ ...form, hfz: e.target.value })}>
-        <option>Unknown</option>
-        <option>HFZ Met</option>
-        <option>Needs Work</option>
-      </select>
-      <textarea style={styles.textArea} value={form.notes} onChange={(e) => setForm({ ...form, notes: e.target.value })} placeholder="Notes..." />
-      <button style={styles.primaryButton} onClick={add}>Add Fitness Entry</button>
-
-      {fitness.slice(0, 6).map((item) => (
-        <div key={item.id} style={styles.inlineItem}>
-          <strong>{formatDate(item.date)} · {item.hfz}</strong>
-          <p style={styles.cardText}>Run: {item.run || "—"} · Pushups: {item.pushups || "—"} · Curl-ups: {item.curlups || "—"}</p>
-          {item.notes && <p style={styles.notesText}>{item.notes}</p>}
-          <button style={styles.deleteButton} onClick={() => setFitness(fitness.filter((x) => x.id !== item.id))}>Delete</button>
-        </div>
-      ))}
-    </Card>
-  );
-}
-
-function FlightLog({ flights, setFlights }) {
-  const [form, setForm] = useState({ aircraft: "", date: "", duration: "", type: "Orientation Flight" });
-  const hours = flights.reduce((sum, item) => sum + (parseFloat(item.duration) || 0), 0).toFixed(1);
-
-  function add() {
-    if (!form.aircraft || !form.date) return;
-    setFlights([{ ...form, id: Date.now() }, ...flights]);
-    setForm({ aircraft: "", date: "", duration: "", type: "Orientation Flight" });
-  }
-
-  return (
-    <Card>
-      <p style={styles.label}>Flight Log</p>
-      <p style={styles.cardText}>{flights.length} flights · {hours} total hours</p>
-      <input style={styles.input} value={form.aircraft} onChange={(e) => setForm({ ...form, aircraft: e.target.value })} placeholder="Aircraft" />
-      <input style={styles.input} type="date" value={form.date} onChange={(e) => setForm({ ...form, date: e.target.value })} />
-      <input style={styles.input} value={form.duration} onChange={(e) => setForm({ ...form, duration: e.target.value })} placeholder="Duration hours" />
-      <select style={styles.input} value={form.type} onChange={(e) => setForm({ ...form, type: e.target.value })}>
-        <option>Orientation Flight</option>
-        <option>Glider Flight</option>
-        <option>Powered Flight</option>
-        <option>Simulator</option>
-        <option>Other</option>
-      </select>
-      <button style={styles.primaryButton} onClick={add}>Log Flight</button>
-
-      {flights.slice(0, 6).map((flight) => (
-        <div key={flight.id} style={styles.inlineItem}>
-          <strong>{flight.aircraft}</strong>
-          <p style={styles.cardText}>{formatDate(flight.date)} · {flight.type} · {flight.duration || "0"} hrs</p>
-          <button style={styles.deleteButton} onClick={() => setFlights(flights.filter((x) => x.id !== flight.id))}>Delete</button>
-        </div>
-      ))}
-    </Card>
   );
 }
 
@@ -875,6 +1900,7 @@ function TimelineCard({ profile, completedCount }) {
     <Card>
       <p style={styles.label}>Promotion Timeline</p>
       <p style={styles.cardText}>Estimated using 8-week minimum windows. Actual timing depends on squadron approval and completed requirements.</p>
+
       {upcoming.map((item, index) => (
         <div key={item.id} style={styles.timelineItem}>
           <strong>{item.name}</strong>
@@ -882,71 +1908,6 @@ function TimelineCard({ profile, completedCount }) {
         </div>
       ))}
     </Card>
-  );
-}
-
-function DocsTab({ profile, completedIds, checks, events, flights, attendance, fitness, notes, listChecks, restoreBackup, resetAll, exportReport }) {
-  const [backupText, setBackupText] = useState("");
-
-  function exportBackup() {
-    const data = {
-      app: "CAP Cadet Hub",
-      version: 7,
-      exportedAt: new Date().toISOString(),
-      profile,
-      completedIds,
-      checks,
-      events,
-      flights,
-      attendance,
-      fitness,
-      notes,
-      listChecks
-    };
-
-    const text = JSON.stringify(data, null, 2);
-    setBackupText(text);
-    navigator.clipboard?.writeText(text).catch(() => {});
-  }
-
-  function importBackup() {
-    try {
-      restoreBackup(JSON.parse(backupText));
-      alert("Backup restored.");
-    } catch {
-      alert("Backup text is not valid JSON.");
-    }
-  }
-
-  return (
-    <>
-      <Hero title="Docs" eyebrow="Official CAP Resources" subtitle="Links, reports, backup, and data safety." />
-
-      <Card>
-        <p style={styles.label}>Reports & Backup</p>
-        <button style={styles.primaryButton} onClick={exportReport}>Export Parent Report</button>
-        <button style={styles.primaryButton} onClick={exportBackup}>Export Backup / Copy Data</button>
-        <textarea style={styles.textArea} value={backupText} onChange={(e) => setBackupText(e.target.value)} placeholder="Backup data appears here. Paste backup data here to restore." />
-        <button style={styles.primaryButton} onClick={importBackup}>Import / Restore Backup</button>
-        <button style={styles.dangerButton} onClick={resetAll}>Reset App Data</button>
-      </Card>
-
-      <Card>
-        <strong style={styles.blueText}>Safety Note</strong>
-        <p style={styles.cardText}>This is an unofficial parent/cadet tracker. It does not connect to eServices and does not store CAP passwords.</p>
-        <p style={styles.phaseText}>Use official CAP resources for real records, tests, regulations, uniforms, and account access.</p>
-      </Card>
-
-      {DOCS.map((doc) => (
-        <a key={doc.id} href={doc.url} target="_blank" rel="noreferrer" style={styles.docCard}>
-          <div>
-            <strong style={styles.blueText}>{doc.name}</strong>
-            <p style={styles.phaseText}>{doc.category}</p>
-          </div>
-          <span style={styles.arrow}>↗</span>
-        </a>
-      ))}
-    </>
   );
 }
 
@@ -975,20 +1936,10 @@ function Card({ children }) {
   return <div style={styles.card}>{children}</div>;
 }
 
-function MiniCard({ label, value, sub }) {
-  return (
-    <div style={styles.miniCard}>
-      <p style={styles.statLabel}>{label}</p>
-      <h3 style={styles.miniTitle}>{value}</h3>
-      <p style={styles.cardText}>{sub}</p>
-    </div>
-  );
-}
-
 function Progress({ percent, light = false }) {
   return (
     <div style={light ? styles.progressBarLightHero : styles.progressBarLight}>
-      <div style={{ ...styles.progressFillBlue, width: `${percent}%` }} />
+      <div style={{ ...styles.progressFillBlue, width: `${Math.max(0, Math.min(100, percent))}%` }} />
     </div>
   );
 }
@@ -1000,48 +1951,6 @@ function CheckRow({ checked, onClick, text }) {
       <span style={checkTextStyle(checked)}>{text}</span>
     </button>
   );
-}
-
-function buildReport({ profile, currentRank, currentAchievement, progress, completedCount, nextStep, events, attendance, fitness, notes }) {
-  const eventText = events.slice(0, 5).map((e) => `- ${formatDate(e.date)}: ${e.title} (${e.type})`).join("\n") || "- No events logged";
-  const attendanceText = attendance.slice(0, 5).map((a) => `- ${formatDate(a.date)}: ${a.type} · Attended: ${a.attended}`).join("\n") || "- No attendance logged";
-  const fitnessText = fitness.slice(0, 5).map((f) => `- ${formatDate(f.date)}: ${f.hfz} · Run: ${f.run || "—"} · Pushups: ${f.pushups || "—"}`).join("\n") || "- No fitness entries logged";
-
-  const notesText = Object.entries(notes)
-    .filter(([, value]) => value && String(value).trim())
-    .map(([id, value]) => {
-      const achievement = ACHIEVEMENTS.find((item) => item.id === Number(id));
-      return `- ${achievement?.name || "Achievement"}: ${value}`;
-    })
-    .join("\n") || "- No parent notes";
-
-  return `CAP Cadet Parent Report
-
-Cadet: ${formatCadetName(profile.name, currentRank)}
-CAP ID: ${profile.capId || "Not entered"}
-Squadron: ${profile.squadron}
-Goal: ${profile.goal}
-
-Progress:
-- Completed: ${completedCount} of ${ACHIEVEMENTS.length}
-- Overall: ${progress}%
-- Current target: ${currentAchievement.name}
-- Next step: ${nextStep}
-
-Events:
-${eventText}
-
-Attendance:
-${attendanceText}
-
-Fitness:
-${fitnessText}
-
-Parent Notes:
-${notesText}
-
-Generated: ${new Date().toLocaleString()}
-`;
 }
 
 function circleButton(done) {
@@ -1136,10 +2045,11 @@ const styles = {
     minHeight: "100vh",
     background: "var(--app-bg)",
     color: "var(--text)",
-    padding: "24px 24px 110px"
+    padding: "24px 20px 110px",
+    fontFamily: "system-ui, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif"
   },
   container: {
-    maxWidth: "430px",
+    maxWidth: "440px",
     margin: "0 auto"
   },
   themeButton: {
@@ -1174,11 +2084,13 @@ const styles = {
   },
   title: {
     margin: "8px 0 4px",
-    fontSize: "30px"
+    fontSize: "30px",
+    lineHeight: 1.05
   },
   subtitle: {
     margin: 0,
-    color: "#dbeafe"
+    color: "#dbeafe",
+    lineHeight: 1.35
   },
   progressBox: {
     marginTop: "18px",
@@ -1223,7 +2135,8 @@ const styles = {
     padding: "16px",
     marginBottom: "12px",
     boxShadow: "var(--shadow)",
-    color: "var(--text)"
+    color: "var(--text)",
+    boxSizing: "border-box"
   },
   rankCard: {
     width: "100%",
@@ -1235,7 +2148,8 @@ const styles = {
     alignItems: "center",
     gap: "12px",
     boxShadow: "var(--shadow)",
-    color: "var(--text)"
+    color: "var(--text)",
+    boxSizing: "border-box"
   },
   cardMainButton: {
     flex: 1,
@@ -1261,7 +2175,8 @@ const styles = {
     margin: "8px 0 0",
     color: "#2563eb",
     fontSize: "12px",
-    fontWeight: "bold"
+    fontWeight: "bold",
+    lineHeight: 1.35
   },
   label: {
     margin: "0 0 6px",
@@ -1272,37 +2187,13 @@ const styles = {
   },
   profileName: {
     margin: "4px 0",
-    color: "var(--text)"
+    color: "var(--text)",
+    lineHeight: 1.15
   },
   sectionTitle: {
     color: "var(--text)",
-    margin: "18px 0 12px"
-  },
-  grid2: {
-    display: "grid",
-    gridTemplateColumns: "1fr 1fr",
-    gap: "12px",
-    marginBottom: "12px"
-  },
-  miniCard: {
-    background: "var(--card-bg)",
-    border: "1px solid var(--card-border)",
-    borderRadius: "18px",
-    padding: "16px",
-    boxShadow: "var(--shadow)"
-  },
-  statLabel: {
-    margin: 0,
-    color: "var(--muted)",
-    fontSize: "12px",
-    fontWeight: "bold",
-    textTransform: "uppercase"
-  },
-  miniTitle: {
-    margin: "8px 0 0",
-    color: "#60a5fa",
-    fontSize: "18px",
-    lineHeight: 1.2
+    margin: "18px 0 12px",
+    fontSize: "21px"
   },
   quickGrid: {
     display: "grid",
@@ -1328,11 +2219,12 @@ const styles = {
     borderRadius: "12px",
     padding: "12px",
     marginBottom: "10px",
-    fontSize: "15px"
+    fontSize: "15px",
+    boxSizing: "border-box"
   },
   textArea: {
     width: "100%",
-    minHeight: "95px",
+    minHeight: "105px",
     border: "1px solid var(--card-border)",
     background: "var(--app-bg)",
     color: "var(--text)",
@@ -1340,7 +2232,8 @@ const styles = {
     padding: "12px",
     marginBottom: "10px",
     fontSize: "15px",
-    resize: "vertical"
+    resize: "vertical",
+    boxSizing: "border-box"
   },
   primaryButton: {
     width: "100%",
@@ -1406,6 +2299,36 @@ const styles = {
     margin: "12px 0",
     color: "var(--text)"
   },
+  detailBlock: {
+    marginTop: "14px",
+    background: "var(--soft-bg)",
+    borderRadius: "16px",
+    padding: "14px",
+    color: "var(--text)"
+  },
+  detailTitle: {
+    margin: "0 0 8px",
+    color: "var(--text)",
+    fontSize: "16px"
+  },
+  detailList: {
+    margin: 0,
+    paddingLeft: "20px",
+    color: "var(--text)"
+  },
+  detailListItem: {
+    marginBottom: "7px",
+    lineHeight: 1.45,
+    fontSize: "14px"
+  },
+  warningBox: {
+    marginTop: "14px",
+    background: "rgba(245,158,11,0.14)",
+    border: "1px solid rgba(245,158,11,0.35)",
+    borderRadius: "16px",
+    padding: "14px",
+    color: "var(--text)"
+  },
   listButton: {
     width: "100%",
     background: "var(--card-bg)",
@@ -1420,13 +2343,6 @@ const styles = {
     boxShadow: "var(--shadow)",
     color: "var(--text)",
     textAlign: "left"
-  },
-  inlineItem: {
-    background: "var(--soft-bg)",
-    borderRadius: "14px",
-    padding: "12px",
-    marginTop: "10px",
-    color: "var(--text)"
   },
   notesText: {
     margin: "8px 0 0",
@@ -1443,7 +2359,8 @@ const styles = {
     padding: "10px",
     borderRadius: "12px",
     background: "var(--soft-bg)",
-    color: "var(--text)"
+    color: "var(--text)",
+    fontSize: "14px"
   },
   docCard: {
     width: "100%",
@@ -1458,10 +2375,11 @@ const styles = {
     alignItems: "center",
     boxShadow: "var(--shadow)",
     color: "var(--text)",
-    textDecoration: "none"
+    textDecoration: "none",
+    boxSizing: "border-box"
   },
   arrow: {
-    fontSize: "32px",
+    fontSize: "30px",
     color: "#9ca3af"
   },
   currentTag: {
@@ -1496,7 +2414,8 @@ const styles = {
     borderRadius: "16px",
     padding: "13px",
     fontSize: "15px",
-    boxShadow: "var(--shadow)"
+    boxShadow: "var(--shadow)",
+    boxSizing: "border-box"
   },
   searchResults: {
     position: "absolute",
@@ -1527,7 +2446,7 @@ const styles = {
     bottom: "18px",
     transform: "translateX(-50%)",
     width: "calc(100% - 32px)",
-    maxWidth: "430px",
+    maxWidth: "440px",
     background: "var(--card-bg)",
     border: "1px solid var(--card-border)",
     borderRadius: "24px",
@@ -1536,7 +2455,8 @@ const styles = {
     gridTemplateColumns: "repeat(6, 1fr)",
     gap: "4px",
     boxShadow: "0 12px 30px rgba(0,0,0,0.25)",
-    zIndex: 10
+    zIndex: 10,
+    boxSizing: "border-box"
   },
   navButton: {
     border: "none",
@@ -1568,3 +2488,9 @@ const styles = {
     fontSize: "17px"
   }
 };
+
+ReactDOM.createRoot(document.getElementById("root")).render(
+  <React.StrictMode>
+    <App />
+  </React.StrictMode>
+);
